@@ -2,7 +2,7 @@
 
 **日期：** 2026-06-27  
 **状态：** 最终定稿  
-**版本：** Final  
+**版本：** Final（2026-06-27 工程评审补充 §18）  
 **主题：** ToB 场景 AI Agent — **Agent Ops Copilot**
 
 > **Hackathon 唯一实施基线。** 历史草案见 [archive/](./archive/README.md)。
@@ -24,6 +24,8 @@
 | OPC 草案 | Agent Ops 叙事 + Webhook + Retry | [archive/2026-06-27-opc-agent-ops-design.md](./archive/2026-06-27-opc-agent-ops-design.md) |
 | v3.1 | Agent Ops 场景 + 工程深度 + 价值创新叙事 | [archive/2026-06-27-coagent-design-v3.md](./archive/2026-06-27-coagent-design-v3.md) |
 | **Final** | **本文档 — 合并定稿，作为唯一实施基线** | — |
+
+**gstack design doc：** `~/.gstack/projects/lurui1997-coagent/drulu-main-design-*.md` 已 superseded，叙事与场景以 **本文档 Agent Ops** 为准（见 [TODOS.md](../../../TODOS.md) 待同步条目）。
 
 **Hackathon 只实施本文档，不再分线。**
 
@@ -300,41 +302,13 @@ incident_started → tool_called ×3 → llm_reasoning → llm_result
 | `query_agent_config` | `concurrent=10`，`rpm_limit=60`，昨日 concurrent=5 |
 | `search_ops_playbook` | OPS-101：等待 / 降并发 / 换 key |
 
-**LLM 期望形态（真实生成，非静态）：**
+**LLM 输出：** 须符合 §5.2 `LLMOutput`（真实 LLM 生成 + Pydantic 校验，非静态模板）。本场景要点：
 
-```json
-{
-  "impact": "客服 Agent 近 5 分钟 38% 请求失败，用户咨询无法自动回复",
-  "hypothesis": ["并发 5→10 触发 OpenAI RPM 限流", "当前 key 配额已打满"],
-  "reasoning_chain": [
-    "配置变更：concurrent 5→10，请求速率超过 rpm_limit",
-    "API 层：OpenAI 返回 429 rate limit",
-    "业务层：cs-bot 连续重试失败，客服通道不可用"
-  ],
-  "steps": [
-    {"order": 1, "action": "等待 60s 后手动重试", "command": null, "risk": "low"},
-    {"order": 2, "action": "临时将 concurrent 降回 5", "command": "coagent config set cs-bot concurrent=5", "risk": "medium"},
-    {"order": 3, "action": "切换 backup API key", "command": "coagent secret rotate cs-bot --key backup", "risk": "medium"}
-  ],
-  "comms_draft": "【客服 Agent 异常】429 限流，已建议降并发并重试",
-  "retry_recommended": true
-}
-```
+- **因果链：** 配置 concurrent↑ → OpenAI 429 → cs-bot 不可用  
+- **`retry_recommended`：** `true`  
+- **steps：** 须覆盖 OPS-101（等待 / 降并发 / 换 key），见 `data/ops_playbooks.json` → `cs_rate_limit`
 
-**Score 设计（目标 85 🟢）：**
-
-| 因子 | 目标 | 手段 |
-|------|------|------|
-| D | 0.92 | 字段齐全 + 3/3 tools + log 含 `429` |
-| P | 0.88 | symptom=`rate_limit` 命中 OPS-101 |
-| C | clamp 0.75 | hypothesis 含 `429`/`concurrent`；steps 引用 OPS-101 |
-
-```yaml
-# playbook cs_rate_limit
-consistency_clamp: [0.72, 0.78]
-expected_score: [82, 88]
-expected_grade: executable
-```
+**Score 设计（目标 85 🟢）：** 配置见 `data/ops_playbooks.json` → `cs_rate_limit`
 
 **实现效果：**
 
@@ -373,40 +347,13 @@ expected_grade: executable
 | `query_agent_config` | `index_version=v2.3`，`kb_last_sync` 滞后 1 天 |
 | `search_ops_playbook` | OPS-203：rebuild 索引 / 兜底 prompt |
 
-**LLM 期望形态：**
+**LLM 输出：** 须符合 §5.2 `LLMOutput`。本场景要点：
 
-```json
-{
-  "impact": "35% 问答无知识库支撑，易产生错误答复",
-  "hypothesis": ["知识库更新后索引未 rebuild", "检索阈值过高"],
-  "reasoning_chain": [
-    "知识库：kb_last_sync 滞后，index 与文档不一致",
-    "检索层：empty_retrieval_rate 35%",
-    "回答层：模型仍生成完整答案 → 客诉级联"
-  ],
-  "steps": [
-    {"order": 1, "action": "切换「无法确认」兜底 prompt", "command": "coagent prompt set rag-bot fallback=strict", "risk": "medium"},
-    {"order": 2, "action": "触发向量索引 rebuild", "command": "coagent kb rebuild rag-bot --version v2.4", "risk": "medium"},
-    {"order": 3, "action": "rebuild 后抽样 20 条验证", "command": null, "risk": "low"}
-  ],
-  "comms_draft": "【RAG 质量告警】空检索飙升，建议 rebuild 索引",
-  "retry_recommended": false
-}
-```
+- **因果链：** 索引 lag → 空检索↑ → 错误答复 / 客诉  
+- **`retry_recommended`：** `false`（禁止盲 Retry）  
+- **steps：** rebuild 索引 / 兜底 prompt，见 `ops_playbooks.json` → `rag_empty_retrieval`
 
-**Score 设计（目标 70 🟡）：**
-
-| 因子 | 目标 | 手段 |
-|------|------|------|
-| D | 0.85 | log 含 `empty_retrieval`；无 retry_webhook 略降 |
-| P | 0.80 | symptom 命中 OPS-203 |
-| C | clamp 0.68 | steps 含 rebuild/索引关键词 |
-
-```yaml
-consistency_clamp: [0.65, 0.72]
-expected_score: [65, 75]
-expected_grade: needs_confirmation
-```
+**Score 设计（目标 70 🟡）：** 见 `ops_playbooks.json` → `rag_empty_retrieval`
 
 **实现效果：**
 
@@ -445,40 +392,13 @@ expected_grade: needs_confirmation
 | `query_agent_config` | 新模板 `v3-longform` 昨日发布，`max_tokens=4096` |
 | `search_ops_playbook` | OPS-305：限流 / 降级模型 / 暂停 batch / 升级审批 |
 
-**LLM 期望形态：**
+**LLM 输出：** 须符合 §5.2 `LLMOutput`。本场景要点：
 
-```json
-{
-  "impact": "日成本超预算 42.5%，若不干预今日预计 ¥35+",
-  "hypothesis": ["marketing-batch 调用量突增", "新模板单请求 token 翻倍"],
-  "reasoning_chain": [
-    "发布：v3-longform 上线，max_tokens 4096",
-    "流量：marketing-batch 占 token 62%",
-    "成本：¥28.5 > 预算 ¥20 → 需负责人止血"
-  ],
-  "steps": [
-    {"order": 1, "action": "暂停 marketing-batch 非紧急任务", "command": "coagent route pause content-bot marketing-batch", "risk": "high"},
-    {"order": 2, "action": "临时降级模型并 cap max_tokens", "command": "coagent model downgrade content-bot", "risk": "high"},
-    {"order": 3, "action": "通知业务负责人确认是否继续投放", "command": null, "risk": "low"}
-  ],
-  "comms_draft": "【成本告警】超预算 42%，建议暂停 batch，需 @负责人 确认",
-  "retry_recommended": false
-}
-```
+- **因果链：** 模板/流量↑ → Token↑ → 超预算 → 需负责人止血  
+- **`retry_recommended`：** `false`  
+- **steps：** 含 high risk（暂停 batch / 降级），见 `ops_playbooks.json` → `cost_over_budget`
 
-**Score 设计（目标 54 🔴）：**
-
-| 因子 | 目标 | 手段 |
-|------|------|------|
-| D | 0.78 | cost 字段齐全；`error` 为空（cost 事件正常） |
-| P | 0.72 | type=`cost_report` + OPS-305 |
-| C | clamp 0.50 | 含 high risk steps；需人工审批 |
-
-```yaml
-consistency_clamp: [0.48, 0.55]
-expected_score: [50, 58]
-expected_grade: escalate
-```
+**Score 设计（目标 54 🔴）：** 见 `ops_playbooks.json` → `cost_over_budget`
 
 **实现效果：**
 
@@ -524,13 +444,12 @@ flowchart LR
 
 ```
 data/agents.json
-data/ops_playbooks.json       # OPS-101 / 203 / 305
+data/ops_playbooks.json       # 唯一 Playbook 配置源（§6、§18.7）
 data/scenarios/s1.json | s2.json | s3.json
 data/calibration/             # calibrate_scores.sh 产出
-app/playbooks/cs_rate_limit.py | rag_empty_retrieval.py | cost_over_budget.py
+app/playbooks/engine.py       # PlaybookEngine（读 ops_playbooks.json）
+tests/                        # §18.10
 ```
-
-每个 Playbook 须实现：`required_tools`（D）、`ops_tags`（P）、`consistency_rules`（C）、`consistency_clamp` / `expected_score`。
 
 ---
 
@@ -549,7 +468,9 @@ flowchart TB
     WEB -->|反馈| DB
 ```
 
-**技术栈：** Python 3.11 · FastAPI · SQLite · HTMX + SSE · 飞书 SDK · OpenAI 兼容 LLM
+**技术栈：** Python 3.11 · FastAPI · SQLite · HTMX + SSE · 飞书 SDK · OpenAI 兼容 LLM（**async**，见 §18.8）
+
+**并发约束：** 外部 I/O（LLM、飞书）不得阻塞 asyncio 事件循环；LLM 使用 async HTTP 客户端；飞书 SDK 若仅 sync，可 `asyncio.to_thread` 包装。
 
 **项目结构：**
 
@@ -557,14 +478,18 @@ flowchart TB
 coagent/
 ├── app/
 │   ├── main.py, orchestrator.py, router.py
-│   ├── playbooks/          # cs_rate_limit, rag_empty_retrieval, cost_over_budget
-│   ├── llm/, scoring/, tools/, channels/feishu_im.py
-│   ├── models/, api/
-├── web/                      # Admin HTMX
+│   ├── playbooks/engine.py     # PlaybookEngine（§18.7）
+│   ├── llm/client.py           # async OpenAI 兼容客户端
+│   ├── scoring/, tools/, channels/feishu_im.py
+│   ├── models/llm_output.py    # Pydantic LLMOutput（§5.2）
+│   ├── api/                    # /events, /admin/*, /demo/retry/*
+├── web/                        # Admin HTMX
 ├── data/
-│   ├── ops_playbooks.json, agents.json
-│   ├── scenarios/            # s1.json, s2.json, s3.json
+│   ├── ops_playbooks.json      # 唯一 Playbook 配置
+│   ├── agents.json
+│   ├── scenarios/
 │   └── calibration/
+├── tests/                      # §18.10
 ├── scripts/demo.sh, calibrate_scores.sh
 └── .env.example
 ```
@@ -597,6 +522,8 @@ S3 差异：`type=cost_report`，`symptom=over_budget`，`error=null`，`cost_yu
 
 ### 5.2 LLM 输出（必须 LLM 生成）
 
+**Schema 为唯一真相源**（§3.3–§3.5 仅描述场景要点，不重复 JSON）。
+
 ```json
 {
   "impact": "string",
@@ -608,7 +535,27 @@ S3 差异：`type=cost_report`，`symptom=over_budget`，`error=null`，`cost_yu
 }
 ```
 
-**约束：** 先完成 playbook `required_tools`；`reasoning_chain` ≥3 步；禁止 SOP 外的高风险操作。
+**Pydantic 模型** `app/models/llm_output.py`：
+
+```python
+class Step(BaseModel):
+    order: int
+    action: str
+    command: str | None = None
+    risk: Literal["low", "medium", "high"]
+
+class LLMOutput(BaseModel):
+    impact: str
+    hypothesis: list[str]
+    reasoning_chain: list[str] = Field(min_length=3)
+    steps: list[Step] = Field(min_length=1)
+    comms_draft: str
+    retry_recommended: bool
+```
+
+**校验流程：** LLM 返回 → `LLMOutput.model_validate` → 失败则 **重试 1 次** → 仍失败走 §10 L0（不读静态 hypothesis）。
+
+**约束：** 先完成 playbook `required_tools`；禁止 Ops 手册外的高风险操作。
 
 ### 5.3 Decision Score
 
@@ -628,21 +575,46 @@ total = round(100 × (0.35×D + 0.35×P + 0.30×C))
 | 60–79 | needs_confirmation 🟡 | 请负责人确认 |
 | <60 | escalate 🔴 | @oncall / Admin 强调升级 |
 
-**Admin Tab3 展示：** 总分 + grade + **三因子分解**（支撑「敢不敢执行」叙事）。
+**Admin Tab3 展示：** 总分 + grade + **三因子分解** +（`DEMO_MODE` 下）**C 校准披露**（§5.4）。
+
+**`score_json` 结构（持久化）：**
+
+```json
+{
+  "total": 85,
+  "grade": "executable",
+  "factors": {
+    "data_completeness": 0.92,
+    "playbook_match": 0.88,
+    "reasoning_consistency": 0.75,
+    "reasoning_consistency_raw": 0.58
+  },
+  "labels": { "grade_display": "🟢 可执行" }
+}
+```
+
+`reasoning_consistency_raw` 为 clamp 前的 **C**；`reasoning_consistency` 为写入公式的 C（Demo 下可能被 clamp）。
 
 ### 5.4 校准与 DEMO_MODE
 
 1. `calibrate_scores.sh --scenario <id> --runs 10` → `data/calibration/<id>.json`  
-2. 未命中 §3 Score 区间 → 调 mock / Ops 标签 / consistency 关键词  
-3. `DEMO_MODE=true`：仅对 **C** 按 playbook `consistency_clamp` clamp；**不伪造 LLM 文本**  
-4. LLM 完全失败 → Admin 错误态或 Replay，不读静态 hypothesis  
+2. 未命中 §3 Score 区间 → 调 `ops_playbooks.json` mock / 标签 / `consistency_rules`  
+3. **`DEMO_MODE=true`：** 仅对 **C** 按 playbook `consistency_clamp` 做 **clamp**（`C = min(max(C_raw, lo), hi)`）；**不修改 LLM 文本**  
+4. LLM 完全失败 → Admin 错误态或 **Replay（§18.2）**，不读静态 hypothesis  
 
-**Playbook 字段（各场景取值见 §3.3–§3.5）：**
+**clamp 说明：** clamp 只稳定 Demo 的 **Score 数字**，不伪造推理。Pitch：「LLM 真生成；Demo 仅将 C 压进 playbook 区间；生产关闭 `DEMO_MODE` 即无 clamp。」
 
-```yaml
-consistency_clamp: [0.68, 0.78]
-expected_score: [82, 88]
-expected_grade: executable
+**Tab3 UI（`DEMO_MODE=true` 且 C 被 clamp 时）：** 显示 footnote  
+`Demo · C 已校准（raw 0.58 → 0.72）`；三因子行展示 raw 与 clamp 后值。
+
+**Playbook 配置字段**（均在 `data/ops_playbooks.json`，各场景见 §3.3–§3.5 引用）：
+
+```json
+{
+  "consistency_clamp": [0.72, 0.78],
+  "expected_score": [82, 88],
+  "expected_grade": "executable"
+}
 ```
 
 ### 5.5 SQLite
@@ -665,6 +637,8 @@ CREATE TABLE incidents (
   duration_ms INTEGER
 );
 
+CREATE INDEX idx_incidents_event_id_started ON incidents(event_id, started_at);
+
 CREATE TABLE feedback (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   incident_id INTEGER NOT NULL REFERENCES incidents(id),
@@ -683,17 +657,51 @@ CREATE TABLE agent_daily_stats (
 );
 ```
 
+**幂等查询（§18.3）：** 插入前查 10 分钟内同 `event_id` 的 `trace_id`。
+
+### 5.6 `agent_daily_stats` 更新（Tab1 / Tab4）
+
+**触发：** `incident_completed` 时 UPSERT：
+
+- `run_count += 1`  
+- `type == run_fail` → `fail_count += 1`  
+- S3 / 含 `cost_yuan_today` → 更新 `cost_yuan` 为当日累计  
+
+**Tab1 Agent 列表数字：** 该 `agent_id` **最新一条** `incidents.score_json.total`（及 grade 色），**不是** stats 表的 run_count。
+
+```sql
+-- Tab1 最新 Score（示意）
+SELECT agent_id, json_extract(score_json, '$.total') AS latest_score
+FROM incidents i
+WHERE completed_at = (
+  SELECT MAX(completed_at) FROM incidents i2 WHERE i2.agent_id = i.agent_id
+);
+```
+
 ---
 
 ## 6. Playbook 摘要
 
-各 Playbook 的 Mock 数据、Score 校准与 UI 效果见 **§3.3–§3.5**。共用约束：
+**单一配置源：** `data/ops_playbooks.json` + **`app/playbooks/engine.py`（PlaybookEngine）**。  
+禁止 per-scenario Python playbook 文件；Router 将 `(type, symptom)` 映射到 JSON 中的 playbook `id`。
 
-- **Tools（三场景相同）：** `query_agent_metrics`, `query_agent_config`, `search_ops_playbook`
-- **LLM 约束：** 先完成 `required_tools`；`reasoning_chain` ≥3 步；禁止 Ops 手册外的高风险操作
+各场景 Mock、Score、UI 见 **§3.3–§3.5**。JSON 条目须包含：
 
-| Playbook | Ops | 关键 symptom/type |
-|----------|-----|-------------------|
+| 字段 | 用途 |
+|------|------|
+| `id` | `cs_rate_limit` / `rag_empty_retrieval` / `cost_over_budget` |
+| `ops_id` | OPS-101 / 203 / 305 |
+| `required_tools` | D 因子 |
+| `ops_tags` | P 因子 |
+| `consistency_rules` | C 因子关键词 |
+| `consistency_clamp` | DEMO_MODE clamp 区间 |
+| `expected_score` / `expected_grade` | calibrate 目标 |
+| `tool_mocks` | mock 返回值 |
+
+**共用 Tools：** `query_agent_metrics`, `query_agent_config`, `search_ops_playbook`
+
+| Playbook id | Ops | 路由键 |
+|-------------|-----|--------|
 | `cs_rate_limit` | OPS-101 | `run_fail` + `rate_limit` |
 | `rag_empty_retrieval` | OPS-203 | `run_fail` + `empty_retrieval` |
 | `cost_over_budget` | OPS-305 | `cost_report` + `over_budget` |
@@ -704,9 +712,9 @@ CREATE TABLE agent_daily_stats (
 
 | Tab | 内容 |
 |-----|------|
-| **1** Agent/Incident | Agent 列表 + SSE timeline |
+| **1** Agent/Incident | Agent 列表（**最新 Score**，§5.6）+ SSE timeline |
 | **2** 场景触发 | S1/S2/S3 + 预期 Score |
-| **3** Decision | 总分 + 三因子 + grade + 步骤 + Retry |
+| **3** Decision | 总分 + 三因子 + grade + 步骤 + Retry；`DEMO_MODE` 下 C clamp 披露（§5.4） |
 | **4** 飞轮 | 统计 + 👍/👎 |
 
 **Tab1 线框：**
@@ -723,17 +731,19 @@ CREATE TABLE agent_daily_stats (
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| POST | `/events` | Webhook |
+| POST | `/events` | Webhook；**幂等**见 §18.3 |
 | POST | `/admin/trigger/{scenario_id}` | Demo 触发 |
 | GET | `/admin/incidents` | 列表 |
 | GET | `/admin/incidents/{trace_id}` | 详情 |
-| GET | `/admin/incidents/{trace_id}/stream` | SSE |
+| GET | `/admin/incidents/{trace_id}/stream` | SSE live pipeline |
 | POST | `/admin/incidents/{trace_id}/feedback` | 反馈 |
 | GET | `/admin/stats` | 飞轮统计 |
-| POST | `/admin/replay/{trace_id}` | Replay |
+| POST | `/admin/replay/{trace_id}` | **只读 Replay**（§18.2） |
+| POST | `/demo/retry/{agent_id}` | Mock Retry（§18.4） |
 
-成功响应：`{ "status": "ok", "trace_id": "..." }`  
-重复 event_id（10min）：`{ "status": "duplicate", "trace_id": "..." }`
+**成功响应：** `{ "status": "ok", "trace_id": "..." }`
+
+**幂等（10min）：** `{ "status": "duplicate", "trace_id": "<original>" }` — 不新建 incident、不调 LLM/飞书。实现见 §18.3。
 
 ---
 
@@ -754,6 +764,8 @@ data: {"type":"score_computed","trace_id":"...","ts":"...","payload":{...}}
 | channel_sync | 飞书状态 |
 | incident_completed | 成功结束 |
 | incident_failed | L0 失败 |
+| replay_started | Replay 开始（§18.2） |
+| replay_completed | Replay 结束 |
 
 ---
 
@@ -774,9 +786,22 @@ S3 🔴 → `@FEISHU_ESCALATE_USER_ID`
 
 ## 10. 错误处理
 
+### 10.1 超时预算
+
+| 步骤 | 超时 | 失败层级 |
+|------|------|----------|
+| 单 Tool | 3s | L1（降级 mock） |
+| LLM（含 1 次重试） | 15s | L0 |
+| 飞书发送 | 5s | L2 |
+| **整链** | **30s** hard cap | L0 或引导 Replay |
+
+外部 I/O 使用 **async** 客户端（§18.8），避免阻塞 SSE。
+
+### 10.2 层级
+
 | 层级 | 触发 | Admin | 禁止 |
 |------|------|-------|------|
-| **L0** | LLM 失败 | 错误态 + 重试/Replay | 伪造 hypothesis |
+| **L0** | LLM 失败 / 超时 | 错误态 + Replay（§18.2） | 伪造 hypothesis |
 | **L1** | Tool 失败 | 降级 mock；D↓ | 中断 pipeline |
 | **L2** | 飞书失败 | Admin 完整；demo.log | — |
 | **L3** | 现场灾难 | Replay + 预录 | — |
@@ -908,8 +933,11 @@ DEMO_MODE=true
 - [ ] Tab3 展示 Score 总分 + 三因子 + grade  
 - [ ] S1 飞书 + Retry；S3 升级态可展示  
 - [ ] Tab4 反馈更新统计  
-- [ ] L0 不伪造；Replay 可用  
-- [ ] calibrate + demo.sh 各 10 次稳定  
+- [ ] L0 不伪造；Replay 只读重放可用（§18.2）  
+- [ ] `event_id` 10min 幂等（§18.3）  
+- [ ] `POST /demo/retry/{agent_id}` 可达（§18.4）  
+- [ ] Tab3 在 `DEMO_MODE` 下展示 C clamp 披露（§5.4）  
+- [ ] `pytest tests/ -m "not live_llm"` 通过；赛前 `pytest -m live_llm` + calibrate + demo.sh 各 10 次稳定（§18.10）  
 
 ---
 
@@ -926,5 +954,117 @@ DEMO_MODE=true
 | 文档 | 说明 |
 |------|------|
 | **本文档** | Hackathon 唯一实施基线 |
+| [TODOS.md](../../../TODOS.md) | 工程评审遗留与赛后项 |
 | [idea.md](../../../idea.md) | 方向收敛 / 切口定位参考 |
+| [coagent-core-innovations.md](./coagent-core-innovations.md) | 核心创新叙事摘要 |
 | [archive/](./archive/README.md) | v1 / v2 / v3.1 / OPC 草案历史归档 |
+
+---
+
+## 18. 实现附录（工程评审 2026-06-27）
+
+> `/plan-eng-review` 决策写回。实现 **必须** 与本节一致。
+
+### 18.1 决策汇总
+
+| ID | 决策 |
+|----|------|
+| Scope | 全量 §2.1 P0 |
+| 1 | gstack design doc superseded → Agent Ops（见 TODOS.md） |
+| 2 | **Replay = 只读** SQLite `timeline_json` / `llm_json` / `score_json`，SSE 重放，**不调 LLM** |
+| 3 | **`event_id` 幂等：** SQLite 查 10min 内已有 incident → `duplicate` |
+| 4 | **`POST /demo/retry/{agent_id}`** → 200 JSON，不真调外部 Agent |
+| 5 | **超时：** Tool 3s / LLM 15s / 飞书 5s / 链 30s（§10.1） |
+| 6 | **`agent_daily_stats` UPSERT** + Tab1 显示最新 Score（§5.6） |
+| 7 | **`ops_playbooks.json` 唯一配置** + `PlaybookEngine`（§6） |
+| 8 | **Pydantic `LLMOutput`**（§5.2） |
+| 9 | **§5.2 唯一 LLM schema**；§3 仅场景要点 |
+| 10 | **Tab3 披露 C clamp** + `reasoning_consistency_raw`（§5.4） |
+| 11 | **测试：** 真 LLM 集成测 + marker（§18.10） |
+| 12 | **LLM async HTTP 客户端**（§4） |
+
+### 18.2 Replay（只读重放）
+
+```
+POST /admin/replay/{trace_id}
+  → 读 incidents.timeline_json (+ llm_json, score_json)
+  → SSE: replay_started → 按序 emit 历史 event types → replay_completed
+  → Tab3 即时填充 score/steps（无需等待 LLM）
+  → 禁止调用 LLM / 飞书（除非单独开关，P0 不做）
+```
+
+Pitch 话术：**「Replay 是审计回放，不是重新推理。」**
+
+### 18.3 `event_id` 幂等（SQLite）
+
+```python
+# 伪代码
+existing = db.query(
+    "SELECT trace_id FROM incidents WHERE event_id = ? AND started_at > ?",
+    event_id, now() - 600,
+)
+if existing:
+    return {"status": "duplicate", "trace_id": existing.trace_id}
+```
+
+适用于 `POST /events` 与 `POST /admin/trigger/*`（trigger 使用 scenario JSON 内固定 `event_id` 时）。
+
+### 18.4 Mock Retry
+
+```
+POST /demo/retry/{agent_id}
+→ 200 {"status": "ok", "agent_id": "cs-bot", "message": "retry scheduled (demo)"}
+→ 可选 SSE: retry_clicked
+```
+
+Tab3 与飞书 S1 卡片 POST 同一 URL（`s1.json` 内 `retry_webhook`）。
+
+### 18.5 超时
+
+见 **§10.1**。
+
+### 18.6 `agent_daily_stats`
+
+见 **§5.6**。
+
+### 18.7 PlaybookEngine
+
+- 加载 `data/ops_playbooks.json`  
+- `PlaybookEngine.run(playbook_id, event)` → tools → LLM prompt context → 返回 structured context  
+- Score 模块读同一 JSON 的 `ops_tags` / `consistency_rules` / `consistency_clamp`
+
+### 18.8 Async LLM
+
+- `app/llm/client.py`：`httpx.AsyncClient` + OpenAI 兼容 chat completions  
+- 所有 orchestrator 步骤 `async def`  
+- 飞书 SDK 若 sync：`await asyncio.to_thread(feishu_send, ...)`
+
+### 18.9 DEMO_MODE clamp UI
+
+见 **§5.4**。`score_json.factors.reasoning_consistency_raw` 必存。
+
+### 18.10 测试策略
+
+```bash
+# 默认 CI / 本地快路径
+pytest tests/ -m "not live_llm" -q
+
+# 赛前 / 手动：真 LLM 集成（§11C）
+pytest tests/ -m live_llm -q
+
+# 稳定性门禁
+./scripts/calibrate_scores.sh --scenario s1 --runs 10
+./scripts/demo.sh   # ×10
+```
+
+| 套件 | 覆盖 |
+|------|------|
+| `test_playbook_engine.py` | Router + JSON 配置 + mock tools |
+| `test_scoring.py` | D/P/C + clamp + grade |
+| `test_idempotency.py` | duplicate event_id |
+| `test_replay.py` | SSE 只读重放、无 LLM 调用 |
+| `test_llm_integration.py` | `@pytest.mark.live_llm` 三场景 pipeline |
+
+**依赖：** `pytest`, `pytest-asyncio`, `httpx`；`live_llm` 需 `LLM_API_KEY`。
+
+---
