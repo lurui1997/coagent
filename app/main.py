@@ -30,7 +30,7 @@ def startup():
 
 
 @app.get("/", response_class=HTMLResponse)
-async def admin_page(request: Request, tab: int = 1):
+async def admin_page(request: Request, tab: int = 1, trace: str | None = None):
     agents_path = settings.data_dir / "agents.json"
     with open(agents_path, encoding="utf-8") as f:
         agents = json.load(f)
@@ -48,6 +48,7 @@ async def admin_page(request: Request, tab: int = 1):
             "stats": stats,
             "demo_mode": settings.demo_mode,
             "escalate_user": settings.feishu_escalate_user_id or "@oncall",
+            "active_trace": trace,
         },
     )
 

@@ -44,11 +44,13 @@ async def stream_incident(trace_id: str):
                     data = {
                         "type": item["type"],
                         "trace_id": trace_id,
+                        "ts": item.get("ts", incident.get("started_at", "")),
                         "payload": item.get("payload", {}),
                     }
                     yield f"event: incident\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
-                    if incident.get("status") in ("completed", "failed"):
-                        return
+
+                if incident.get("status") in ("completed", "failed"):
+                    return
 
             while True:
                 try:

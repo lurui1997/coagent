@@ -13,6 +13,7 @@ from app.db import (
     new_trace_id,
     update_incident,
     upsert_agent_stats,
+    utc_now_iso,
 )
 from app.llm.client import LLMClient
 from app.models.event import AgentEvent
@@ -54,7 +55,7 @@ class Orchestrator:
         start_ms = time.time()
 
         async def record(event_type: str, payload: dict) -> None:
-            entry = {"type": event_type, "payload": payload}
+            entry = {"type": event_type, "payload": payload, "ts": utc_now_iso()}
             timeline.append(entry)
             await sse_manager.emit(trace_id, event_type, payload)
 

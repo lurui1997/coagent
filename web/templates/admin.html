@@ -4,215 +4,446 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoAgent — Agent Ops Copilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>CoAgent</h1>
-      <span class="tagline">Agent 出错或烧钱时，几分钟内知道要不要动、怎么动、有多大把握</span>
+  <header class="site-header">
+    <a href="/?tab=1" class="brand">
+      <div class="brand-mark">C</div>
+      <span class="brand-name">CoAgent</span>
+    </a>
+    <div class="header-meta">
+      <span class="badge-live" id="header-status">Pipeline ready</span>
+      {% if demo_mode %}
+      <span class="badge">Demo Mode</span>
+      {% endif %}
     </div>
-    {% if demo_mode %}
-    <span class="tagline">DEMO_MODE</span>
-    {% endif %}
   </header>
 
-  <nav class="tabs">
-    <a href="/?tab=1" class="{% if tab == 1 %}active{% endif %}">Tab1 · Agent / Timeline</a>
-    <a href="/?tab=2" class="{% if tab == 2 %}active{% endif %}">Tab2 · 场景触发</a>
-    <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">Tab3 · Decision</a>
-    <a href="/?tab=4" class="{% if tab == 4 %}active{% endif %}">Tab4 · 飞轮</a>
+  <nav class="subnav">
+    <a href="/?tab=1" class="{% if tab == 1 %}active{% endif %}">Overview</a>
+    <a href="/?tab=2" class="{% if tab == 2 %}active{% endif %}">Scenarios</a>
+    <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">Decision Score</a>
+    <a href="/?tab=4" class="{% if tab == 4 %}active{% endif %}">Flywheel</a>
   </nav>
 
-  <main>
+  <div class="page {% if tab == 1 %}tab-overview{% endif %}">
     {% if tab == 1 %}
+    <section class="page-hero">
+      <h2>Power <em>autonomous</em> Agent operations.</h2>
+      <p>Webhook 事件 → Playbook → LLM 推理 → Decision Score — 几分钟内知道要不要动、怎么动、有多大把握。</p>
+    </section>
+
+    <div id="trace-banner" class="trace-banner" style="display:none">
+      <span>当前 incident: <code id="trace-banner-id"></code></span>
+      <a id="trace-banner-link" href="#">查看完整决策链路 →</a>
+    </div>
+
+    <div class="pipeline-stack">
+      <div class="stack-layer"><span></span>Data · Metrics & Config</div>
+      <div class="stack-layer"><span></span>Router · Scenario Mapping</div>
+      <div class="stack-layer active"><span></span>Playbook Engine · OPS-101/203/305</div>
+      <div class="stack-layer"><span></span>LLM · Reasoning Chain</div>
+      <div class="stack-layer"><span></span>Decision Score · D / P / C</div>
+    </div>
+
     <div class="grid-2">
       <div class="card">
-        <h3>Agent 列表</h3>
+        <div class="card-header">
+          <h3>Agents</h3>
+          <span class="card-count">{{ agents|length }}</span>
+        </div>
         {% for agent in agents %}
         <div class="agent-item">
-          <span>{{ agent.agent_id }}</span>
+          <span class="agent-id">{{ agent.agent_id }}</span>
           {% set sc = latest_scores.get(agent.agent_id) %}
           {% if sc %}
           <span class="score-badge score-{{ 'green' if sc.total >= 80 else ('amber' if sc.total >= 60 else 'red') }}">
             {{ sc.total }} {{ sc.labels.grade_display.split()[0] if sc.labels else '' }}
           </span>
           {% else %}
-          <span class="score-badge" style="color: var(--muted)">—</span>
+          <span class="score-badge" style="color: var(--text-muted); background: var(--bg)">—</span>
           {% endif %}
         </div>
         {% endfor %}
       </div>
       <div class="card">
-        <h3>SSE Timeline</h3>
+        <div class="card-header">
+          <h3>Audit Timeline</h3>
+          <span class="card-count" id="timeline-count">—</span>
+        </div>
         <div id="timeline" class="timeline">
-          <div class="empty">触发场景后，事件将在此实时滚动</div>
+          <div class="empty">
+            <div class="empty-icon">◎</div>
+            在 Scenarios 页触发 S1/S2/S3，事件将在此实时滚动
+          </div>
         </div>
       </div>
     </div>
 
     {% elif tab == 2 %}
+    <section class="page-hero">
+      <h2>Run <em>demo scenarios</em></h2>
+      <p>三场景展示同一 Agent Ops 内核：敢动手 → 不敢盲动 → 必须升级。</p>
+    </section>
+
     <div class="scenario-grid">
-      <div class="scenario-card" onclick="triggerScenario('s1')">
-        <h4>S1 · 客服限流 🟢</h4>
-        <p>cs-bot · run_fail + rate_limit · 429 限流</p>
-        <div class="expected">预期 Score: 82–88 🟢 · 可 Retry</div>
-        <button class="btn">触发 S1</button>
+      <div class="scenario-card s1" onclick="triggerScenario('s1')">
+        <div class="scenario-id">Scenario 01 · Executable</div>
+        <h4>客服 Agent API 限流</h4>
+        <p>cs-bot · run_fail + rate_limit · OpenAI 429 连续失败</p>
+        <div class="expected">Score 82–88 🟢 · Retry 可恢复</div>
+        <button class="btn" type="button">触发 S1</button>
       </div>
-      <div class="scenario-card" onclick="triggerScenario('s2')">
-        <h4>S2 · RAG 空检索 🟡</h4>
-        <p>rag-bot · run_fail + empty_retrieval</p>
-        <div class="expected">预期 Score: 65–75 🟡 · 不建议 Retry</div>
-        <button class="btn btn-secondary">触发 S2</button>
+      <div class="scenario-card s2" onclick="triggerScenario('s2')">
+        <div class="scenario-id">Scenario 02 · Confirm</div>
+        <h4>RAG 空检索飙升</h4>
+        <p>rag-bot · run_fail + empty_retrieval · 索引 lag 致幻觉</p>
+        <div class="expected">Score 65–75 🟡 · 不建议 Retry</div>
+        <button class="btn btn-warning" type="button">触发 S2</button>
       </div>
-      <div class="scenario-card" onclick="triggerScenario('s3')">
-        <h4>S3 · 成本超预算 🔴</h4>
-        <p>content-bot · cost_report + over_budget</p>
-        <div class="expected">预期 Score: 50–58 🔴 · 升级 @</div>
-        <button class="btn btn-danger">触发 S3</button>
+      <div class="scenario-card s3" onclick="triggerScenario('s3')">
+        <div class="scenario-id">Scenario 03 · Escalate</div>
+        <h4>Agent 日成本超预算</h4>
+        <p>content-bot · cost_report + over_budget · Token 突增</p>
+        <div class="expected">Score 50–58 🔴 · 升级 @负责人</div>
+        <button class="btn btn-danger" type="button">触发 S3</button>
       </div>
     </div>
-    <div id="trigger-result" style="margin-top: 1rem;"></div>
+    <div id="trigger-result"></div>
 
     {% elif tab == 3 %}
-    <div id="decision-panel" class="card decision-panel">
-      <div class="empty">触发场景后查看 Decision Score 详情，或选择历史 incident</div>
+    <section class="page-hero">
+      <h2>Verify with <em>Decision Score</em></h2>
+      <p>三因子可验证推理：数据完备 (D) · 手册匹配 (P) · 推理一致 (C) — 非 LLM 自报 confidence。</p>
+    </section>
+
+    <div id="incident-meta" class="card incident-meta" style="display:none">
+      <div class="meta-item"><span>trace_id · </span><strong id="meta-trace"></strong></div>
+      <div class="meta-item"><span>agent · </span><strong id="meta-agent"></strong></div>
+      <div class="meta-item"><span>scenario · </span><strong id="meta-scenario"></strong></div>
+      <div class="meta-item highlight"><span>status · </span><strong id="meta-status"></strong></div>
     </div>
+
+    <div id="execution-chain" class="card execution-chain" style="display:none">
+      <div class="card-header"><h3>Decision Execution Chain</h3></div>
+      <div id="pipeline-flow" class="pipeline-flow"></div>
+      <div id="causal-chain" class="causal-chain" style="display:none">
+        <h4>因果一跳 · Reasoning Chain</h4>
+        <div id="causal-steps" class="causal-steps"></div>
+      </div>
+    </div>
+
+    <div class="incident-split">
+      <div class="card">
+        <div class="card-header">
+          <h3>Audit Timeline</h3>
+          <span class="card-count" id="timeline-count">—</span>
+        </div>
+        <div id="timeline" class="timeline">
+          <div class="empty">
+            <div class="empty-icon">◎</div>
+            触发场景后，完整处置链路将在此展示
+          </div>
+        </div>
+      </div>
+      <div id="decision-panel" class="card decision-panel">
+        <div class="empty">
+          <div class="empty-icon">◈</div>
+          触发场景后 Decision 详情将自动展示，或从下方历史 incident 选择
+        </div>
+      </div>
+    </div>
+
     {% if incidents %}
-    <div class="card" style="margin-top: 1rem;">
-      <h3>历史 Incidents</h3>
+    <div class="card" style="margin-top: 1.25rem;">
+      <div class="card-header">
+        <h3>Recent Incidents</h3>
+        <span class="card-count">{{ incidents|length }}</span>
+      </div>
       {% for inc in incidents[:10] %}
-      <div class="agent-item" style="cursor:pointer" onclick="loadDecision('{{ inc.trace_id }}')">
-        <span>{{ inc.agent_id }} · {{ inc.scenario_id }}</span>
-        <span>{{ inc.status }}</span>
+      <div class="incident-row" data-trace="{{ inc.trace_id }}" onclick="selectIncident('{{ inc.trace_id }}')">
+        <span><span class="agent-id">{{ inc.agent_id }}</span> · {{ inc.scenario_id }}</span>
+        <span class="status-dot {{ inc.status }}">{{ inc.status }}</span>
       </div>
       {% endfor %}
     </div>
     {% endif %}
 
     {% elif tab == 4 %}
+    <section class="page-hero">
+      <h2>Ops <em>flywheel</em></h2>
+      <p>👍/👎 反馈驱动 Ops 手册与 prompt 迭代 — 处置资产沉淀在团队侧。</p>
+    </section>
+
     <div class="stats-grid">
-      <div class="card stat-box">
+      <div class="card stat-box stat-up">
         <div class="num" id="stat-up">{{ stats.thumbs_up }}</div>
-        <div class="label">👍 有用</div>
+        <div class="label">有用反馈</div>
       </div>
-      <div class="card stat-box">
+      <div class="card stat-box stat-down">
         <div class="num" id="stat-down">{{ stats.thumbs_down }}</div>
-        <div class="label">👎 无用</div>
+        <div class="label">无用反馈</div>
       </div>
       <div class="card stat-box">
         <div class="num" id="stat-total">{{ stats.total }}</div>
-        <div class="label">总反馈</div>
+        <div class="label">总计</div>
       </div>
     </div>
-    <div class="card" style="margin-top: 1rem;">
-      <h3>提交反馈</h3>
-      <p style="color: var(--muted); font-size: 0.875rem; margin-bottom: 1rem;">
-        选择最近 incident 后提交 👍/👎，驱动 Ops 手册迭代
+    <div class="card" style="margin-top: 1.25rem;">
+      <div class="card-header"><h3>Submit Feedback</h3></div>
+      <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+        选择最近 incident 提交反馈，驱动 Ops 手册迭代
       </p>
-      <select id="feedback-trace" style="width:100%; padding:0.5rem; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:6px;">
+      <select id="feedback-trace" class="select-field">
         {% for inc in incidents[:10] %}
         <option value="{{ inc.trace_id }}">{{ inc.agent_id }} · {{ inc.trace_id }}</option>
         {% endfor %}
       </select>
       <div class="feedback-btns">
-        <button class="btn btn-success" onclick="submitFeedback('up')">👍 有用</button>
-        <button class="btn btn-danger" onclick="submitFeedback('down')">👎 无用</button>
+        <button class="btn btn-success" type="button" onclick="submitFeedback('up')">👍 有用</button>
+        <button class="btn btn-outline" type="button" onclick="submitFeedback('down')">👎 无用</button>
       </div>
     </div>
     {% endif %}
-  </main>
+  </div>
 
   <script>
     let currentTraceId = null;
     let eventSource = null;
 
+    const EVENT_LABELS = {
+      incident_started: 'Event Ingest',
+      tool_called: 'Tool Query',
+      llm_reasoning: 'LLM Reasoning',
+      llm_result: 'LLM Output',
+      score_computed: 'Decision Score',
+      channel_sync: 'Channel Sync',
+      incident_completed: 'Completed',
+      incident_failed: 'Failed',
+      replay_started: 'Replay',
+      replay_completed: 'Replay Done',
+    };
+
+    const PIPELINE_STEPS = [
+      { key: 'incident_started', label: 'Event' },
+      { key: 'tool_called', label: 'Tools', multi: true },
+      { key: 'llm_reasoning', label: 'LLM' },
+      { key: 'score_computed', label: 'Score' },
+      { key: 'incident_completed', label: 'Done' },
+    ];
+
     function gradeClass(grade) {
       return grade || 'needs_confirmation';
+    }
+
+    function clearTimeline() {
+      const el = document.getElementById('timeline');
+      if (!el) return;
+      el.innerHTML = '';
     }
 
     function appendTimeline(event) {
       const el = document.getElementById('timeline');
       if (!el) return;
-      const empty = el.querySelector('.empty');
-      if (empty) empty.remove();
+      const label = EVENT_LABELS[event.type] || event.type;
+      const ts = event.ts ? String(event.ts).slice(11, 19) : '';
+      const payload = event.payload || {};
+      let summary = '';
+      if (event.type === 'tool_called') summary = payload.tool || '';
+      else if (event.type === 'score_computed') summary = `total=${payload.total} ${payload.grade || ''}`;
+      else if (event.type === 'llm_reasoning') summary = (payload.reasoning_chain || []).length + ' hops';
+      else if (event.type === 'incident_started') summary = payload.agent_id || '';
+
       const div = document.createElement('div');
       div.className = 'timeline-entry';
-      div.innerHTML = `<span class="type">${event.type}</span> <span class="ts">${event.ts || ''}</span><pre>${JSON.stringify(event.payload || {}, null, 2).slice(0, 300)}</pre>`;
+      div.dataset.type = event.type;
+      div.innerHTML = `<span class="type">${label}${summary ? ' · ' + summary : ''}</span><span class="ts">${ts}</span><pre>${JSON.stringify(payload, null, 2).slice(0, 320)}</pre>`;
       el.appendChild(div);
       el.scrollTop = el.scrollHeight;
+      updateTimelineCount();
     }
 
-    function connectSSE(traceId) {
-      if (eventSource) eventSource.close();
-      currentTraceId = traceId;
-      eventSource = new EventSource(`/admin/incidents/${traceId}/stream`);
-      eventSource.addEventListener('incident', (e) => {
-        const data = JSON.parse(e.data);
-        appendTimeline(data);
-        if (['score_computed', 'llm_result', 'replay_completed'].includes(data.type)) {
-          loadDecision(traceId);
+    function updateTimelineCount() {
+      const el = document.getElementById('timeline-count');
+      if (!el) return;
+      const n = document.querySelectorAll('#timeline .timeline-entry').length;
+      el.textContent = n > 0 ? `${n} events` : '—';
+    }
+
+    function renderTimelineFromIncident(timeline) {
+      clearTimeline();
+      if (!timeline || timeline.length === 0) {
+        const el = document.getElementById('timeline');
+        if (el) el.innerHTML = '<div class="empty"><div class="empty-icon">◎</div>暂无 timeline 数据</div>';
+        return;
+      }
+      timeline.forEach(e => appendTimeline({ type: e.type, ts: e.ts, payload: e.payload || {} }));
+    }
+
+    function renderExecutionChain(inc) {
+      const chainEl = document.getElementById('execution-chain');
+      const flowEl = document.getElementById('pipeline-flow');
+      if (!chainEl || !flowEl) return;
+
+      const timeline = inc.timeline_json || [];
+      const types = timeline.map(e => e.type);
+      const toolCount = types.filter(t => t === 'tool_called').length;
+
+      chainEl.style.display = 'block';
+      flowEl.innerHTML = '';
+
+      PIPELINE_STEPS.forEach((step, i) => {
+        if (i > 0) {
+          const arrow = document.createElement('span');
+          arrow.className = 'pipeline-arrow';
+          arrow.textContent = '→';
+          flowEl.appendChild(arrow);
         }
+        const hit = step.multi
+          ? toolCount > 0
+          : types.includes(step.key);
+        const div = document.createElement('div');
+        div.className = 'pipeline-step' + (hit ? ' done' : '');
+        div.textContent = step.multi && toolCount ? `${step.label} ×${toolCount}` : step.label;
+        flowEl.appendChild(div);
       });
-    }
 
-    async function triggerScenario(id) {
-      const res = await fetch(`/admin/trigger/${id}`, { method: 'POST' });
-      const data = await res.json();
-      const el = document.getElementById('trigger-result');
-      if (el) {
-        el.innerHTML = `<div class="card">状态: ${data.status} · trace_id: <code>${data.trace_id}</code></div>`;
-      }
-      if (data.trace_id && data.status !== 'duplicate') {
-        connectSSE(data.trace_id);
-        window.location.href = '/?tab=1';
-        sessionStorage.setItem('pendingTrace', data.trace_id);
+      const causalEl = document.getElementById('causal-chain');
+      const stepsEl = document.getElementById('causal-steps');
+      const chain = inc.llm_json?.reasoning_chain || [];
+      if (causalEl && stepsEl && chain.length) {
+        causalEl.style.display = 'block';
+        stepsEl.innerHTML = chain.map((text, i) =>
+          `<div class="causal-step"><strong>Hop ${i + 1}</strong>${text}</div>`
+        ).join('');
+      } else if (causalEl) {
+        causalEl.style.display = 'none';
       }
     }
 
-    async function loadDecision(traceId) {
-      const res = await fetch(`/admin/incidents/${traceId}`);
-      const inc = await res.json();
+    function renderIncidentMeta(inc) {
+      const meta = document.getElementById('incident-meta');
+      if (!meta) return;
+      meta.style.display = 'flex';
+      document.getElementById('meta-trace').textContent = inc.trace_id;
+      document.getElementById('meta-agent').textContent = inc.agent_id;
+      document.getElementById('meta-scenario').textContent = inc.scenario_id;
+      document.getElementById('meta-status').textContent = inc.status;
+    }
+
+    function renderDecision(inc) {
       const panel = document.getElementById('decision-panel');
-      if (!panel || !inc.score_json) return;
+      if (!panel || !inc.score_json) {
+        if (panel && inc.status === 'running') {
+          panel.innerHTML = '<div class="empty"><div class="empty-icon">◌</div>Pipeline 运行中…</div>';
+        }
+        return;
+      }
 
       const sc = inc.score_json;
       const llm = inc.llm_json || {};
       const grade = sc.grade;
       panel.className = `card decision-panel ${gradeClass(grade)}`;
 
-      let html = `<h3>Decision Score: ${sc.total} ${sc.labels?.grade_display || ''}</h3>`;
+      let html = `<div class="decision-score-header">
+        <h3>Score ${sc.total}</h3>
+        <span class="grade-pill ${gradeClass(grade)}">${sc.labels?.grade_display || grade}</span>
+      </div>`;
+
       html += `<div class="factors">
-        <div class="factor"><div class="label">D 数据完备</div><div class="value">${(sc.factors.data_completeness * 100).toFixed(0)}%</div></div>
-        <div class="factor"><div class="label">P 手册匹配</div><div class="value">${(sc.factors.playbook_match * 100).toFixed(0)}%</div></div>
-        <div class="factor"><div class="label">C 推理一致</div><div class="value">${(sc.factors.reasoning_consistency * 100).toFixed(0)}%</div></div>
+        <div class="factor"><div class="label">D · Data</div><div class="value">${(sc.factors.data_completeness * 100).toFixed(0)}%</div></div>
+        <div class="factor"><div class="label">P · Playbook</div><div class="value">${(sc.factors.playbook_match * 100).toFixed(0)}%</div></div>
+        <div class="factor"><div class="label">C · Consistency</div><div class="value">${(sc.factors.reasoning_consistency * 100).toFixed(0)}%</div></div>
       </div>`;
 
       {% if demo_mode %}
       if (sc.clamp_applied) {
-        html += `<div class="footnote">Demo · C 已校准（raw ${sc.factors.reasoning_consistency_raw} → ${sc.factors.reasoning_consistency}）</div>`;
+        html += `<div class="footnote">Demo · C calibrated (raw ${sc.factors.reasoning_consistency_raw} → ${sc.factors.reasoning_consistency})</div>`;
       }
       {% endif %}
 
-      if (llm.impact) html += `<p style="margin:1rem 0">${llm.impact}</p>`;
+      if (llm.impact) html += `<div class="impact-text">${llm.impact}</div>`;
       if (llm.steps) {
         html += '<ul class="steps-list">';
-        llm.steps.forEach(s => { html += `<li>[${s.risk}] ${s.action}</li>`; });
+        llm.steps.forEach(s => {
+          html += `<li><span class="risk-tag risk-${s.risk}">${s.risk}</span><span>${s.action}</span></li>`;
+        });
         html += '</ul>';
       }
 
+      html += '<div class="action-row">';
       if (grade === 'executable' && llm.retry_recommended) {
-        html += `<button class="btn btn-success" onclick="doRetry('cs-bot')">一键 Retry</button>`;
+        html += `<button class="btn btn-success" type="button" onclick="doRetry('cs-bot')">一键 Retry</button>`;
       } else if (grade === 'needs_confirmation') {
-        html += `<div class="alert alert-warning">⚠️ 不建议 Retry — 请确认后执行</div>`;
+        html += `<div class="alert alert-warning" style="flex:1;margin:0">不建议 Retry — 请确认后执行</div>`;
       } else if (grade === 'escalate') {
-        html += `<div class="alert alert-danger">🔴 升级 {{ escalate_user }} — 高风险步骤不可自动执行</div>`;
-        if (llm.comms_draft) html += `<p style="margin-top:0.5rem;font-size:0.875rem">${llm.comms_draft}</p>`;
+        html += `<div class="alert alert-danger" style="flex:1;margin:0">升级 {{ escalate_user }} — 高风险步骤不可自动执行</div>`;
+      }
+      html += `<button class="btn btn-secondary" type="button" onclick="doReplay('${inc.trace_id}')">Replay 审计回放</button>`;
+      html += '</div>';
+
+      if (grade === 'escalate' && llm.comms_draft) {
+        html += `<p style="margin-top:1rem;font-size:0.875rem;color:var(--text-secondary)">${llm.comms_draft}</p>`;
       }
 
-      html += `<div style="margin-top:1rem"><button class="btn btn-secondary" onclick="doReplay('${traceId}')">Replay 审计回放</button></div>`;
       panel.innerHTML = html;
+    }
+
+    function highlightIncidentRow(traceId) {
+      document.querySelectorAll('.incident-row').forEach(row => {
+        row.classList.toggle('selected', row.dataset.trace === traceId);
+      });
+    }
+
+    function showTraceBanner(traceId) {
+      const banner = document.getElementById('trace-banner');
+      if (!banner) return;
+      banner.style.display = 'flex';
+      document.getElementById('trace-banner-id').textContent = traceId;
+      document.getElementById('trace-banner-link').href = `/?tab=3&trace=${traceId}`;
+    }
+
+    async function hydrateIncident(traceId) {
+      currentTraceId = traceId;
+      const res = await fetch(`/admin/incidents/${traceId}`);
+      if (!res.ok) return;
+      const inc = await res.json();
+
+      const statusEl = document.getElementById('header-status');
+      if (statusEl) statusEl.textContent = `Incident ${inc.status}`;
+
+      renderIncidentMeta(inc);
+      renderExecutionChain(inc);
+      renderTimelineFromIncident(inc.timeline_json);
+      renderDecision(inc);
+      highlightIncidentRow(traceId);
+      showTraceBanner(traceId);
+    }
+
+    function selectIncident(traceId) {
+      window.location.href = `/?tab=3&trace=${traceId}`;
+    }
+
+    async function triggerScenario(id) {
+      const card = document.querySelector(`.scenario-card.${id}`);
+      const btn = card?.querySelector('.btn');
+      if (btn) { btn.textContent = '运行中…'; btn.disabled = true; }
+
+      const res = await fetch(`/admin/trigger/${id}`, { method: 'POST' });
+      const data = await res.json();
+      const el = document.getElementById('trigger-result');
+      if (el) {
+        const note = data.status === 'duplicate' ? '（幂等命中，展示已有 incident）' : '';
+        el.innerHTML = `<div class="result-banner">Status: <strong>${data.status}</strong>${note} · 跳转 Decision 页…</div>`;
+      }
+      if (data.trace_id) {
+        setTimeout(() => { window.location.href = `/?tab=3&trace=${data.trace_id}`; }, 400);
+      }
     }
 
     async function doRetry(agentId) {
@@ -222,8 +453,18 @@
     }
 
     async function doReplay(traceId) {
+      if (eventSource) eventSource.close();
+      clearTimeline();
+      eventSource = new EventSource(`/admin/incidents/${traceId}/stream`);
+      eventSource.addEventListener('incident', (e) => {
+        const data = JSON.parse(e.data);
+        appendTimeline(data);
+        if (data.type === 'replay_completed') {
+          eventSource.close();
+          hydrateIncident(traceId);
+        }
+      });
       await fetch(`/admin/replay/${traceId}`, { method: 'POST' });
-      connectSSE(traceId);
     }
 
     async function submitFeedback(rating) {
@@ -238,12 +479,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      const pending = sessionStorage.getItem('pendingTrace');
-      if (pending) {
-        sessionStorage.removeItem('pendingTrace');
-        connectSSE(pending);
-        loadDecision(pending);
-      }
+      const params = new URLSearchParams(location.search);
+      const trace = params.get('trace') || {% if active_trace %}'{{ active_trace }}'{% else %}null{% endif %};
+      if (trace) hydrateIncident(trace);
     });
   </script>
 </body>
