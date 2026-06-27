@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoAgent · 技术架构</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #070b12;
+      --bg-grid: rgba(59, 130, 246, 0.04);
+      --surface: rgba(22, 32, 50, 0.72);
+      --surface-solid: #121c2e;
+      --border: rgba(100, 130, 180, 0.22);
+      --text: #eef2f8;
+      --muted: #8fa3be;
+      --accent: #4d8ef7;
+      --accent-glow: rgba(77, 142, 247, 0.35);
+      --orange: #f59e42;
+      --orange-soft: rgba(245, 158, 66, 0.14);
+      --purple: #9b7bff;
+      --purple-soft: rgba(155, 123, 255, 0.14);
+      --green: #3dd68c;
+      --green-soft: rgba(61, 214, 140, 0.14);
+      --yellow: #e8c547;
+      --yellow-soft: rgba(232, 197, 71, 0.12);
+      --code-bg: #0d1524;
+      --radius: 14px;
+      --font: "DM Sans", "PingFang SC", "Hiragino Sans GB", sans-serif;
+      --display: "Syne", "PingFang SC", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(77, 142, 247, 0.12), transparent),
+        radial-gradient(ellipse 40% 30% at 90% 60%, rgba(155, 123, 255, 0.08), transparent),
+        linear-gradient(var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+      background-size: auto, auto, 48px 48px, 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(77, 142, 247, 0.1);
+      border: 1px solid rgba(77, 142, 247, 0.28);
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      margin-bottom: 0.85rem;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+
+    h1 {
+      font-family: var(--display);
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    h1 em {
+      font-style: normal;
+      background: linear-gradient(120deg, #93c5fd 0%, #9b7bff 50%, #3dd68c 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      margin-top: 0.6rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+      max-width: 520px;
+    }
+
+    .view-tabs {
+      display: flex;
+      gap: 0.35rem;
+      background: var(--surface-solid);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.3rem;
+    }
+
+    .view-tabs button {
+      font-family: var(--font);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.55rem 1.1rem;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .view-tabs button.active {
+      background: rgba(77, 142, 247, 0.2);
+      color: var(--text);
+      box-shadow: 0 0 20px rgba(77, 142, 247, 0.15);
+    }
+
+    /* ── Pipeline strip ── */
+    .pipeline-strip {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-bottom: 1.75rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .pipeline-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-right: 0.75rem;
+    }
+
+    .chip {
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      cursor: default;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .chip:hover { transform: translateY(-2px); }
+
+    .chip.orange { background: var(--orange-soft); border-color: rgba(245,158,66,0.35); color: #fbbf72; }
+    .chip.yellow { background: var(--yellow-soft); border-color: rgba(232,197,71,0.35); color: #f0d060; }
+    .chip.blue { background: rgba(77,142,247,0.12); border-color: rgba(77,142,247,0.35); color: #93c5fd; }
+    .chip.purple { background: var(--purple-soft); border-color: rgba(155,123,255,0.35); color: #c4b5fd; }
+    .chip.green { background: var(--green-soft); border-color: rgba(61,214,140,0.35); color: #6ee7a8; }
+
+    .arrow-sep {
+      color: var(--muted);
+      font-size: 0.75rem;
+      opacity: 0.5;
+      user-select: none;
+    }
+
+    /* ── Main canvas ── */
+    .canvas {
+      display: none;
+      position: relative;
+    }
+
+    .canvas.active { display: block; }
+
+    .arch-canvas {
+      position: relative;
+    }
+
+    .arch-grid {
+      display: grid;
+      grid-template-columns: 220px 1fr 280px;
+      gap: 1.25rem;
+      align-items: start;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 1100px) {
+      .arch-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.15rem;
+    }
+
+    .panel-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* External nodes */
+    .ext-node {
+      position: relative;
+      z-index: 3;
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+    }
+
+    .ext-node:last-child { margin-bottom: 0; }
+
+    .ext-node:hover, .ext-node.highlight {
+      transform: translateX(4px);
+      box-shadow: -4px 0 0 var(--accent);
+    }
+
+    .ext-node.orange { background: var(--orange-soft); }
+    .ext-node.purple { background: var(--purple-soft); }
+    .ext-node.green { background: var(--green-soft); }
+
+    .ext-node h3 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    .ext-node p {
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .ext-node .tag {
+      display: inline-block;
+      margin-top: 0.5rem;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.25);
+      color: var(--muted);
+    }
+
+    /* CoAgent core */
+    .core {
+      position: relative;
+      padding: 1.25rem;
+      min-height: 620px;
+    }
+
+    .layer {
+      margin-bottom: 1.1rem;
+    }
+
+    .layer-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.55rem;
+    }
+
+    .layer-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      justify-content: center;
+    }
+
+    .node {
+      position: relative;
+      z-index: 3;
+      min-width: 130px;
+      max-width: 200px;
+      flex: 1;
+      padding: 0.85rem 1rem;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--surface-solid);
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .node:hover, .node.highlight {
+      border-color: var(--accent);
+      box-shadow: 0 0 24px var(--accent-glow);
+      z-index: 2;
+    }
+
+    .node.hero {
+      flex: 1 1 100%;
+      max-width: 420px;
+      text-align: center;
+      border-color: rgba(245, 158, 66, 0.4);
+      background: linear-gradient(145deg, rgba(245,158,66,0.12), rgba(22,32,50,0.9));
+    }
+
+    .node.hero.highlight {
+      box-shadow: 0 0 32px rgba(245, 158, 66, 0.25);
+      border-color: var(--orange);
+    }
+
+    .node-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .node-desc {
+      font-size: 0.7rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .node.orange { border-color: rgba(245,158,66,0.3); }
+    .node.yellow { border-color: rgba(232,197,71,0.3); }
+    .node.blue { border-color: rgba(77,142,247,0.35); }
+    .node.purple { border-color: rgba(155,123,255,0.35); }
+    .node.green { border-color: rgba(61,214,140,0.35); }
+
+    .pipeline-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      position: relative;
+      z-index: 3;
+    }
+
+    .pipeline-track {
+      position: relative;
+    }
+
+    .pipeline-track::before {
+      content: "";
+      position: absolute;
+      left: 6%;
+      right: 6%;
+      top: 50%;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        rgba(77, 142, 247, 0.05),
+        rgba(77, 142, 247, 0.45) 20%,
+        rgba(77, 142, 247, 0.45) 80%,
+        rgba(77, 142, 247, 0.05)
+      );
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .pipeline-row .node:not(:last-child)::after {
+      content: "▸";
+      position: absolute;
+      right: -0.62rem;
+      top: 50%;
+      transform: translateY(-52%);
+      font-size: 0.65rem;
+      color: rgba(147, 197, 253, 0.55);
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .arch-hint {
+      margin-top: 0.65rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      .pipeline-row { grid-template-columns: 1fr 1fr; }
+    }
+
+    .pipeline-row .node { max-width: none; min-width: 0; }
+
+    .infra-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .data-bar {
+      position: relative;
+      z-index: 3;
+      margin-top: 0.5rem;
+      padding: 0.65rem 1rem;
+      border-radius: 10px;
+      background: rgba(77, 142, 247, 0.08);
+      border: 1px dashed rgba(77, 142, 247, 0.3);
+      font-size: 0.68rem;
+      color: #93c5fd;
+      text-align: center;
+      font-family: ui-monospace, "Cascadia Code", monospace;
+    }
+
+    /* SVG overlay — behind nodes */
+    .svg-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+      z-index: 2;
+    }
+
+    .flow-line {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: opacity 0.25s, stroke-width 0.25s;
+    }
+
+    .flow-line.kind-primary {
+      stroke-width: 2.5;
+      opacity: 0.72;
+    }
+
+    .flow-line.kind-secondary,
+    .flow-line.kind-feedback {
+      stroke-width: 1.5;
+      opacity: 0;
+      stroke-dasharray: 5 6;
+      transition: opacity 0.2s;
+    }
+
+    .flow-line.kind-secondary.show,
+    .flow-line.kind-feedback.show {
+      opacity: 0.45;
+    }
+
+    .flow-line.kind-external {
+      stroke-width: 2;
+      opacity: 0.55;
+    }
+
+    .flow-line.dimmed { opacity: 0.08 !important; }
+
+    .flow-line.lit {
+      opacity: 1 !important;
+      stroke-width: 3;
+    }
+
+    .flow-line.lit.kind-primary {
+      stroke-dasharray: none;
+    }
+
+    .flow-line.lit.kind-primary.hover-flow {
+      stroke-dasharray: 10 8;
+      animation: dash 1s linear infinite;
+    }
+
+    @keyframes dash {
+      to { stroke-dashoffset: -36; }
+    }
+
+    .edge-label {
+      font-family: var(--font);
+      font-size: 10px;
+      fill: #64748b;
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .edge-label.lit { opacity: 0.9; }
+
+    /* Protocol panel */
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 0.85rem;
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", monospace;
+      font-size: 0.72rem;
+      line-height: 1.55;
+      overflow-x: auto;
+    }
+
+    .code-block:last-child { margin-bottom: 0; }
+
+    .code-block .kw { color: #7dd3fc; }
+    .code-block .str { color: #86efac; }
+    .code-block .key { color: #c4b5fd; }
+    .code-block .cmt { color: #64748b; }
+
+    .sse-list {
+      list-style: none;
+    }
+
+    .sse-list li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0;
+      font-size: 0.75rem;
+      color: var(--muted);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .sse-list li:last-child { border-bottom: none; }
+
+    .sse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .sse-list li.active .sse-dot {
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+    }
+
+    .sse-list li.active { color: var(--text); }
+
+    /* Business flow view */
+    .flow-canvas {
+      position: relative;
+      padding: 2rem 1rem;
+      min-height: 680px;
+    }
+
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .flow-step {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface-solid);
+      text-align: center;
+      position: relative;
+      transition: all 0.25s;
+    }
+
+    .flow-step:hover {
+      border-color: var(--accent);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .flow-step h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .flow-step p { font-size: 0.75rem; color: var(--muted); line-height: 1.45; }
+
+    .flow-connector {
+      width: 2px;
+      height: 28px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      position: relative;
+    }
+
+    .flow-connector::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--accent);
+      opacity: 0.6;
+    }
+
+    .branch-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      width: 100%;
+      max-width: 720px;
+      margin: 1rem auto 0;
+    }
+
+    @media (max-width: 640px) {
+      .branch-row { grid-template-columns: 1fr; }
+    }
+
+    .branch-card {
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .branch-card.g { background: var(--green-soft); border-color: rgba(61,214,140,0.35); }
+    .branch-card.y { background: var(--yellow-soft); border-color: rgba(232,197,71,0.35); }
+    .branch-card.r { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.35); }
+
+    .branch-card .score { font-family: var(--display); font-size: 1.5rem; font-weight: 800; }
+    .branch-card.g .score { color: var(--green); }
+    .branch-card.y .score { color: var(--yellow); }
+    .branch-card.r .score { color: #f87171; }
+
+    .branch-card h4 { font-size: 0.78rem; font-weight: 700; margin: 0.35rem 0; }
+    .branch-card p { font-size: 0.72rem; color: var(--muted); }
+
+    .side-card {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 200px;
+      padding: 1rem;
+      background: var(--green-soft);
+      border: 1px solid rgba(61,214,140,0.35);
+      border-radius: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .side-card { position: static; transform: none; margin: 1rem auto; width: 100%; max-width: 320px; }
+    }
+
+    .metrics-float {
+      position: absolute;
+      left: 1rem;
+      top: 1rem;
+      padding: 1rem;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.75rem;
+    }
+
+    .metrics-float div { margin: 0.25rem 0; color: var(--muted); }
+    .metrics-float strong { color: var(--text); }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="badge"><span class="badge-dot"></span> Agent Ops Copilot</div>
+        <h1>CoAgent <em>Architecture</em></h1>
+        <p class="subtitle">FastAPI · Python 3.11 · async Pipeline · 配置驱动 Playbook · 把握度评分可验证推理</p>
+      </div>
+      <div class="view-tabs" role="tablist">
+        <button type="button" class="active" data-view="arch" role="tab" aria-selected="true">技术架构</button>
+        <button type="button" data-view="flow" role="tab" aria-selected="false">业务流程</button>
+      </div>
+    </header>
+
+    <div class="pipeline-strip" id="pipelineStrip">
+      <span class="pipeline-label">主链路</span>
+      <span class="chip orange" data-link="agent">Webhook</span>
+      <span class="arrow-sep">→</span>
+      <span class="chip yellow" data-link="router">Router</span>
+      <span class="arrow-sep">→</span>
+      <span class="chip blue" data-link="playbook">Playbook</span>
+      <span class="arrow-sep">→</span>
+      <span class="chip purple" data-link="llm">LLM</span>
+      <span class="arrow-sep">→</span>
+      <span class="chip green" data-link="scorer">Score</span>
+      <span class="arrow-sep">→</span>
+      <span class="chip blue" data-link="admin">Admin / 飞书</span>
+    </div>
+
+    <!-- Architecture View -->
+    <section class="canvas active" id="view-arch" aria-label="技术架构">
+      <div class="arch-canvas" id="archCanvas">
+      <svg class="svg-layer" id="archSvg" aria-hidden="true"></svg>
+      <div class="arch-grid">
+        <aside class="panel">
+          <div class="panel-title">外部系统</div>
+          <div class="ext-node orange" data-node="agent" tabindex="0">
+            <h3>Agent 运行时</h3>
+            <p>cs-bot · rag-bot · content-bot</p>
+            <span class="tag">POST /events</span>
+          </div>
+          <div class="ext-node purple" data-node="llm-ext" tabindex="0">
+            <h3>LLM API</h3>
+            <p>OpenAI 兼容 · httpx async · 15s 超时</p>
+            <span class="tag">chat completions</span>
+          </div>
+          <div class="ext-node green" data-node="feishu" tabindex="0">
+            <h3>飞书 IM</h3>
+            <p>S1 卡片 + Retry · L2 降级兜底</p>
+            <span class="tag">S1 only</span>
+          </div>
+        </aside>
+
+        <div class="panel core" id="corePanel">
+
+          <div class="layer">
+            <div class="layer-label">接入 & 表现</div>
+            <div class="layer-row">
+              <div class="node blue" data-node="admin" tabindex="0">
+                <div class="node-name">Admin HTMX</div>
+                <div class="node-desc">4 Tabs · EventSource SSE</div>
+              </div>
+              <div class="node blue" data-node="api" tabindex="0">
+                <div class="node-name">API Layer</div>
+                <div class="node-desc">events · admin · demo · replay</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="layer">
+            <div class="layer-label">编排</div>
+            <div class="layer-row">
+              <div class="node hero orange" data-node="orch" tabindex="0">
+                <div class="node-name">Orchestrator</div>
+                <div class="node-desc">幂等 10min · 超时 30s · timeline 持久化 · L0–L3 降级</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="layer">
+            <div class="layer-label">领域层 Pipeline</div>
+            <div class="pipeline-track">
+            <div class="pipeline-row">
+              <div class="node yellow" data-node="router" tabindex="0">
+                <div class="node-name">Scenario Router</div>
+                <div class="node-desc">(type,symptom) → playbook_id</div>
+              </div>
+              <div class="node blue" data-node="playbook" tabindex="0">
+                <div class="node-name">PlaybookEngine</div>
+                <div class="node-desc">ops_playbooks.json · mock tools ×3</div>
+              </div>
+              <div class="node purple" data-node="llm" tabindex="0">
+                <div class="node-name">LLM Client</div>
+                <div class="node-desc">LLMOutput · Pydantic · retry ×1</div>
+              </div>
+              <div class="node green" data-node="scorer" tabindex="0">
+                <div class="node-name">把握度评分器</div>
+                <div class="node-desc">数据·手册·推理 · 🟢🟡🔴 分级</div>
+              </div>
+            </div>
+            </div>
+          </div>
+
+          <div class="layer">
+            <div class="layer-label">基础设施</div>
+            <div class="infra-row">
+              <div class="node blue" data-node="sse" tabindex="0">
+                <div class="node-name">SSE Manager</div>
+                <div class="node-desc">pub/sub · replay</div>
+              </div>
+              <div class="node blue" data-node="db" tabindex="0">
+                <div class="node-name">SQLite</div>
+                <div class="node-desc">coagent.db</div>
+              </div>
+              <div class="node blue" data-node="config" tabindex="0">
+                <div class="node-name">Settings</div>
+                <div class="node-desc">.env · DEMO_MODE</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="layer">
+            <div class="layer-label">数据层</div>
+            <div class="data-bar" data-node="data">ops_playbooks.json · scenarios/s1|s2|s3.json · agents.json · calibration/</div>
+          </div>
+        </div>
+
+        <aside class="panel">
+          <div class="panel-title">接口 & 协议</div>
+          <div class="code-block">
+            <span class="cmt">// POST /events</span><br />
+            {<br />
+            &nbsp;&nbsp;<span class="key">"type"</span>: <span class="str">"run_fail"</span>,<br />
+            &nbsp;&nbsp;<span class="key">"symptom"</span>: <span class="str">"rate_limit"</span>,<br />
+            &nbsp;&nbsp;<span class="key">"agent_id"</span>: <span class="str">"cs-bot"</span>,<br />
+            &nbsp;&nbsp;<span class="key">"event_id"</span>: <span class="str">"evt-s1-demo"</span><br />
+            }
+          </div>
+          <div class="code-block">
+            <span class="cmt">// SSE incident 事件序</span>
+            <ul class="sse-list" id="sseList">
+              <li data-sse="0"><span class="sse-dot"></span>incident_started</li>
+              <li data-sse="1"><span class="sse-dot"></span>tool_called ×3</li>
+              <li data-sse="2"><span class="sse-dot"></span>llm_reasoning</li>
+              <li data-sse="3"><span class="sse-dot"></span>llm_result</li>
+              <li data-sse="4"><span class="sse-dot"></span>score_computed</li>
+              <li data-sse="5"><span class="sse-dot"></span>channel_sync</li>
+              <li data-sse="6"><span class="sse-dot"></span>incident_completed</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+      <p class="arch-hint">默认仅显示主链路 · 悬停节点可查看依赖连线</p>
+      </div>
+    </section>
+
+    <!-- Business Flow View -->
+    <section class="canvas" id="view-flow" aria-label="业务流程">
+      <div class="panel flow-canvas">
+        <div class="metrics-float">
+          <div><strong>S1</strong> 87 · executable</div>
+          <div><strong>S2</strong> 72 · needs_confirmation</div>
+          <div><strong>S3</strong> 58 · escalate</div>
+          <div style="margin-top:0.5rem;font-size:0.68rem">耗时 ~8–15s</div>
+        </div>
+
+        <div class="flow-steps">
+          <div class="flow-step" style="border-color:rgba(245,158,66,0.35);background:var(--orange-soft)">
+            <h3>运维 / Webhook</h3>
+            <p>POST /events · POST /admin/trigger/s1</p>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step" style="border-color:rgba(232,197,71,0.35);background:var(--yellow-soft)">
+            <h3>幂等检查</h3>
+            <p>event_id 10min → duplicate?</p>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step" style="border-color:rgba(232,197,71,0.35);background:var(--yellow-soft)">
+            <h3>Scenario Router</h3>
+            <p>rate_limit → cs_rate_limit · empty_retrieval → rag · over_budget → cost</p>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step">
+            <h3>PlaybookEngine</h3>
+            <p>query_agent_metrics · query_agent_config · search_ops_playbook</p>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step" style="border-color:rgba(155,123,255,0.35);background:var(--purple-soft)">
+            <h3>LLM Client</h3>
+            <p>reasoning_chain ≥3 · steps · retry_recommended</p>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step" style="border-color:rgba(61,214,140,0.35);background:var(--green-soft)">
+            <h3>把握度评分</h3>
+            <p>D×0.35 + P×0.35 + C×0.30 → grade</p>
+          </div>
+        </div>
+
+        <div class="branch-row">
+          <div class="branch-card g">
+            <div class="score">87</div>
+            <h4>executable</h4>
+            <p>Score ≥80 · 一键 Retry</p>
+          </div>
+          <div class="branch-card y">
+            <div class="score">72</div>
+            <h4>needs_confirmation</h4>
+            <p>60–79 · 禁止 Retry</p>
+          </div>
+          <div class="branch-card r">
+            <div class="score">58</div>
+            <h4>escalate</h4>
+            <p>&lt;60 · @负责人升级</p>
+          </div>
+        </div>
+
+        <div class="side-card">
+          <h4 style="font-size:0.85rem;margin-bottom:0.35rem">飞书 S1</h4>
+          <p style="font-size:0.72rem;color:var(--muted)">卡片 + Retry · channel_sync · L2 降级</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      CoAgent · 基于 <a href="../intro/coagent-tech-report.md">coagent-tech-report.md</a> · 打开本地文件即可预览交互效果
+    </footer>
+  </div>
+
+  <script>
+    const LINKS = {
+      agent: ["agent", "api", "orch"],
+      admin: ["admin", "api", "sse"],
+      api: ["api", "orch", "agent"],
+      orch: ["orch", "router", "sse", "db", "api"],
+      router: ["router", "playbook", "orch"],
+      playbook: ["playbook", "llm", "data", "router"],
+      llm: ["llm", "llm-ext", "scorer", "playbook"],
+      scorer: ["scorer", "db", "feishu", "llm", "admin"],
+      sse: ["sse", "admin", "orch"],
+      db: ["db", "orch", "scorer"],
+      "llm-ext": ["llm", "llm-ext"],
+      feishu: ["scorer", "feishu"],
+      data: ["playbook", "data"],
+      config: ["config", "playbook"],
+    };
+
+    /** always=true 默认显示；false 仅悬停相关节点时显示 */
+    const EDGES = [
+      { id: "e1", from: "agent", to: "api", fromSide: "right", toSide: "left", kind: "external", color: "#f59e42", label: "POST /events", route: "cross-column", always: true },
+      { id: "e2", from: "admin", to: "api", fromSide: "right", toSide: "left", kind: "primary", color: "#4d8ef7", label: "trigger", route: "horizontal", always: true },
+      { id: "e3", from: "api", to: "orch", fromSide: "bottom", toSide: "top", kind: "primary", color: "#4d8ef7", route: "vertical", always: true },
+      { id: "e4", from: "orch", to: "router", fromSide: "bottom", toSide: "top", kind: "primary", color: "#f59e42", route: "vertical", always: true },
+      { id: "e8", from: "llm-ext", to: "llm", fromSide: "right", toSide: "left", kind: "external", color: "#9b7bff", label: "async", route: "cross-column", always: true },
+      { id: "e9", from: "scorer", to: "feishu", fromSide: "bottom", toSide: "right", kind: "external", color: "#3dd68c", label: "S1", route: "scorer-feishu", always: true },
+      { id: "e11", from: "sse", to: "admin", fromSide: "top", toSide: "bottom", kind: "feedback", color: "#64748b", label: "SSE", route: "left-rail", always: false },
+      { id: "e10", from: "orch", to: "sse", fromSide: "bottom", toSide: "top", kind: "secondary", color: "#64748b", route: "right-rail", always: false },
+      { id: "e12", from: "orch", to: "db", fromSide: "bottom", toSide: "top", kind: "secondary", color: "#64748b", route: "right-rail-db", always: false },
+      { id: "e13", from: "playbook", to: "data", fromSide: "bottom", toSide: "top", kind: "secondary", color: "#64748b", route: "vertical", always: false },
+    ];
+
+    let activeNode = null;
+
+    function nodeEl(id) {
+      return document.querySelector(`[data-node="${id}"]`);
+    }
+
+    function anchor(id, side) {
+      const el = nodeEl(id);
+      const canvas = document.getElementById("archCanvas");
+      if (!el || !canvas) return [0, 0];
+      const r = el.getBoundingClientRect();
+      const p = canvas.getBoundingClientRect();
+      const pad = 4;
+      const x = r.left - p.left;
+      const y = r.top - p.top;
+      const w = r.width;
+      const h = r.height;
+      switch (side) {
+        case "top": return [x + w / 2, y - pad];
+        case "bottom": return [x + w / 2, y + h + pad];
+        case "left": return [x - pad, y + h / 2];
+        case "right": return [x + w + pad, y + h / 2];
+        default: return [x + w / 2, y + h / 2];
+      }
+    }
+
+    function pathHorizontal(from, to) {
+      const [x1, y1] = from;
+      const [x2, y2] = to;
+      const mid = (x1 + x2) / 2;
+      return `M ${x1} ${y1} L ${mid} ${y1} L ${mid} ${y2} L ${x2} ${y2}`;
+    }
+
+    function getCoreBounds() {
+      const core = document.getElementById("corePanel");
+      const canvas = document.getElementById("archCanvas");
+      if (!core || !canvas) return { left: 280, right: 900 };
+      const c = core.getBoundingClientRect();
+      const p = canvas.getBoundingClientRect();
+      return { left: c.left - p.left, right: c.right - p.left };
+    }
+
+    function pathVertical(from, to) {
+      const [x1, y1] = from;
+      const [x2, y2] = to;
+      const midY = y1 + (y2 - y1) * 0.5;
+      if (Math.abs(x1 - x2) < 8) return `M ${x1} ${y1} L ${x2} ${y2}`;
+      return `M ${x1} ${y1} L ${x1} ${midY} L ${x2} ${midY} L ${x2} ${y2}`;
+    }
+
+    function pathLeftRail(from, to) {
+      const { left } = getCoreBounds();
+      const rail = left + 14;
+      const [x1, y1] = from;
+      const [x2, y2] = to;
+      return `M ${x1} ${y1} L ${rail} ${y1} L ${rail} ${y2} L ${x2} ${y2}`;
+    }
+
+    function pathRightRail(from, to, offset = 0) {
+      const { right } = getCoreBounds();
+      const rail = right - 14 - offset;
+      const [x1, y1] = from;
+      const [x2, y2] = to;
+      return `M ${x1} ${y1} L ${rail} ${y1} L ${rail} ${y2} L ${x2} ${y2}`;
+    }
+
+    function pathScorerToFeishu(from, to) {
+      const [x1, y1] = from;
+      const [x2, y2] = to;
+      const gutterX = getColumnGutter();
+      const busY = y1 + 72;
+      return `M ${x1} ${y1} L ${x1} ${busY} L ${gutterX} ${busY} L ${gutterX} ${y2} L ${x2} ${y2}`;
+    }
+
+    function buildPath(edge) {
+      const from = anchor(edge.from, edge.fromSide);
+      const to = anchor(edge.to, edge.toSide);
+      switch (edge.route) {
+        case "horizontal": return pathHorizontal(from, to);
+        case "cross-column": return pathCrossColumn(from, to);
+        case "scorer-feishu": return pathScorerToFeishu(from, to);
+        case "left-rail": return pathLeftRail(from, to);
+        case "right-rail": return pathRightRail(from, to, 0);
+        case "right-rail-db": return pathRightRail(from, to, 28);
+        case "vertical": return pathVertical(from, to);
+        default: return pathVertical(from, to);
+      }
+    }
+
+    function edgeVisible(edge, focusId) {
+      if (edge.always) return true;
+      if (!focusId) return false;
+      const related = new Set([focusId, ...(LINKS[focusId] || [])]);
+      return related.has(edge.from) || related.has(edge.to);
+    }
+
+    function getColumnGutter() {
+      const aside = document.querySelector("#view-arch .arch-grid > aside.panel");
+      const core = document.getElementById("corePanel");
+      const canvas = document.getElementById("archCanvas");
+      if (!aside || !core || !canvas) return 268;
+      const a = aside.getBoundingClientRect();
+      const c = core.getBoundingClientRect();
+      const p = canvas.getBoundingClientRect();
+      return (a.right + c.left) / 2 - p.left;
+    }
+
+    function pathViaGutter(from, to, gutterX) {
+      const [x1, y1] = from;
+      const [x2, y2] = to;
+      return `M ${x1} ${y1} L ${gutterX} ${y1} L ${gutterX} ${y2} L ${x2} ${y2}`;
+    }
+
+    function pathCrossColumn(from, to) {
+      return pathViaGutter(from, to, getColumnGutter());
+    }
+
+    function labelPoint(d) {
+      const nums = d.match(/-?\d+\.?\d*/g).map(Number);
+      if (nums.length < 4) return [0, 0];
+      const mid = Math.floor(nums.length / 2);
+      return [(nums[mid - 2] + nums[mid]) / 2, (nums[mid - 1] + nums[mid + 1]) / 2];
+    }
+
+    function renderEdges(focusId) {
+      const svg = document.getElementById("archSvg");
+      const canvas = document.getElementById("archCanvas");
+      if (!svg || !canvas) return;
+
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+      svg.setAttribute("width", w);
+      svg.setAttribute("height", h);
+
+      const defs = `<defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/>
+        </marker>
+      </defs>`;
+
+      const parts = EDGES.filter(edge => edgeVisible(edge, focusId)).map(edge => {
+        const d = buildPath(edge);
+        const cls = `flow-line kind-${edge.kind} ${edge.always ? "lit" : "show"}`;
+        let labels = "";
+        if (edge.label) {
+          const [lx, ly] = labelPoint(d);
+          labels = `<text class="edge-label lit" x="${lx}" y="${ly - 6}" text-anchor="middle">${edge.label}</text>`;
+        }
+        return `<path class="${cls}" d="${d}" stroke="${edge.color}" marker-end="url(#arrow)" data-edge="${edge.id}"/>${labels}`;
+      });
+
+      svg.innerHTML = defs + parts.join("");
+    }
+
+    function highlight(nodeId) {
+      activeNode = nodeId;
+      document.querySelectorAll("[data-node]").forEach(el => {
+        el.classList.toggle("highlight", el.dataset.node === nodeId || (LINKS[nodeId] || []).includes(el.dataset.node));
+      });
+      document.querySelectorAll(".chip[data-link]").forEach(el => {
+        el.style.boxShadow = el.dataset.link === nodeId ? "0 0 16px var(--accent-glow)" : "";
+        el.style.transform = el.dataset.link === nodeId ? "translateY(-2px) scale(1.05)" : "";
+      });
+      renderEdges(nodeId);
+    }
+
+    function clearHighlight() {
+      activeNode = null;
+      document.querySelectorAll(".highlight").forEach(el => el.classList.remove("highlight"));
+      document.querySelectorAll(".chip[data-link]").forEach(el => {
+        el.style.boxShadow = "";
+        el.style.transform = "";
+      });
+      renderEdges(null);
+    }
+
+    document.querySelectorAll("[data-node], .chip[data-link]").forEach(el => {
+      const id = el.dataset.node || el.dataset.link;
+      el.addEventListener("mouseenter", () => highlight(id));
+      el.addEventListener("focus", () => highlight(id));
+      el.addEventListener("mouseleave", clearHighlight);
+      el.addEventListener("blur", clearHighlight);
+    });
+
+    document.querySelectorAll(".view-tabs button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".view-tabs button").forEach(b => {
+          b.classList.toggle("active", b === btn);
+          b.setAttribute("aria-selected", b === btn);
+        });
+        document.querySelectorAll(".canvas").forEach(c => c.classList.remove("active"));
+        document.getElementById("view-" + btn.dataset.view).classList.add("active");
+        if (btn.dataset.view === "arch") requestAnimationFrame(() => renderEdges(activeNode));
+      });
+    });
+
+    const sseItems = document.querySelectorAll("#sseList li");
+    let sseIdx = 0;
+    setInterval(() => {
+      sseItems.forEach((li, i) => li.classList.toggle("active", i === sseIdx));
+      sseIdx = (sseIdx + 1) % sseItems.length;
+    }, 900);
+
+    let resizeTimer;
+    function onResize() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => renderEdges(activeNode), 80);
+    }
+    window.addEventListener("resize", onResize);
+    window.addEventListener("load", () => renderEdges(null));
+    requestAnimationFrame(() => renderEdges(null));
+  </script>
+</body>
+</html>
