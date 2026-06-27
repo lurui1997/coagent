@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoAgent · 项目速览与竞品分析</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface-2: #243044;
+      --border: #2d3f56;
+      --text: #e8edf4;
+      --text-muted: #8b9cb3;
+      --accent: #3b82f6;
+      --accent-soft: rgba(59, 130, 246, 0.15);
+      --green: #22c55e;
+      --green-soft: rgba(34, 197, 94, 0.12);
+      --yellow: #eab308;
+      --yellow-soft: rgba(234, 179, 8, 0.12);
+      --red: #ef4444;
+      --red-soft: rgba(239, 68, 68, 0.12);
+      --purple: #a78bfa;
+      --radius: 12px;
+      --font: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f1419 50%, #1a1a2e 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 3.5rem 1.5rem 3rem;
+    }
+
+    .hero-inner { max-width: 960px; margin: 0 auto; }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 区间校正(1.75rem, 4vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-tagline {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 640px;
+    }
+
+    .hero-quote {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      border-left: 3px solid var(--accent);
+      background: rgba(255,255,255,0.04);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-size: 0.95rem;
+      color: #c5d0de;
+    }
+
+    main { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+    section { margin-bottom: 3rem; }
+
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h2 .num {
+      font-size: 0.75rem;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.75rem;
+      color: #c5d0de;
+    }
+
+    p { margin-bottom: 0.75rem; color: var(--text-muted); }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+
+    .card h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.75rem;
+    }
+
+    .card ul { list-style: none; }
+
+    .card li {
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.9rem;
+    }
+
+    .card li:last-child { border-bottom: none; }
+
+    .card li strong { color: var(--text); }
+
+    .pill-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.75rem 0; }
+
+    .pill {
+      font-size: 0.82rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+    }
+
+    .pill.highlight {
+      border-color: rgba(59, 130, 246, 0.4);
+      background: var(--accent-soft);
+      color: #93c5fd;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin: 1rem 0;
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    thead { background: var(--surface-2); }
+
+    th {
+      text-align: left;
+      padding: 0.65rem 0.75rem;
+      font-weight: 600;
+      color: #c5d0de;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      vertical-align: top;
+      color: var(--text-muted);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    td:first-child, th:first-child { font-weight: 500; color: var(--text); }
+
+    td.coagent {
+      background: var(--accent-soft);
+      color: #bfdbfe;
+      font-weight: 500;
+    }
+
+    th.coagent-h { background: rgba(59, 130, 246, 0.25); color: #93c5fd; }
+
+    .table-wrap { overflow-x: auto; margin: 1rem 0; border-radius: var(--radius); }
+
+    .stars { color: var(--yellow); letter-spacing: 1px; }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+    }
+
+    .flow-step {
+      background: var(--surface-2);
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      color: #c5d0de;
+    }
+
+    .flow-arrow { color: var(--text-muted); }
+
+    .分级 {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .分级-green { background: var(--green-soft); color: var(--green); }
+    .分级-yellow { background: var(--yellow-soft); color: var(--yellow); }
+    .分级-red { background: var(--red-soft); color: var(--red); }
+
+    .innovation-list { list-style: none; margin: 1rem 0; }
+
+    .innovation-list li {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .innovation-num {
+      flex-shrink: 0;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .innovation-body strong { display: block; color: var(--text); margin-bottom: 0.25rem; }
+    .innovation-body span { font-size: 0.88rem; color: var(--text-muted); }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 2px;
+      background: var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 1.25rem 0;
+      height: 280px;
+      position: relative;
+    }
+
+    .matrix-cell {
+      background: var(--surface);
+      padding: 1rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      position: relative;
+    }
+
+    .matrix-cell.target {
+      background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(59,130,246,0.05));
+    }
+
+    .matrix-cell .label {
+      font-weight: 600;
+      color: #c5d0de;
+      margin-bottom: 0.5rem;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .dot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .dot-coagent { background: var(--accent); box-shadow: 0 0 12px var(--accent); width: 14px; height: 14px; }
+    .dot-other { background: #64748b; width: 8px; height: 8px; }
+
+    .matrix-axes {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    .swot {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    @media (max-width: 640px) { .swot { grid-template-columns: 1fr; } }
+
+    .swot-box {
+      padding: 1.25rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .swot-box h4 { font-size: 0.8rem; font-weight: 700; margin-bottom: 0.6rem; letter-spacing: 0.04em; }
+    .swot-box ul { list-style: none; font-size: 0.85rem; color: var(--text-muted); }
+    .swot-box li { padding: 0.25rem 0; padding-left: 1rem; position: relative; }
+    .swot-box li::before { content: "·"; position: absolute; left: 0; color: var(--text-muted); }
+
+    .swot-s { background: var(--green-soft); border-color: rgba(34,197,94,0.3); }
+    .swot-s h4 { color: var(--green); }
+    .swot-w { background: var(--red-soft); border-color: rgba(239,68,68,0.3); }
+    .swot-w h4 { color: var(--red); }
+    .swot-o { background: var(--accent-soft); border-color: rgba(59,130,246,0.3); }
+    .swot-o h4 { color: var(--accent); }
+    .swot-t { background: var(--yellow-soft); border-color: rgba(234,179,8,0.3); }
+    .swot-t h4 { color: var(--yellow); }
+
+    .qa-table td:first-child { color: #93c5fd; font-weight: 500; width: 28%; }
+
+    .footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .toc h3 { margin: 0 0 0.75rem; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .toc ol { padding-left: 1.25rem; color: var(--text-muted); font-size: 0.9rem; }
+    .toc a { color: var(--accent); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    .toc li { padding: 0.2rem 0; }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .metric .val { font-size: 1.25rem; font-weight: 700; color: var(--text); }
+    .metric .lbl { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+    .strategy-list {
+      list-style: none;
+      counter-reset: strat;
+    }
+
+    .strategy-list li {
+      counter-increment: strat;
+      padding: 0.85rem 1rem 0.85rem 3rem;
+      margin-bottom: 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      position: relative;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .strategy-list li::before {
+      content: counter(strat);
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.5rem;
+      height: 1.5rem;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+
+    .strategy-list li strong { color: var(--text); }
+
+    .conclusion {
+      background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(167,139,250,0.08));
+      border: 1px solid rgba(59,130, 246, 0.25);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .conclusion p { color: #c5d0de; margin: 0; }
+    .conclusion strong { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="badge">CoAgent · 2026-06-27</span>
+    <h1>项目速览与竞品分析调研</h1>
+    <p class="hero-tagline">面向企业的 Agent 运维助手 — Agent 出错或烧钱时，90 秒内拿到「该信什么、该做什么、有多把握」</p>
+    <blockquote class="hero-quote">
+      Agent 异常 →根因推理 → 把握度评分可验证 → 人工把关处置 → 飞轮复盘
+    </blockquote>
+  </div>
+</header>
+
+<main>
+
+  <nav class="toc">
+    <h3>目录</h3>
+    <ol>
+      <li><a href="#summary">项目速览</a></li>
+      <li><a href="#landscape">竞争格局总览</a></li>
+      <li><a href="#基础设施">基础设施智能运维 / AI SRE 平台</a></li>
+      <li><a href="#llmops">大模型运维 可观测平台</a></li>
+      <li><a href="#gateway">大模型 Gateway / 成本管控</a></li>
+      <li><a href="#eval">Eval / 质量平台</a></li>
+      <li><a href="#故障事件">传统 Incident 管理</a></li>
+      <li><a href="#china">国内平台</a></li>
+      <li><a href="#radar">能力维度雷达</a></li>
+      <li><a href="#qa">竞品一句话定位</a></li>
+      <li><a href="#swot">SWOT 分析</a></li>
+      <li><a href="#strategy">竞争策略建议</a></li>
+      <li><a href="#market">市场参考数据</a></li>
+      <li><a href="#conclusion">结论</a></li>
+    </ol>
+  </nav>
+
+  <!-- 一、项目速览 -->
+  <section id="summary">
+    <h2><span class="num">01</span> 项目速览</h2>
+
+    <div class="cards">
+      <div class="card">
+        <h4>核心痛点</h4>
+        <ul>
+          <li><strong>静默失败</strong> — 429、空检索，客户先发现</li>
+          <li><strong>不会处置</strong> — 不知重试 / 改 提示词 / 换模型</li>
+          <li><strong>成本失控</strong> — Token 飙升，一线无权止血</li>
+          <li><strong>无法复盘</strong> — 说不清建议了什么、谁批准</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>目标客户</h4>
+        <ul>
+          <li><strong>Buyer</strong> — 已部署多个 AI Agent 的中小企业 / OPC / 平台团队</li>
+          <li><strong>角色</strong> — 运维方、AI 架构师、值班工程师</li>
+          <li><strong>场景</strong> — 客服 Agent、检索增强 问答、内容生成</li>
+          <li><strong>驱动</strong> — Agent 越多真空越大；金融/政企要私有化</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>赛道真空</h4>
+        <ul>
+          <li>PagerDuty 管 <strong>基础设施</strong></li>
+          <li>聊天机器人 管 <strong>问答</strong></li>
+          <li>没人管 <strong>Agent 运行态运维</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>价值递进</h3>
+    <div class="flow">
+      <span class="flow-step">听见异常</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">获得处置建议</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">评估把握程度</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">团队复盘迭代</span>
+    </div>
+
+    <h3>五大核心创新</h3>
+    <ol class="innovation-list">
+      <li>
+        <span class="innovation-num">1</span>
+        <div class="innovation-body">
+          <strong>根因推理</strong>
+          <span>在 Agent 运行态做处置手册约束推理，非基础设施 日志关联。S1 限流→不可用可重试；S2 空检索→幻觉不可盲重试；S3 Token 突增→须升级止血。</span>
+        </div>
+      </li>
+      <li>
+        <span class="innovation-num">2</span>
+        <div class="innovation-body">
+          <strong>把握度评分 —可验证推理</strong>
+          <span>总分 = round(100 × (0.35×数据 + 0.35×手册 + 0.30×推理))。数据=完备度 / 手册=匹配度 / 推理=一致性。≥80 🟢 可执行 · 60–79 🟡 需确认 · &lt;60 🔴 需升级。</span>
+        </div>
+      </li>
+      <li>
+        <span class="innovation-num">3</span>
+        <div class="innovation-body">
+          <strong>人工把关处置边界</strong>
+          <span>评分 不是装饰，而是动作权限：S1 能重试、S2 不能、S3 必须 @升级。同一 run_fail 事件，不同场景处置边界不同。</span>
+        </div>
+      </li>
+      <li>
+        <span class="innovation-num">4</span>
+        <div class="innovation-body">
+          <strong>过程可审计 + 反馈飞轮</strong>
+          <span>管理台 实时推送时间线 + SQLite 故障事件 全链路留痕；👍/👎 驱动 运维手册与 提示词 迭代。</span>
+        </div>
+      </li>
+      <li>
+        <span class="innovation-num">5</span>
+        <div class="innovation-body">
+          <strong>赛道切口 — Agent 运行态运维 真空</strong>
+          <span>聚焦大模型 Agent 层（429 / 空检索 / Token），与 Azure / Datadog / 通知器错位竞争；本地部署，日志不出域。</span>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- 竞争格局 -->
+  <section id="landscape">
+    <h2><span class="num">02</span> 竞争格局总览</h2>
+    <p>CoAgent 占据的差异化空间：<strong style="color:var(--text)">Agent 运行态 ×可验证处置</strong>，而非单纯观测或基础设施 RCA。</p>
+
+    <div style="position:relative;margin:1.5rem 0;">
+      <div class="matrix">
+        <div class="matrix-cell">
+          <div class="label">AI SRE 平台</div>
+          Azure SRE · Rootly · Harness
+          <span class="dot dot-other" style="left:25%;top:70%;"></span>
+        </div>
+        <div class="matrix-cell target">
+          <div class="label">CoAgent 目标区 ★</div>
+          Agent 专精 +根因处置 + 置信决策
+          <span class="dot dot-coagent" style="left:75%;top:25%;"></span>
+        </div>
+        <div class="matrix-cell">
+          <div class="label">传统 应用性能监控 / 可观测</div>
+          PagerDuty · Dynatrace
+          <span class="dot dot-other" style="left:20%;top:55%;"></span>
+        </div>
+        <div class="matrix-cell">
+          <div class="label">大模型运维 可观测</div>
+          Langfuse · LangSmith · AgentOps
+          <span class="dot dot-other" style="left:70%;top:65%;"></span>
+          <span class="dot dot-other" style="left:78%;top:58%;"></span>
+        </div>
+      </div>
+      <div class="matrix-axes">
+        <span>← Infra / 通用监控</span>
+        <span>Agent 运行态专精 →</span>
+      </div>
+      <div class="matrix-axes" style="justify-content:center;margin-top:0.25rem;">
+        <span>↑根因处置 + 置信决策 &nbsp;|&nbsp; 观测 / 告警 ↓</span>
+      </div>
+    </div>
+  </section>
+
+  <!--基础设施智能运维 -->
+  <section id="基础设施">
+    <h2><span class="num">03</span>基础设施智能运维 / AI SRE 平台</h2>
+    <p>最强间接竞品 — 管服务器/5xx/变更归因，不下沉到 Agent 语义层。</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>Azure SRE Agent</th>
+            <th>Datadog Bits AI</th>
+            <th>Rootly AI SRE</th>
+            <th>Harness AI SRE</th>
+            <th class="coagent-h">CoAgent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>定位</td>
+            <td>Azure 云基础设施 自主 SRE</td>
+            <td>可观测 + AI SRE + Dev Agent</td>
+            <td>事件管理 + AI 调查</td>
+            <td>变更归因 + 事件管理</td>
+            <td class="coagent">Agent 运行态运维 助手</td>
+          </tr>
+          <tr>
+            <td>监控对象</td>
+            <td>服务/5xx/部署/遥测</td>
+            <td>应用性能监控 + 大模型 Agent + 安全</td>
+            <td>告警 + 代码变更 + 事件</td>
+            <td>部署/PR/ServiceNow 变更</td>
+            <td class="coagent">429 / 空检索 / Token 超预算</td>
+          </tr>
+          <tr>
+            <td>RCA 方式</td>
+            <td>假设树 + 多源遥测验证</td>
+            <td>交互调查 + 代码修复 PR</td>
+            <td>并行假设 + 置信度</td>
+            <td>变更关联 + 0–100 置信分</td>
+            <td class="coagent">处置手册根因推理</td>
+          </tr>
+          <tr>
+            <td>置信度</td>
+            <td>假设验证状态</td>
+            <td>推理过程可见</td>
+            <td>Confidence scores</td>
+            <td>Theory 置信度 0–100</td>
+            <td class="coagent">数据·手册·推理 三因子把握度评分</td>
+          </tr>
+          <tr>
+            <td>处置</td>
+            <td>策略护栏内自动缓解</td>
+            <td>Bits Dev Agent 开 PR</td>
+            <td>建议为主，人签字</td>
+            <td>Runbook 触发</td>
+            <td class="coagent"><span class="分级 分级-green">🟢 重试</span> <span class="分级 分级-yellow">🟡 禁盲动</span> <span class="分级 分级-red">🔴 升级</span></td>
+          </tr>
+          <tr>
+            <td>Agent 专精</td>
+            <td>❌ 通用基础设施</td>
+            <td>⚠️ 2025 新增 Agent Monitoring</td>
+            <td>❌</td>
+            <td>❌</td>
+            <td class="coagent">✅ 核心</td>
+          </tr>
+          <tr>
+            <td>部署</td>
+            <td>Azure 云</td>
+            <td>云服务</td>
+            <td>云服务</td>
+            <td>云服务</td>
+            <td class="coagent">本地 / 私有化</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong style="color:var(--yellow)">威胁等级：中</strong> — 需强调赛道错位 + 评分 定义处置边界（非 RCA 概率）。</p>
+  </section>
+
+  <!--大模型运维 -->
+  <section id="llmops">
+    <h2><span class="num">04</span>大模型运维 可观测平台</h2>
+    <p>最直接功能重叠 — 「看见 Agent 做了什么」，但不管「出事了该怎么办、敢不敢动」。</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>LangSmith</th>
+            <th>Langfuse</th>
+            <th>Arize Phoenix/AX</th>
+            <th>AgentOps</th>
+            <th>Helicone</th>
+            <th class="coagent-h">CoAgent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>定位</td>
+            <td>LangChain 生态观测 + Eval</td>
+            <td>开源大模型 观测</td>
+            <td>Agent trace + Eval</td>
+            <td>Agent 监控 SDK</td>
+            <td>Gateway + 成本告警</td>
+            <td class="coagent">Agent 运维助手</td>
+          </tr>
+          <tr>
+            <td>根因/建议</td>
+            <td>❌ 人工查 trace</td>
+            <td>❌</td>
+            <td>⚠️ 步骤级 debug</td>
+            <td>❌</td>
+            <td>❌</td>
+            <td class="coagent">✅ 大模型 +处置手册根因链</td>
+          </tr>
+          <tr>
+            <td>置信度评分</td>
+            <td>❌</td>
+            <td>❌</td>
+            <td>Eval 分数</td>
+            <td>❌</td>
+            <td>❌</td>
+            <td class="coagent">✅ 把握度评分</td>
+          </tr>
+          <tr>
+            <td>人工把关处置</td>
+            <td>❌</td>
+            <td>❌</td>
+            <td>❌</td>
+            <td>❌</td>
+            <td>❌</td>
+            <td class="coagent">✅ 分级动作</td>
+          </tr>
+          <tr>
+            <td>告警</td>
+            <td>✅ 阈值告警</td>
+            <td>⚠️ 发展中</td>
+            <td>⚠️ AX 在线监控</td>
+            <td>⚠️ 失败检测</td>
+            <td>✅ Slack/Email</td>
+            <td class="coagent">✅ 事件回调 + 飞书</td>
+          </tr>
+          <tr>
+            <td>部署</td>
+            <td>云 云服务</td>
+            <td>自托管/云</td>
+            <td>自托管/企业云</td>
+            <td>云/自托管</td>
+            <td>云（2026 维护模式）</td>
+            <td class="coagent">本地优先</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong style="color:var(--red)">威胁等级：高</strong> — 应对：互补而非替代，「他们是眼睛，CoAgent 是值班大脑」。</p>
+  </section>
+
+  <!-- Gateway -->
+  <section id="gateway">
+    <h2><span class="num">05</span> 大模型 Gateway / 成本管控</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>Portkey</th>
+            <th>Helicone</th>
+            <th>LiteLLM</th>
+            <th class="coagent-h">CoAgent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>定位</td>
+            <td>AI Gateway + 治理</td>
+            <td>Gateway + 成本追踪</td>
+            <td>开源代理</td>
+            <td class="coagent">Agent 运维决策</td>
+          </tr>
+          <tr>
+            <td>成本告警</td>
+            <td>✅ 预算/用量</td>
+            <td>✅ 分级阈值</td>
+            <td>⚠️ 基础</td>
+            <td class="coagent">✅ S3 超预算场景</td>
+          </tr>
+          <tr>
+            <td>失败处置</td>
+            <td>重试/Fallback 自动</td>
+            <td>重试/Fallback</td>
+            <td>配置化</td>
+            <td class="coagent">评分 决定是否重试</td>
+          </tr>
+          <tr>
+            <td>根因推理</td>
+            <td>❌</td>
+            <td>❌</td>
+            <td>❌</td>
+            <td class="coagent">✅</td>
+          </tr>
+          <tr>
+            <td>升级/协同</td>
+            <td>❌</td>
+            <td>Slack 通知</td>
+            <td>❌</td>
+            <td class="coagent">✅ 飞书 + @升级</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Gateway 解决「怎么路由/怎么省钱」；CoAgent 解决「超预算了谁拍板、要不要止血升级」。</p>
+  </section>
+
+  <!-- Eval -->
+  <section id="eval">
+    <h2><span class="num">06</span> Eval / 质量平台</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>Braintrust</th>
+            <th>Maxim AI</th>
+            <th class="coagent-h">CoAgent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>定位</td>
+            <td>CI/CD Eval 门禁</td>
+            <td>仿真 + Eval + 观测</td>
+            <td class="coagent">生产事件 Ops</td>
+          </tr>
+          <tr>
+            <td>质量检测</td>
+            <td>✅ 离线/在线 Eval</td>
+            <td>✅ 仿真 + Eval</td>
+            <td class="coagent">⚠️ 事件驱动（空检索）</td>
+          </tr>
+          <tr>
+            <td>生产 故障事件</td>
+            <td>❌</td>
+            <td>⚠️</td>
+            <td class="coagent">✅ 核心</td>
+          </tr>
+          <tr>
+            <td>处置建议</td>
+            <td>❌</td>
+            <td>❌</td>
+            <td class="coagent">✅ 改知识库 vs 重试</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Braintrust 在上线前/CI 阶段保质量；CoAgent 在生产运行时处理「空检索已发生、现在怎么办」。</p>
+  </section>
+
+  <!-- Incident -->
+  <section id="故障事件">
+    <h2><span class="num">07</span> 传统 Incident 管理</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>PagerDuty</th>
+            <th>Rootly On-Call</th>
+            <th class="coagent-h">CoAgent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>监控对象</td>
+            <td>Infra/服务告警</td>
+            <td>通用事件</td>
+            <td class="coagent">Agent 运行态</td>
+          </tr>
+          <tr>
+            <td>Agent 语义</td>
+            <td>❌</td>
+            <td>❌</td>
+            <td class="coagent">✅ rate_limit / empty_retrieval</td>
+          </tr>
+          <tr>
+            <td>协同</td>
+            <td>Slack/Teams</td>
+            <td>Slack 深度集成</td>
+            <td class="coagent">飞书 IM</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 国内 -->
+  <section id="china">
+    <h2><span class="num">08</span> 国内平台</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>产品</th>
+            <th>厂商</th>
+            <th>能力</th>
+            <th>与 CoAgent 差异</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AgentArts 智果</td>
+            <td>华为云</td>
+            <td>Agent 开发 + 全链路观测 + 自动化评估</td>
+            <td>偏开发平台，非独立 Ops 助手；缺把握度评分处置边界</td>
+          </tr>
+          <tr>
+            <td>HiAgent</td>
+            <td>火山引擎</td>
+            <td>Agent 编排 + 运维</td>
+            <td>平台绑定，非轻量 webhook 接入</td>
+          </tr>
+          <tr>
+            <td>Sophon大模型运维</td>
+            <td>星环科技</td>
+            <td>企业大模型运维 全链路</td>
+            <td>偏模型/检索增强 运维，非 故障事件 处置</td>
+          </tr>
+          <tr>
+            <td>Dify / FastGPT</td>
+            <td>开源</td>
+            <td>Agent 构建 + 基础日志</td>
+            <td>无评分 分级、无 运维飞轮</td>
+          </tr>
+          <tr>
+            <td>嘉为蓝鲸 / 鲸眼</td>
+            <td>国产 AIOps</td>
+            <td>Infra 可观测 + AgentOps 概念</td>
+            <td>偏基础设施，Agent 层浅</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pill-row">
+      <span class="pill highlight">私有化 + 飞书协同</span>
+      <span class="pill highlight">轻量事件回调 接入</span>
+      <span class="pill highlight">把握度评分可解释</span>
+    </div>
+    <p><strong style="color:var(--yellow)">威胁等级：中</strong> — 打轻量、专精、可私有化差异化。</p>
+  </section>
+
+  <!-- 雷达 -->
+  <section id="radar">
+    <h2><span class="num">09</span> 能力维度对比（Top 5 vs CoAgent）</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>能力维度</th>
+            <th>Azure SRE</th>
+            <th>Datadog</th>
+            <th>Langfuse</th>
+            <th>Rootly</th>
+            <th class="coagent-h">CoAgent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Agent 运行态专精</td><td class="stars">★☆☆</td><td class="stars">★★☆</td><td class="stars">★★★</td><td class="stars">★☆☆</td><td class="coagent stars">★★★</td></tr>
+          <tr><td>根因推理（非 日志关联）</td><td class="stars">★★★</td><td class="stars">★★☆</td><td class="stars">★☆☆</td><td class="stars">★★☆</td><td class="coagent stars">★★★</td></tr>
+          <tr><td>可验证置信度</td><td class="stars">★★☆</td><td class="stars">★★☆</td><td class="stars">☆☆☆</td><td class="stars">★★☆</td><td class="coagent stars">★★★</td></tr>
+          <tr><td>处置边界（敢不敢动）</td><td class="stars">★★☆</td><td class="stars">★☆☆</td><td class="stars">☆☆☆</td><td class="stars">★★☆</td><td class="coagent stars">★★★</td></tr>
+          <tr><td>审计 + 复盘闭环</td><td class="stars">★★☆</td><td class="stars">★★☆</td><td class="stars">★★☆</td><td class="stars">★★★</td><td class="coagent stars">★★★</td></tr>
+          <tr><td>成本 Ops</td><td class="stars">★☆☆</td><td class="stars">★★☆</td><td class="stars">★★☆</td><td class="stars">☆☆☆</td><td class="coagent stars">★★☆</td></tr>
+          <tr><td>私有化部署</td><td class="stars">★★☆</td><td class="stars">★☆☆</td><td class="stars">★★★</td><td class="stars">★☆☆</td><td class="coagent stars">★★★</td></tr>
+          <tr><td>生态成熟度</td><td class="stars">★★★</td><td class="stars">★★★</td><td class="stars">★★★</td><td class="stars">★★☆</td><td class="coagent stars">★☆☆</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>CoAgent 在「Agent 专精 + 处置边界 +可验证评分」三角同时领先；短板是生态成熟度与生产验证。</p>
+  </section>
+
+  <!-- 问答 -->
+  <section id="qa">
+    <h2><span class="num">10</span> 竞品一句话定位（答辩 问答）</h2>
+    <div class="table-wrap">
+      <table class="qa-table">
+        <thead>
+          <tr><th>竞品类型</th><th>他们说什么</th><th>CoAgent 怎么说</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>基础设施智能运维</td><td>「哪次部署导致 5xx」</td><td>「429 后敢不敢重试」</td></tr>
+          <tr><td>大模型运维 观测</td><td>「Trace 里看到空检索」</td><td>「空检索→幻觉→不能盲重试，要改知识库」</td></tr>
+          <tr><td>大模型 Gateway</td><td>「成本超 $100 发 Slack」</td><td>「超预算→评分 54 🔴→必须 @负责人止血」</td></tr>
+          <tr><td>Eval 平台</td><td>「上线前跑 100 条测试」</td><td>「生产事件 90 秒内给处置方案 + 把握度」</td></tr>
+          <tr><td>通知器</td><td>「Agent 挂了」</td><td>「挂了 + 为什么 + 怎么办 + 敢不敢动 + 留痕」</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SWOT -->
+  <section id="swot">
+    <h2><span class="num">11</span> SWOT 分析</h2>
+    <div class="swot">
+      <div class="swot-box swot-s">
+        <h4>S · 优势</h4>
+        <ul>
+          <li>Agent 层切口清晰</li>
+          <li>把握度评分可追问公式</li>
+          <li>三场景展示处置边界</li>
+          <li>私有化 + 飞书</li>
+          <li>人工把关 符合企业采购心理</li>
+        </ul>
+      </div>
+      <div class="swot-box swot-w">
+        <h4>W · 劣势</h4>
+        <ul>
+          <li>黑客松 MVP，仅 3 场景 mock</li>
+          <li>无真实 multi-tenant</li>
+          <li>集成面窄（vs Datadog 2000+ actions）</li>
+          <li>品牌/客户案例为零</li>
+        </ul>
+      </div>
+      <div class="swot-box swot-o">
+        <h4>O · 机会</h4>
+        <ul>
+          <li>AgentOps 2024–2026 快速成熟</li>
+          <li>大模型运维 观测成熟但 运维决策层真空</li>
+          <li>国内信创 + 私有化需求</li>
+          <li>主办方小宿科技 Agent基础设施生态位</li>
+        </ul>
+      </div>
+      <div class="swot-box swot-t">
+        <h4>T · 威胁</h4>
+        <ul>
+          <li>Datadog 2025 推 Agent Monitoring + Bits AI SRE</li>
+          <li>Langfuse 加告警后向上延伸</li>
+          <li>Azure SRE Agent GA 占心智</li>
+          <li>「观测+告警」被误认为已够用</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 策略 -->
+  <section id="strategy">
+    <h2><span class="num">12</span> 竞争策略建议</h2>
+    <ol class="strategy-list">
+      <li><strong>错位竞争</strong> — 不正面打 Datadog/Azure，强调「不管服务器，管 Agent 失败/质量/成本决策」</li>
+      <li><strong>与 Langfuse/LangSmith 互补</strong> — 「他们是眼睛，CoAgent 是值班大脑」；事件回调 接入现有观测栈</li>
+      <li><strong>把握度评分作为 demo 记忆点</strong> — S1 能重试、S2 不能，现场对比最强</li>
+      <li><strong>私有化叙事</strong> — 对标美国 云服务 RCA 进不来的金融/政企缝隙</li>
+      <li><strong>赛后集成路线</strong> — 接 Langfuse OTel export、PagerDuty escalation、真实重试 API</li>
+    </ol>
+  </section>
+
+  <!-- 市场数据 -->
+  <section id="market">
+    <h2><span class="num">13</span> 市场参考数据</h2>
+    <div class="metric-grid">
+      <div class="metric">
+        <div class="val">~164 亿美元</div>
+        <div class="lbl">全球 AIOps 市场 2025<br>CAGR ~21%</div>
+      </div>
+      <div class="metric">
+        <div class="val">~300 亿元</div>
+        <div class="lbl">2026 中国 IT 基础架构监控<br>+15.4% YoY</div>
+      </div>
+      <div class="metric">
+        <div class="val">2000+</div>
+        <div class="lbl">Langfuse 付费客户<br>Fortune 50 中 19 家</div>
+      </div>
+      <div class="metric">
+        <div class="val">15% → 60%</div>
+        <div class="lbl">AgentOps 企业渗透率<br>2024 → 2026+ 预测</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 结论 -->
+  <section id="conclusion">
+    <h2><span class="num">14</span> 结论</h2>
+    <div class="conclusion">
+      <p>
+        CoAgent 的竞品不是单一产品，而是 <strong>三条线的交集空白</strong> —基础设施智能运维 不下沉到 Agent 语义、大模型运维 观测不上浮到处置决策、Gateway 不管「谁拍板」。
+        <strong>把握度评分 +根因推理 + 人工把关</strong> 是这个空白区的差异化组合。
+      </p>
+      <p style="margin-top:0.75rem;">
+        最大风险：<strong>Datadog / Langfuse 向上/向下延伸</strong> 吞噬该空间。
+        最大机会：<strong>Agent 规模化部署后运维真空爆发</strong>。
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  CoAgent · 面向企业的 Agent 运维助手 · 基于 coagent-design-spec.md 与 2026 竞品调研 · 生成于 2026-06-27
+</footer>
+
+</body>
+</html>
