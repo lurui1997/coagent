@@ -1,119 +1,121 @@
-# CoAgent Design Spec
+# CoAgent 设计规格说明（v1，已 superseded）
 
-**Date:** 2026-06-27  
-**Status:** Approved  
-**Author:** Hackathon solo design  
-**Theme:** ToB Scenario AI Agent — IM-native SRE War Room
+> **⚠️ 本文档已被 [v2](./2026-06-27-coagent-design-v2.md) 替代，请勿按 v1 实现。**
 
----
-
-## 1. Overview
-
-### 1.1 Problem
-
-On-call SRE engineers face information overload when P1 alerts fire. New responders struggle to triage quickly, runbooks are scattered, and context switching across monitoring tools slows mean-time-to-recovery (MTTR).
-
-### 1.2 Solution
-
-**CoAgent** is a Feishu-native SRE war room. When an alert arrives, two specialist agents collaborate in an IM thread: one triages impact and root-cause hypotheses, the other matches runbooks and outputs executable steps plus a comms draft.
-
-### 1.3 Pitch (One Sentence)
-
-> CoAgent: alerts enter Feishu; two agents collaborate in-thread—one triages impact, one delivers runbook commands—cutting novice on-call decision time from 30 minutes to 3 minutes.
-
-### 1.4 Hackathon Constraints
-
-| Constraint | Value |
-|------------|-------|
-| Team size | 1 (solo) |
-| Duration | ~48 hours |
-| Industry | No restriction |
-| Platform/API | No restriction |
-| IM platform | Feishu (飞书) |
-| Team background | SRE, cloud computing, IM |
-
-### 1.5 Scoring Alignment
-
-| Dimension | Weight | How CoAgent Scores |
-|-----------|--------|-------------------|
-| Scenario innovation | 30% | Event-driven multi-agent workflow in IM, not generic chatbot |
-| Product completion | 25% | Single end-to-end demo path, fully runnable |
-| Technical depth | 20% | Orchestrator + tool calling + mock CMDB/SOP with real interfaces |
-| Commercial potential | 15% | Clear buyer (SRE/platform teams), MTTR ROI story |
-| Demo performance | 10% | Feishu thread timeline + `demo.sh` + backup video |
+**日期：** 2026-06-27  
+**状态：** 已被 v2 替代  
+**作者：** Hackathon Solo 设计  
+**主题：** ToB 场景 AI Agent — 飞书原生 SRE 值班室
 
 ---
 
-## 2. Scope
+## 1. 概述
 
-### 2.1 In Scope
+### 1.1 问题
+
+P1 告警触发时，on-call SRE 面临信息过载：新人难以快速 triage，runbook 分散在各处，在多个监控工具间切换会拖长 MTTR（平均恢复时间）。
+
+### 1.2 方案
+
+**CoAgent** 是飞书原生的 SRE 值班室。告警到达后，两个 Specialist Agent 在 IM 线程中协作：一个负责判影响面与根因假设，另一个匹配 runbook 并输出可执行步骤与同步文案。
+
+### 1.3 一句话 Pitch
+
+> CoAgent：告警进飞书，两个 Agent 在 thread 里协作——一个判影响面，一个给 runbook 命令——把新人 on-call 的决策时间从 30 分钟压到 3 分钟。
+
+### 1.4 Hackathon 约束
+
+| 约束 | 值 |
+|------|-----|
+| 团队规模 | 1 人（solo） |
+| 时长 | 约 48 小时 |
+| 行业 | 无限制 |
+| 平台/API | 无限制 |
+| IM 平台 | 飞书 |
+| 团队背景 | SRE、云计算、IM |
+
+### 1.5 评分对齐
+
+| 维度 | 权重 | CoAgent 如何拿分 |
+|------|------|------------------|
+| 场景创新性 | 30% | IM 内事件驱动的 Multi-Agent 工作流，而非通用聊天机器人 |
+| 产品完成度 | 25% | 单条端到端 demo 路径，完整可运行 |
+| 技术深度 | 20% | Orchestrator + Tool calling + Mock CMDB/SOP，接口可替换为真实系统 |
+| 商业潜力 | 15% | 明确 buyer（SRE/平台团队），MTTR 降本故事清晰 |
+| Demo 表现 | 10% | 飞书 thread 时间线 + `demo.sh` + 预录备份视频 |
+
+---
+
+## 2. 范围
+
+### 2.1 范围内
 
 ```
-Mock Alert → Feishu Card → TriageAgent → RunbookAgent → Thread Replies (commands + comms draft)
+Mock 告警 → 飞书卡片 → TriageAgent → RunbookAgent → Thread 回复（命令 + 同步文案）
 ```
 
-- One alert type: `payment-api` 5xx rate spike
-- Two agents in linear pipeline: TriageAgent → RunbookAgent
-- Feishu: 2 top-level cards (alert + closing) + 2 thread replies (Triage + Runbook) = 4 messages total
-- Mock tools: metrics, service metadata, SOP search
-- Fallback JSON when LLM fails
-- One-click demo script (`scripts/demo.sh`)
+- 一种告警类型：`payment-api` 5xx 突增
+- 两个 Agent 线性 pipeline：TriageAgent → RunbookAgent
+- 飞书：2 张顶层卡片（告警 + 结束）+ 2 条 thread 回复（Triage + Runbook）= 共 4 条消息
+- Mock 工具：metrics、服务元数据、SOP 检索
+- LLM 失败时使用 fallback JSON
+- 一键 demo 脚本（`scripts/demo.sh`）
 
-### 2.2 Out of Scope
+### 2.2 范围外
 
-| Feature | Reason |
-|---------|--------|
-| Third CommsAgent | Merged into RunbookAgent output |
-| Agent trace visualization UI | IM timeline is sufficient for solo 48h |
-| Generic workflow platform | Hardcoded 2-step pipeline |
-| Real Prometheus/Grafana integration | Mock webhook for demo stability |
-| Multiple alert types | Focus on one polished demo path |
+| 功能 | 原因 |
+|------|------|
+| 第三个 CommsAgent | 已合并进 RunbookAgent 输出 |
+| Agent trace 可视化 UI | IM 时间线对 solo 48h 足够 |
+| 通用工作流编排平台 | 硬编码 2 步 pipeline |
+| 真实 Prometheus/Grafana 对接 | Mock webhook 保证 demo 稳定 |
+| 多种告警类型 | 聚焦一条打磨好的 demo 路径 |
 
 ---
 
-## 3. Architecture
+## 3. 架构
 
 ```mermaid
 flowchart LR
-    A[Mock Alert Webhook] --> B[Orchestrator]
+    A[Mock 告警 Webhook] --> B[Orchestrator]
     B --> C[TriageAgent]
     C -->|tools: metrics + meta| B
     B --> D[RunbookAgent]
     D -->|tool: search_sop| B
-    B --> E[Feishu Bot]
-    E --> F[Feishu Group Chat]
+    B --> E[飞书 Bot]
+    E --> F[飞书群聊]
 ```
 
-### 3.1 Components
+### 3.1 组件
 
-| Component | Responsibility |
-|-----------|----------------|
-| Webhook entry (`POST /alert`) | Receive fixed JSON alert, validate, forward to orchestrator |
-| Orchestrator | Linear agent pipeline; assign `trace_id`; handle fallback |
-| TriageAgent | Impact assessment, hypothesis, escalation flag |
-| RunbookAgent | SOP match, executable steps, comms draft |
-| Feishu Bot | Send card + thread replies |
+| 组件 | 职责 |
+|------|------|
+| Webhook 入口（`POST /alert`） | 接收固定 JSON 告警，校验后转交 Orchestrator |
+| Orchestrator | 线性 Agent pipeline；分配 `trace_id`；处理 fallback |
+| TriageAgent | 影响面评估、根因假设、升级标记 |
+| RunbookAgent | SOP 匹配、可执行步骤、同步文案 |
+| 飞书 Bot | 发送卡片 + thread 回复 |
 
-### 3.2 Tech Stack
+### 3.2 技术栈
 
-- **Runtime:** Python 3.11+
-- **HTTP:** FastAPI
-- **IM:** Feishu official SDK
-- **LLM:** OpenAI-compatible API with tool calling
-- **Data:** Local JSON files (`data/sops.json`, `data/services.json`, `data/fallback/`)
+- **运行时：** Python 3.11+
+- **HTTP：** FastAPI
+- **IM：** 飞书官方 SDK
+- **LLM：** OpenAI 兼容 API + Tool calling
+- **数据：** 本地 JSON 文件（`data/sops.json`、`data/services.json`、`data/fallback/`）
 
-### 3.3 Project Structure
+### 3.3 项目结构
 
 ```
 coagent/
 ├── app/
 │   ├── main.py           # FastAPI webhook
-│   ├── orchestrator.py   # Linear pipeline
+│   ├── orchestrator.py   # 线性 pipeline
 │   ├── agents/
 │   │   ├── triage.py
 │   │   └── runbook.py
-│   ├── tools/            # Mock implementations
-│   └── feishu/           # Bot client + card builder
+│   ├── tools/            # Mock 实现
+│   └── feishu/           # Bot 客户端 + 卡片构建
 ├── data/
 │   ├── sops.json
 │   ├── services.json
@@ -122,18 +124,18 @@ coagent/
 │       ├── triage.json
 │       └── runbook.json
 ├── scripts/
-│   └── demo.sh           # One-click demo trigger
+│   └── demo.sh           # 一键触发 demo
 ├── .env.example
 └── README.md
 ```
 
 ---
 
-## 4. Data Models
+## 4. 数据模型
 
-### 4.1 Alert Input (Webhook Payload)
+### 4.1 告警输入（Webhook Payload）
 
-Demo supports one fixed alert shape:
+Demo 仅支持一种固定告警结构：
 
 ```json
 {
@@ -148,9 +150,9 @@ Demo supports one fixed alert shape:
 }
 ```
 
-Orchestrator validates and normalizes; no LLM involved at this stage.
+Orchestrator 负责校验与标准化；此阶段不调用 LLM。
 
-### 4.2 TriageAgent Output
+### 4.2 TriageAgent 输出
 
 ```json
 {
@@ -162,7 +164,7 @@ Orchestrator validates and normalizes; no LLM involved at this stage.
 }
 ```
 
-### 4.3 RunbookAgent Output
+### 4.3 RunbookAgent 输出
 
 ```json
 {
@@ -187,64 +189,64 @@ Orchestrator validates and normalizes; no LLM involved at this stage.
 
 ---
 
-## 5. Agent Design
+## 5. Agent 设计
 
 ### 5.1 TriageAgent
 
-**Responsibilities:**
-- Assess impact scope
-- Generate root-cause hypotheses
-- Decide escalation flag
+**职责：**
+- 评估影响范围
+- 生成根因假设
+- 决定是否标记升级
 
-**Must NOT:**
-- Provide kubectl commands
-- Search SOPs
-- Write external notifications
+**禁止：**
+- 提供 kubectl 命令
+- 检索 SOP
+- 撰写对外通知
 
-**System Prompt Guidelines:**
-- Role: SRE triage specialist
-- Output: structured JSON only
-- Must call `query_metrics` and `query_service_meta` before concluding
-- Set `escalate: true` when confidence < 0.7
+**System Prompt 要点：**
+- 角色：SRE Triage 专家
+- 输出：仅结构化 JSON
+- 下结论前必须调用 `query_metrics` 和 `query_service_meta`
+- 置信度 < 0.7 时设 `escalate: true`
 
-**`escalate` field behavior:**
-- Display-only flag in TriageAgent thread message (e.g., "⚠️ 建议升级")
-- Pipeline always continues to RunbookAgent regardless of `escalate` value
-- No branching logic in v1
+**`escalate` 字段行为：**
+- 仅在 TriageAgent thread 消息中展示（如「⚠️ 建议升级」）
+- 无论 `escalate` 取值，pipeline 始终继续执行 RunbookAgent
+- v1 无分支逻辑
 
-**Tools (Mock):**
+**Tools（Mock）：**
 
-| Tool | Input | Mock Return |
-|------|-------|-------------|
+| Tool | 输入 | Mock 返回 |
+|------|------|-----------|
 | `query_metrics` | `service`, `window=15m` | 5xx=12.3%, QPS=8.2k, p99=2.1s |
 | `query_service_meta` | `service` | tier=P0, owner=@张三, deps=[order-db, redis-cache] |
 
 ### 5.2 RunbookAgent
 
-**Responsibilities:**
-- Match SOP from knowledge base
-- Generate numbered executable steps with commands
-- Draft sync/comms message
+**职责：**
+- 从知识库匹配 SOP
+- 生成带命令的编号步骤
+- 草拟同步/通报文案
 
-**Must NOT:**
-- Re-triage or change impact assessment
+**禁止：**
+- 重新 triage 或修改影响面判断
 
-**System Prompt Guidelines:**
-- Input: original alert + TriageAgent output
-- Must call `search_sop` before generating steps
-- Steps must be numbered with risk labels
+**System Prompt 要点：**
+- 输入：原始告警 + TriageAgent 输出
+- 生成步骤前必须调用 `search_sop`
+- 步骤须编号并标注风险等级
 
-**Tools (Mock):**
+**Tools（Mock）：**
 
-| Tool | Input | Mock Return |
-|------|-------|-------------|
-| `search_sop` | `symptom=5xx_rate_spike`, `service=payment-api` | SOP-042 summary from `data/sops.json` |
+| Tool | 输入 | Mock 返回 |
+|------|------|-----------|
+| `search_sop` | `symptom=5xx_rate_spike`, `service=payment-api` | 来自 `data/sops.json` 的 SOP-042 摘要 |
 
 ---
 
-## 6. Feishu Message Format
+## 6. 飞书消息格式
 
-### 6.1 Message 1 — Alert Card
+### 6.1 消息 1 — 告警卡片
 
 ```
 🔴 P1 告警 | payment-api 5xx 突增
@@ -255,7 +257,7 @@ CoAgent 已接手，正在 Triage...
 [查看 Grafana]（可点击链接）
 ```
 
-### 6.2 Message 2 — Thread: TriageAgent
+### 6.2 消息 2 — Thread：TriageAgent
 
 ```
 🤖 TriageAgent
@@ -265,9 +267,9 @@ CoAgent 已接手，正在 Triage...
 → 移交 RunbookAgent
 ```
 
-When `escalate: true`, prepend `⚠️ 建议升级 |` to the first line.
+当 `escalate: true` 时，首行前缀 `⚠️ 建议升级 |`。
 
-### 6.3 Message 3 — Thread: RunbookAgent
+### 6.3 消息 3 — Thread：RunbookAgent
 
 ```
 🤖 RunbookAgent | SOP-042
@@ -280,7 +282,7 @@ When `escalate: true`, prepend `⚠️ 建议升级 |` to the first line.
 【P1】payment 服务 5xx 异常...
 ```
 
-### 6.4 Message 4 — Closing Card
+### 6.4 消息 4 — 结束卡片
 
 ```
 ✅ CoAgent 处置建议已生成 | 耗时 8s
@@ -288,58 +290,60 @@ trace_id: abc-123
 （Demo 模式：Mock 告警 demo-001）
 ```
 
-**Message placement:**
-- Messages 2–3: thread replies attached to Message 1 (alert card) via Feishu reply API
-- Message 4: new top-level card in group chat (not a thread reply)
+**消息挂载方式：**
+- 消息 2–3：通过飞书 reply API 回复到消息 1（告警卡片）的 thread
+- 消息 4：群内新发顶层卡片（非 thread 回复）
 
 ---
 
-## 7. Orchestrator Flow
+## 7. Orchestrator 流程
 
 ```mermaid
 sequenceDiagram
     participant W as Webhook
     participant O as Orchestrator
-    participant F as Feishu Bot
+    participant F as 飞书 Bot
     participant T as TriageAgent
     participant R as RunbookAgent
 
     W->>O: POST /alert
-    O->>F: Alert card (msg_1)
+    O->>F: 告警卡片 (msg_1)
     O->>T: run(alert)
     T->>T: query_metrics + query_service_meta
     T-->>O: triage_result
-    O->>F: Thread reply Triage (msg_2)
+    O->>F: Thread 回复 Triage (msg_2)
     O->>R: run(alert, triage_result)
     R->>R: search_sop
     R-->>O: runbook_result
-    O->>F: Thread reply Runbook (msg_3)
-    O->>F: Closing card (msg_4)
+    O->>F: Thread 回复 Runbook (msg_3)
+    O->>F: 结束卡片 (msg_4)
     O-->>W: 200 OK + trace_id
 ```
 
-**Rules:**
-- Single `trace_id` for entire pipeline; included in logs and Feishu footer
-- Any step failure → fallback JSON; still send all 4 messages
-- Per-step LLM timeout: 15 seconds
-- End-to-end target: < 30 seconds (typical ~8s for pitch)
+**规则：**
+- 全程使用同一个 `trace_id`，写入日志与飞书 footer
+- Orchestrator 须保存消息 1 返回的 `message_id`，供消息 2–3 作为 thread reply 挂载
+- 任一步失败 → 使用 fallback JSON，仍发送全部 4 条消息
+- 单步 LLM 超时：15 秒（每个 Agent 各自重试 1 次）
+- 端到端目标：< 30 秒（pitch 中可称典型约 8 秒）
+- 成功响应体：`{ "status": "ok", "trace_id": "..." }`
 
 ---
 
-## 8. Error Handling
+## 8. 错误处理
 
-| Priority | Scenario | Behavior |
-|----------|----------|----------|
-| P0 | LLM returns invalid JSON | Retry once → read fallback JSON |
-| P0 | Feishu send fails | Retry 2x with exponential backoff → write `demo.log` |
-| P1 | Tool call exception | Use hardcoded mock data; do not interrupt pipeline |
-| P2 | Duplicate `alert_id` | Idempotent: return `200 OK` with `{ "status": "duplicate", "trace_id": "<original>" }`; no new Feishu messages |
+| 优先级 | 场景 | 行为 |
+|--------|------|------|
+| P0 | LLM 返回非法 JSON | 该 Agent 重试 1 次 → 读取 fallback JSON |
+| P0 | 飞书发送失败 | 指数退避重试 2 次 → 写入 `demo.log` |
+| P1 | Tool 调用异常 | 使用硬编码 mock 数据，不中断 pipeline |
+| P2 | 重复 `alert_id` | 幂等：返回 `200 OK` 及 `{ "status": "duplicate", "trace_id": "<original>" }`；不发送新飞书消息（内存 dict 去重，10 分钟内有效） |
 
-**Demo rule:** Never show empty thread. Fallback results are acceptable; mention in pitch as production safety net.
+**Demo 铁律：** 绝不出现空白 thread。Fallback 结果可接受；pitch 中可说明为生产环境安全网。
 
 ---
 
-## 9. Configuration
+## 9. 配置
 
 ```env
 FEISHU_APP_ID=
@@ -351,38 +355,38 @@ LLM_MODEL=gpt-4o-mini
 DEMO_MODE=true
 ```
 
-**`DEMO_MODE` behavior when `true`:**
-- Append "（Demo 模式）" footer to closing card
-- On LLM failure, use fallback JSON immediately (no retry)
-- Does not skip LLM on happy path
+**`DEMO_MODE=true` 时的行为：**
+- 结束卡片 footer 追加「（Demo 模式）」
+- LLM 失败时直接使用 fallback JSON（不重试）
+- 正常路径仍调用 LLM
 
-**Webhook security:** localhost-only for hackathon; no auth required. Do not expose publicly without adding signature verification.
+**Webhook 安全：** Hackathon 阶段仅 localhost；无需鉴权。公网暴露前须增加签名校验。
 
-Use `.env` locally; never commit secrets.
+本地使用 `.env`；切勿提交密钥。
 
 ---
 
-## 10. Demo Plan
+## 10. Demo 计划
 
-### 10.1 Live Demo Script (5 minutes)
+### 10.1 现场 Demo 脚本（5 分钟）
 
-| Time | Action |
-|------|--------|
-| 0:00 | Problem: on-call overload, scattered runbooks |
-| 0:30 | Run `scripts/demo.sh` — curl hits webhook |
-| 1:00 | Switch to Feishu — alert card appears |
-| 1:30 | TriageAgent thread reply |
-| 2:30 | RunbookAgent thread reply with commands |
-| 3:30 | Closing card; mention 8s typical latency |
-| 4:30 | Commercial: MTTR reduction, SRE team buyer |
+| 时间 | 动作 |
+|------|------|
+| 0:00 | 问题：on-call 信息过载、runbook 分散 |
+| 0:30 | 运行 `scripts/demo.sh` — curl 触发 webhook |
+| 1:00 | 切到飞书 — 告警卡片出现 |
+| 1:30 | TriageAgent thread 回复 |
+| 2:30 | RunbookAgent thread 回复（含命令） |
+| 3:30 | 结束卡片；提及典型耗时约 8 秒 |
+| 4:30 | 商业：MTTR 降低、SRE 团队 buyer |
 | 5:00 | Q&A |
 
-### 10.2 Backup
+### 10.2 备份方案
 
-- Pre-recorded 30s video of full Feishu thread
-- `demo.log` fallback if Feishu API fails on stage
+- 预录 30 秒完整飞书 thread 视频
+- 飞书 API 现场失败时使用 `demo.log`
 
-### 10.3 One-Click Trigger
+### 10.3 一键触发
 
 ```bash
 curl -X POST http://localhost:8000/alert \
@@ -392,45 +396,45 @@ curl -X POST http://localhost:8000/alert \
 
 ---
 
-## 11. Pitch Deck (5 Slides)
+## 11. Pitch  Deck（5 页）
 
-| Slide | Title | Content |
-|-------|-------|---------|
-| 1 | Problem | On-call info overload; novice hesitation; scattered runbooks |
-| 2 | CoAgent | IM-native war room; Feishu thread collaboration; Triage + Runbook agents |
-| 3 | Live Demo | Feishu thread screenshots; 30s to actionable runbook |
-| 4 | Architecture | Component diagram; multi-agent + tool use; mock→real API path |
-| 5 | Business & Roadmap | Buyer: SRE/platform; ROI: MTTR; V2: Prometheus, Postmortem agent |
-
----
-
-## 12. Solo 48h Timeline
-
-| Phase | Hours | Deliverable |
-|-------|-------|-------------|
-| Scaffold | 0–6 | Webhook + Feishu messaging works |
-| Agent 1 | 6–14 | TriageAgent + mock metrics tools |
-| Agent 2 | 14–22 | RunbookAgent + mock SOP search |
-| Integration | 22–30 | End-to-end + fixed demo data |
-| Polish | 30–38 | Error handling, fallback, retries |
-| Pitch | 38–48 | 5-slide deck + backup video + 3 rehearsals |
+| 页 | 标题 | 内容 |
+|----|------|------|
+| 1 | 问题 | On-call 信息过载；新人犹豫；runbook 分散 |
+| 2 | CoAgent | IM 原生值班室；飞书 thread 协作；Triage + Runbook 双 Agent |
+| 3 | Live Demo | 飞书 thread 截图；30 秒内给出可执行 runbook |
+| 4 | 技术架构 | 组件图；Multi-Agent + Tool use；Mock → 真实 API 路径 |
+| 5 | 商业与路线图 | Buyer：SRE/平台团队；ROI：MTTR；V2：Prometheus、Postmortem Agent |
 
 ---
 
-## 13. Future Roadmap (Post-Hackathon)
+## 12. Solo 48 小时时间线
 
-- Connect real Prometheus/Grafana webhooks
-- Third agent: auto-generate postmortem from thread
-- Support multiple IM platforms (Slack, WeCom)
-- Configurable SOP knowledge base with RAG
+| 阶段 | 时间 | 交付物 |
+|------|------|--------|
+| 骨架 | 0–6h | Webhook + 飞书发消息跑通 |
+| Agent 1 | 6–14h | TriageAgent + mock metrics tools |
+| Agent 2 | 14–22h | RunbookAgent + mock SOP 检索 |
+| 串联 | 22–30h | 端到端 + 固定 demo 数据 |
+| 打磨 | 30–38h | 错误处理、fallback、重试 |
+| Pitch | 38–48h | 5 页 deck + 备份视频 + 排练 3 遍 |
 
 ---
 
-## 14. Success Criteria
+## 13. 后续路线图（Hackathon 之后）
 
-- [ ] `POST /alert` with demo payload triggers full Feishu thread (4 messages)
-- [ ] TriageAgent calls both mock tools and returns valid JSON
-- [ ] RunbookAgent calls SOP search and returns steps + comms draft
-- [ ] Pipeline completes in < 30s or falls back gracefully
-- [ ] `scripts/demo.sh` works reliably after 10 consecutive runs
-- [ ] 5-slide pitch deck ready with backup video
+- 对接真实 Prometheus/Grafana webhook
+- 第三个 Agent：从 thread 自动生成 postmortem
+- 支持多 IM 平台（Slack、企业微信）
+- 可配置 SOP 知识库 + RAG
+
+---
+
+## 14. 验收标准
+
+- [ ] `POST /alert` 使用 demo payload 可触发完整飞书 thread（4 条消息）
+- [ ] TriageAgent 调用两个 mock tool 并返回合法 JSON
+- [ ] RunbookAgent 调用 SOP 检索并返回步骤 + 同步文案
+- [ ] Pipeline 在 30 秒内完成，或优雅 fallback
+- [ ] `scripts/demo.sh` 连续运行 10 次均稳定
+- [ ] 5 页 pitch deck 就绪，含备份视频
