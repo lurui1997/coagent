@@ -124,7 +124,7 @@ Hackathon 评分表中 **场景创新性 30% + 技术深度 20% = 50%**，高于
 
 #### 1.5.3 三场景 = 创新性优先重排序（对齐 Demo）
 
-** CoAgent 用 S1/S2/S3 展示同一创新内核的三种 Agent Ops 切面，**不是三条独立产品**。
+**CoAgent 用 S1/S2/S3 展示同一创新内核的三种 Agent Ops 切面，**不是三条独立产品**。
 
 | 优先级 | 场景 | 切口角色 | 因果一跳（Demo 必讲清） | 创新性贡献 |
 |--------|------|----------|------------------------|-----------|
@@ -132,7 +132,7 @@ Hackathon 评分表中 **场景创新性 30% + 技术深度 20% = 50%**，高于
 | 🥈 **S2** | RAG 空检索飙升 | **质量因果链** | 索引/知识库问题 → 空检索 → 错误回答级联 | 🟡「不能盲 retry，要改知识库」— 破「固定重试」 |
 | 🥉 **S3** | Agent 日成本超预算 | **成本因果链** | 发布/流量 → Token 突增 → 超预算 → 需止血升级 | 🔴 升级分级 — 展示「敢不敢动」边界 |
 
-> **范围警告：** CoAgent 的「因果」落在 **Agent 运行态层。
+> **范围警告：** CoAgent 的「因果」落在 **Agent 运行态层**，与当前 Spec 工程范围一致。
 
 #### 1.5.4 与现成产品的差异（创新性答辩用）
 
@@ -195,13 +195,20 @@ Hackathon 评分表中 **场景创新性 30% + 技术深度 20% = 50%**，高于
 
 ## 3. Demo 场景（Agent Ops）
 
-| ID | 场景 | type | agent | Ops | Score | grade |
-|----|------|------|-------|-----|-------|-------|
-| **S1** | 客服 Agent API 限流 | `run_fail` | cs-bot | OPS-101 | 82–88 | 🟢 |
-| **S2** | RAG 空检索飙升 | `run_fail` | rag-bot | OPS-203 | 65–75 | 🟡 |
-| **S3** | 日成本超预算 | `cost_report` | content-bot | OPS-305 | 50–58 | 🔴 |
+### 3.1 三场景总览
 
-**叙事：** 能重试 → 需确认改库 → 要止血升级。  
+| | S1 限流 | S2 空检索 | S3 超预算 |
+|---|---------|-----------|-----------|
+| **Agent** | cs-bot 客服 | rag-bot 知识问答 | content-bot 内容生成 |
+| **事件** | `run_fail` + `rate_limit` | `run_fail` + `empty_retrieval` | `cost_report` + `over_budget` |
+| **用户痛点** | 挂了不知道能不能重试 | 错了不能盲 retry | 烧钱不知道谁拍板 |
+| **因果一跳** | 流量↑ → 429 → 客服不可用 | 索引 lag → 空检索 → 答非所问 | 发布↑ → Token↑ → 超预算 |
+| **Ops** | OPS-101 | OPS-203 | OPS-305 |
+| **Score** | 82–88 🟢 | 65–75 🟡 | 50–58 🔴 |
+| **处置边界** | 可执行（人点 Retry） | 需确认（改知识库） | 升级 @（止血） |
+| **飞书** | P0 卡片 + Retry | Admin 为主 | Admin 升级态 |
+
+**叙事递进：** 敢动手 → 不敢盲动 → 必须升级。  
 **因果一跳（Pitch 必讲）：** 见 §1.5.3。
 
 **Router：**
@@ -213,6 +220,316 @@ ROUTES = {
     ("cost_report", "over_budget"): "cost_over_budget",
 }
 ```
+
+### 3.2 统一流程（三场景共用）
+
+```mermaid
+sequenceDiagram
+    participant U as 运维/评委
+    participant AD as Admin Tab2
+    participant OR as Orchestrator
+    participant SR as Scenario Router
+    participant PB as Playbook
+    participant T as Mock Tools
+    participant LLM as LLM
+    participant SC as Decision Score
+    participant T1 as Admin Tab1 SSE
+    participant T3 as Admin Tab3
+    participant FS as 飞书(S1)
+
+    U->>AD: 点击「触发 S1/S2/S3」
+    AD->>OR: 加载 data/scenarios/sN.json
+    OR->>T1: SSE incident_started
+    OR->>SR: (type, symptom) 路由
+    SR->>PB: 选中 playbook
+    loop required_tools
+        PB->>T: query_* / search_ops_playbook
+        PB->>T1: SSE tool_called
+    end
+    PB->>LLM: event + tool 结果 + system prompt
+    LLM-->>PB: impact / reasoning_chain / steps
+    PB->>T1: SSE llm_reasoning → llm_result
+    PB->>SC: 计算 D / P / C
+    SC->>T1: SSE score_computed
+    SC->>T3: 总分 + 三因子 + grade
+    alt S1
+        SC->>FS: 卡片 + Retry
+        OR->>T1: SSE channel_sync
+    end
+    OR->>T1: SSE incident_completed
+    U->>T3: 👍/👎 → Tab4 飞轮
+```
+
+**典型耗时：** 8–15s（Pitch 可说「90 秒内拿到结论」，含人工切换 Tab）。
+
+**SSE 事件顺序（Tab1 逐条滚动）：**
+
+```
+incident_started → tool_called ×3 → llm_reasoning → llm_result
+→ score_computed → [channel_sync] → incident_completed
+```
+
+### 3.3 S1 — 客服 Agent API 限流（主 Demo · 🟢）
+
+**场景故事：** 电商 OPC 的 cs-bot 接 OpenAI。大促前并发 5→10，触发连续 429，客服 thread 全挂。运维不知该等、重试还是换 key。
+
+**触发数据** `data/scenarios/s1.json`：
+
+```json
+{
+  "event_id": "evt-s1-demo",
+  "agent_id": "cs-bot",
+  "agent_name": "客服 Agent",
+  "type": "run_fail",
+  "symptom": "rate_limit",
+  "error": "OpenAI 429: Rate limit exceeded for gpt-4o-mini",
+  "log_snippet": "[14:02:11] retry=3/3 failed; model=gpt-4o-mini; concurrent=10",
+  "cost_yuan_today": 8.5,
+  "budget_yuan_daily": 20,
+  "retry_webhook": "http://localhost:8000/demo/retry/cs-bot",
+  "ts": "2026-06-27T14:02:00+08:00"
+}
+```
+
+**Playbook：** `cs_rate_limit` · OPS-101
+
+| Tool | Mock 返回要点 |
+|------|---------------|
+| `query_agent_metrics` | 429 次数 47/5min，失败率 38% |
+| `query_agent_config` | `concurrent=10`，`rpm_limit=60`，昨日 concurrent=5 |
+| `search_ops_playbook` | OPS-101：等待 / 降并发 / 换 key |
+
+**LLM 期望形态（真实生成，非静态）：**
+
+```json
+{
+  "impact": "客服 Agent 近 5 分钟 38% 请求失败，用户咨询无法自动回复",
+  "hypothesis": ["并发 5→10 触发 OpenAI RPM 限流", "当前 key 配额已打满"],
+  "reasoning_chain": [
+    "配置变更：concurrent 5→10，请求速率超过 rpm_limit",
+    "API 层：OpenAI 返回 429 rate limit",
+    "业务层：cs-bot 连续重试失败，客服通道不可用"
+  ],
+  "steps": [
+    {"order": 1, "action": "等待 60s 后手动重试", "command": null, "risk": "low"},
+    {"order": 2, "action": "临时将 concurrent 降回 5", "command": "coagent config set cs-bot concurrent=5", "risk": "medium"},
+    {"order": 3, "action": "切换 backup API key", "command": "coagent secret rotate cs-bot --key backup", "risk": "medium"}
+  ],
+  "comms_draft": "【客服 Agent 异常】429 限流，已建议降并发并重试",
+  "retry_recommended": true
+}
+```
+
+**Score 设计（目标 85 🟢）：**
+
+| 因子 | 目标 | 手段 |
+|------|------|------|
+| D | 0.92 | 字段齐全 + 3/3 tools + log 含 `429` |
+| P | 0.88 | symptom=`rate_limit` 命中 OPS-101 |
+| C | clamp 0.75 | hypothesis 含 `429`/`concurrent`；steps 引用 OPS-101 |
+
+```yaml
+# playbook cs_rate_limit
+consistency_clamp: [0.72, 0.78]
+expected_score: [82, 88]
+expected_grade: executable
+```
+
+**实现效果：**
+
+- **Tab1 SSE：** tool×3 → reasoning_chain → score_computed(85 🟢) → channel_sync → completed（~13s）
+- **Tab3：** 总分 + 三因子 + 步骤 + **[一键 Retry]**
+- **飞书：** 卡片含 Score、步骤、Retry 按钮（§9）
+- **Pitch：** 「限流是 Agent 配置打满配额——Score 85，可以先 Retry。」
+
+### 3.4 S2 — RAG 空检索飙升（质量链 · 🟡）
+
+**场景故事：** rag-bot 接企业知识库。FAQ 更新后未 rebuild 索引 → 空检索率 5%→35%。Agent 仍「自信作答」，客诉上升。盲 Retry 只会重复幻觉。
+
+**触发数据** `data/scenarios/s2.json`：
+
+```json
+{
+  "event_id": "evt-s2-demo",
+  "agent_id": "rag-bot",
+  "agent_name": "RAG 客服 Agent",
+  "type": "run_fail",
+  "symptom": "empty_retrieval",
+  "error": "Retrieval returned 0 chunks above threshold 0.7",
+  "log_snippet": "[09:15:22] empty_retrieval_rate=35%; index_version=v2.3; kb_last_sync=2026-06-26",
+  "cost_yuan_today": 12.0,
+  "budget_yuan_daily": 30,
+  "retry_webhook": null,
+  "ts": "2026-06-27T09:15:00+08:00"
+}
+```
+
+**Playbook：** `rag_empty_retrieval` · OPS-203
+
+| Tool | Mock 返回要点 |
+|------|---------------|
+| `query_agent_metrics` | 空检索率 35%（基线 5%），幻觉投诉 +12 |
+| `query_agent_config` | `index_version=v2.3`，`kb_last_sync` 滞后 1 天 |
+| `search_ops_playbook` | OPS-203：rebuild 索引 / 兜底 prompt |
+
+**LLM 期望形态：**
+
+```json
+{
+  "impact": "35% 问答无知识库支撑，易产生错误答复",
+  "hypothesis": ["知识库更新后索引未 rebuild", "检索阈值过高"],
+  "reasoning_chain": [
+    "知识库：kb_last_sync 滞后，index 与文档不一致",
+    "检索层：empty_retrieval_rate 35%",
+    "回答层：模型仍生成完整答案 → 客诉级联"
+  ],
+  "steps": [
+    {"order": 1, "action": "切换「无法确认」兜底 prompt", "command": "coagent prompt set rag-bot fallback=strict", "risk": "medium"},
+    {"order": 2, "action": "触发向量索引 rebuild", "command": "coagent kb rebuild rag-bot --version v2.4", "risk": "medium"},
+    {"order": 3, "action": "rebuild 后抽样 20 条验证", "command": null, "risk": "low"}
+  ],
+  "comms_draft": "【RAG 质量告警】空检索飙升，建议 rebuild 索引",
+  "retry_recommended": false
+}
+```
+
+**Score 设计（目标 70 🟡）：**
+
+| 因子 | 目标 | 手段 |
+|------|------|------|
+| D | 0.85 | log 含 `empty_retrieval`；无 retry_webhook 略降 |
+| P | 0.80 | symptom 命中 OPS-203 |
+| C | clamp 0.68 | steps 含 rebuild/索引关键词 |
+
+```yaml
+consistency_clamp: [0.65, 0.72]
+expected_score: [65, 75]
+expected_grade: needs_confirmation
+```
+
+**实现效果：**
+
+- **Tab3：** 🟡 70 + **⚠️ 不建议 Retry** + [确认后执行]（无 Retry 按钮）
+- **Tab1 左侧：** `rag-bot  70 🟡`
+- **Pitch：** 「同样 run_fail，S1 能 Retry，S2 不能——Score 定义敢不敢动的边界。」
+- **现场改变量：** 口头改 `empty_retrieval_rate` 为 15%，展示 Score 非固定路径
+
+### 3.5 S3 — Agent 日成本超预算（成本链 · 🔴）
+
+**场景故事：** content-bot 上新模板 + 批量任务 → 日成本 **¥28.5 / 预算 ¥20**。非报错，是 `cost_report`。一线无权停服，须升级负责人止血。
+
+**触发数据** `data/scenarios/s3.json`：
+
+```json
+{
+  "event_id": "evt-s3-demo",
+  "agent_id": "content-bot",
+  "agent_name": "内容生成 Agent",
+  "type": "cost_report",
+  "symptom": "over_budget",
+  "error": null,
+  "log_snippet": "[18:00:00] tokens_today=1.2M (+180% vs 7d avg); top_route=marketing-batch",
+  "cost_yuan_today": 28.5,
+  "budget_yuan_daily": 20,
+  "retry_webhook": null,
+  "ts": "2026-06-27T18:00:00+08:00"
+}
+```
+
+**Playbook：** `cost_over_budget` · OPS-305
+
+| Tool | Mock 返回要点 |
+|------|---------------|
+| `query_agent_metrics` | Token 1.2M/日（+180%），top route `marketing-batch` |
+| `query_agent_config` | 新模板 `v3-longform` 昨日发布，`max_tokens=4096` |
+| `search_ops_playbook` | OPS-305：限流 / 降级模型 / 暂停 batch / 升级审批 |
+
+**LLM 期望形态：**
+
+```json
+{
+  "impact": "日成本超预算 42.5%，若不干预今日预计 ¥35+",
+  "hypothesis": ["marketing-batch 调用量突增", "新模板单请求 token 翻倍"],
+  "reasoning_chain": [
+    "发布：v3-longform 上线，max_tokens 4096",
+    "流量：marketing-batch 占 token 62%",
+    "成本：¥28.5 > 预算 ¥20 → 需负责人止血"
+  ],
+  "steps": [
+    {"order": 1, "action": "暂停 marketing-batch 非紧急任务", "command": "coagent route pause content-bot marketing-batch", "risk": "high"},
+    {"order": 2, "action": "临时降级模型并 cap max_tokens", "command": "coagent model downgrade content-bot", "risk": "high"},
+    {"order": 3, "action": "通知业务负责人确认是否继续投放", "command": null, "risk": "low"}
+  ],
+  "comms_draft": "【成本告警】超预算 42%，建议暂停 batch，需 @负责人 确认",
+  "retry_recommended": false
+}
+```
+
+**Score 设计（目标 54 🔴）：**
+
+| 因子 | 目标 | 手段 |
+|------|------|------|
+| D | 0.78 | cost 字段齐全；`error` 为空（cost 事件正常） |
+| P | 0.72 | type=`cost_report` + OPS-305 |
+| C | clamp 0.50 | 含 high risk steps；需人工审批 |
+
+```yaml
+consistency_clamp: [0.48, 0.55]
+expected_score: [50, 58]
+expected_grade: escalate
+```
+
+**实现效果：**
+
+- **Tab3：** 🔴 54 + **@FEISHU_ESCALATE_USER_ID** + 高风险步骤不可自动执行
+- **无飞书 P0**（P1）；Admin 展示升级文案与 `comms_draft`
+- **Pitch：** 「不是坏了，是烧钱——Score 54 告诉你不该自己动，该升级。」
+
+### 3.6 Admin Tab3 差异化渲染
+
+| grade | Tab3 主色 | Retry | 升级 @ |
+|-------|-----------|-------|--------|
+| 🟢 executable | green | 显示 | 否 |
+| 🟡 needs_confirmation | amber | 隐藏 | 否 |
+| 🔴 escalate | red | 隐藏 | 显示 |
+
+### 3.7 场景对比（答辩用）
+
+```mermaid
+flowchart LR
+    subgraph S1["S1 限流 🟢"]
+        A1[配置变更] --> A2[429]
+        A2 --> A3[Retry 可恢复]
+    end
+    subgraph S2["S2 空检索 🟡"]
+        B1[索引 lag] --> B2[空检索]
+        B2 --> B3[改库非 Retry]
+    end
+    subgraph S3["S3 超预算 🔴"]
+        C1[模板+流量] --> C2[Token↑]
+        C2 --> C3[升级止血]
+    end
+```
+
+| 维度 | S1 | S2 | S3 |
+|------|----|----|-----|
+| 事件类型 | 失败 | 失败 | 成本 |
+| 核心问题 | 能不能恢复 | 能不能信 | 谁有权动 |
+| C 因子 | 高 | 中 | 低 |
+| 飞书 | ✅ | — | — |
+| 飞轮 Demo | 👍 可选 | 👎 推荐 | — |
+
+**实现文件：**
+
+```
+data/agents.json
+data/ops_playbooks.json       # OPS-101 / 203 / 305
+data/scenarios/s1.json | s2.json | s3.json
+data/calibration/             # calibrate_scores.sh 产出
+app/playbooks/cs_rate_limit.py | rag_empty_retrieval.py | cost_over_budget.py
+```
+
+每个 Playbook 须实现：`required_tools`（D）、`ops_tags`（P）、`consistency_rules`（C）、`consistency_clamp` / `expected_score`。
 
 ---
 
@@ -257,6 +574,8 @@ coagent/
 
 ### 5.1 事件 `POST /events`
 
+完整 Demo payload 见 **§3.3–§3.5**（`data/scenarios/s1.json` 等）。通用字段：
+
 ```json
 {
   "event_id": "evt-s1-001",
@@ -273,7 +592,7 @@ coagent/
 }
 ```
 
-S3：`type=cost_report`，`cost_yuan_today=28.5`，`budget_yuan_daily=20`。
+S3 差异：`type=cost_report`，`symptom=over_budget`，`error=null`，`cost_yuan_today=28.5`。
 
 ### 5.2 LLM 输出（必须 LLM 生成）
 
@@ -317,7 +636,7 @@ total = round(100 × (0.35×D + 0.35×P + 0.30×C))
 3. `DEMO_MODE=true`：仅对 **C** 按 playbook `consistency_clamp` clamp；**不伪造 LLM 文本**  
 4. LLM 完全失败 → Admin 错误态或 Replay，不读静态 hypothesis  
 
-**Playbook 字段：**
+**Playbook 字段（各场景取值见 §3.3–§3.5）：**
 
 ```yaml
 consistency_clamp: [0.68, 0.78]
@@ -367,20 +686,16 @@ CREATE TABLE agent_daily_stats (
 
 ## 6. Playbook 摘要
 
-### S1 `cs_rate_limit`（OPS-101）
+各 Playbook 的 Mock 数据、Score 校准与 UI 效果见 **§3.3–§3.5**。共用约束：
 
-- Tools: `query_agent_metrics`, `query_agent_config`, `search_ops_playbook`  
-- Mock: 429 计数 ↑，并发=10，OPS-101 限流手册  
+- **Tools（三场景相同）：** `query_agent_metrics`, `query_agent_config`, `search_ops_playbook`
+- **LLM 约束：** 先完成 `required_tools`；`reasoning_chain` ≥3 步；禁止 Ops 手册外的高风险操作
 
-### S2 `rag_empty_retrieval`（OPS-203）
-
-- symptom: `empty_retrieval`  
-- Mock: 空检索率 35%，索引版本 lag，OPS-203 知识库检查  
-
-### S3 `cost_over_budget`（OPS-305）
-
-- type: `cost_report`  
-- Mock: 日成本 28.5/20，token 突增，OPS-305 停服/降级手册  
+| Playbook | Ops | 关键 symptom/type |
+|----------|-----|-------------------|
+| `cs_rate_limit` | OPS-101 | `run_fail` + `rate_limit` |
+| `rag_empty_retrieval` | OPS-203 | `run_fail` + `empty_retrieval` |
+| `cost_over_budget` | OPS-305 | `cost_report` + `over_budget` |
 
 ---
 
@@ -474,10 +789,10 @@ S3 🔴 → `@FEISHU_ESCALATE_USER_ID`
 | 时间 | 动作 |
 |------|------|
 | 0:00 | 痛点 + 用户价值一句话 |
-| 0:30 | Tab2 → **S1** → Tab1 timeline |
-| 1:15 | Tab3 🟢 + Retry（敢动手） |
-| 1:40 | Tab2 → **S2** → Tab3 🟡（需确认） |
-| 2:05 | Tab2 → **S3** → Tab3 🔴（升级止血） |
+| 0:30 | Tab2 → **S1** → Tab1 timeline（§3.3） |
+| 1:15 | Tab3 🟢 + Retry（§3.6 敢动手） |
+| 1:40 | Tab2 → **S2** → Tab3 🟡（§3.4 无 Retry） |
+| 2:05 | Tab2 → **S3** → Tab3 🔴（§3.5 升级） |
 | 2:40 | Tab4 👎 → 飞轮统计更新 |
 | 3:10 | 飞书 S1 |
 | 4:00 | §1.5 三件套 + 核心问题→价值 + 「越用越准」 |
@@ -535,7 +850,7 @@ DEMO_MODE=true
 - [ ] S1/S2/S3 Webhook 与 Admin 触发均可闭环  
 - [ ] Tab1 Agent 列表 + SSE timeline  
 - [ ] LLM 真实 reasoning_chain / steps  
-- [ ] S1/S2/S3 Score 与 grade 符合 §3（或 clamp）  
+- [ ] S1/S2/S3 符合 §3.3–§3.5 的 Score 区间与 Tab3 渲染规则（§3.6）  
 - [ ] Tab3 展示 Score 总分 + 三因子 + grade  
 - [ ] S1 飞书 + Retry；S3 升级态可展示  
 - [ ] Tab4 反馈更新统计  
