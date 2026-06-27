@@ -1,0 +1,17 @@
+[
+  {
+    "agent_id": "cs-bot",
+    "agent_name": "客服 Agent",
+    "description": "电商 OPC 客服 Agent，接 OpenAI API"
+  },
+  {
+    "agent_id": "rag-bot",
+    "agent_name": "RAG 客服 Agent",
+    "description": "企业知识库问答 Agent"
+  },
+  {
+    "agent_id": "content-bot",
+    "agent_name": "内容生成 Agent",
+    "description": "营销内容批量生成 Agent"
+  }
+]

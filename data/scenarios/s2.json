@@ -1,0 +1,13 @@
+{
+  "event_id": "evt-s2-demo",
+  "agent_id": "rag-bot",
+  "agent_name": "RAG 客服 Agent",
+  "type": "run_fail",
+  "symptom": "empty_retrieval",
+  "error": "Retrieval returned 0 chunks above threshold 0.7",
+  "log_snippet": "[09:15:22] empty_retrieval_rate=35%; index_version=v2.3; kb_last_sync=2026-06-26",
+  "cost_yuan_today": 12.0,
+  "budget_yuan_daily": 30,
+  "retry_webhook": null,
+  "ts": "2026-06-27T09:15:00+08:00"
+}

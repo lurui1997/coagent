@@ -1,0 +1,107 @@
+{
+  "playbooks": [
+    {
+      "id": "cs_rate_limit",
+      "ops_id": "OPS-101",
+      "route": {"type": "run_fail", "symptom": "rate_limit"},
+      "required_tools": ["query_agent_metrics", "query_agent_config", "search_ops_playbook"],
+      "ops_tags": ["rate_limit", "429", "openai", "concurrent", "retry"],
+      "consistency_rules": {
+        "error_keywords": ["429", "rate limit", "rate_limit"],
+        "log_keywords": ["concurrent", "retry", "429"],
+        "step_keywords": ["等待", "降并发", "换 key", "backup", "retry", "重试", "concurrent"]
+      },
+      "consistency_clamp": [0.72, 0.78],
+      "expected_score": [82, 88],
+      "expected_grade": "executable",
+      "retry_recommended": true,
+      "system_prompt": "你是 Agent Ops Copilot。分析客服 Agent API 限流事件，给出因果链和处置步骤。必须覆盖 OPS-101：等待/降并发/换 key。retry_recommended 应为 true。",
+      "tool_mocks": {
+        "query_agent_metrics": {
+          "rate_limit_429_count_5min": 47,
+          "failure_rate_pct": 38,
+          "avg_latency_ms": 3200
+        },
+        "query_agent_config": {
+          "concurrent": 10,
+          "rpm_limit": 60,
+          "yesterday_concurrent": 5,
+          "model": "gpt-4o-mini"
+        },
+        "search_ops_playbook": {
+          "ops_id": "OPS-101",
+          "title": "API 限流处置",
+          "steps": ["等待 60s 后重试", "降低 concurrent 至 5", "切换 backup API key"]
+        }
+      }
+    },
+    {
+      "id": "rag_empty_retrieval",
+      "ops_id": "OPS-203",
+      "route": {"type": "run_fail", "symptom": "empty_retrieval"},
+      "required_tools": ["query_agent_metrics", "query_agent_config", "search_ops_playbook"],
+      "ops_tags": ["empty_retrieval", "rag", "index", "knowledge_base", "hallucination"],
+      "consistency_rules": {
+        "error_keywords": ["empty", "retrieval", "0 chunks", "threshold"],
+        "log_keywords": ["empty_retrieval", "index", "kb_last_sync"],
+        "step_keywords": ["rebuild", "索引", "兜底", "prompt", "知识库", "sync"]
+      },
+      "consistency_clamp": [0.55, 0.62],
+      "expected_score": [65, 75],
+      "expected_grade": "needs_confirmation",
+      "retry_recommended": false,
+      "system_prompt": "你是 Agent Ops Copilot。分析 RAG 空检索飙升事件。因果链：索引 lag → 空检索 → 错误答复/客诉。禁止盲 Retry，retry_recommended 必须为 false。步骤应含 rebuild 索引或兜底 prompt。",
+      "tool_mocks": {
+        "query_agent_metrics": {
+          "empty_retrieval_rate_pct": 35,
+          "baseline_empty_retrieval_pct": 5,
+          "hallucination_complaints_delta": 12
+        },
+        "query_agent_config": {
+          "index_version": "v2.3",
+          "kb_last_sync": "2026-06-26",
+          "retrieval_threshold": 0.7
+        },
+        "search_ops_playbook": {
+          "ops_id": "OPS-203",
+          "title": "RAG 空检索处置",
+          "steps": ["Rebuild 知识库索引", "启用兜底 prompt 拒绝作答", "检查 FAQ 更新是否已同步"]
+        }
+      }
+    },
+    {
+      "id": "cost_over_budget",
+      "ops_id": "OPS-305",
+      "route": {"type": "cost_report", "symptom": "over_budget"},
+      "required_tools": ["query_agent_metrics", "query_agent_config", "search_ops_playbook"],
+      "ops_tags": ["over_budget", "cost", "token", "budget", "escalate"],
+      "consistency_rules": {
+        "error_keywords": ["budget", "cost", "token", "超预算"],
+        "log_keywords": ["tokens", "marketing-batch", "budget"],
+        "step_keywords": ["限流", "降级", "暂停", "batch", "升级", "止血"]
+      },
+      "consistency_clamp": [0.40, 0.46],
+      "expected_score": [50, 58],
+      "expected_grade": "escalate",
+      "retry_recommended": false,
+      "system_prompt": "你是 Agent Ops Copilot。分析 Agent 日成本超预算事件。因果链：模板/流量↑ → Token↑ → 超预算 → 需负责人止血。retry_recommended 必须为 false。步骤含 high risk 操作（暂停 batch/降级模型），需升级审批。",
+      "tool_mocks": {
+        "query_agent_metrics": {
+          "tokens_today": 1200000,
+          "tokens_vs_7d_avg_pct": 180,
+          "top_route": "marketing-batch"
+        },
+        "query_agent_config": {
+          "new_template": "v3-longform",
+          "template_released": "2026-06-26",
+          "max_tokens": 4096
+        },
+        "search_ops_playbook": {
+          "ops_id": "OPS-305",
+          "title": "成本超预算处置",
+          "steps": ["对 marketing-batch 路由限流", "降级至 gpt-4o-mini", "暂停 batch 任务", "升级负责人审批止血"]
+        }
+      }
+    }
+  ]
+}

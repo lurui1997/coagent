@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoAgent — Agent Ops Copilot</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>CoAgent</h1>
+      <span class="tagline">Agent 出错或烧钱时，几分钟内知道要不要动、怎么动、有多大把握</span>
+    </div>
+    {% if demo_mode %}
+    <span class="tagline">DEMO_MODE</span>
+    {% endif %}
+  </header>
+
+  <nav class="tabs">
+    <a href="/?tab=1" class="{% if tab == 1 %}active{% endif %}">Tab1 · Agent / Timeline</a>
+    <a href="/?tab=2" class="{% if tab == 2 %}active{% endif %}">Tab2 · 场景触发</a>
+    <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">Tab3 · Decision</a>
+    <a href="/?tab=4" class="{% if tab == 4 %}active{% endif %}">Tab4 · 飞轮</a>
+  </nav>
+
+  <main>
+    {% if tab == 1 %}
+    <div class="grid-2">
+      <div class="card">
+        <h3>Agent 列表</h3>
+        {% for agent in agents %}
+        <div class="agent-item">
+          <span>{{ agent.agent_id }}</span>
+          {% set sc = latest_scores.get(agent.agent_id) %}
+          {% if sc %}
+          <span class="score-badge score-{{ 'green' if sc.total >= 80 else ('amber' if sc.total >= 60 else 'red') }}">
+            {{ sc.total }} {{ sc.labels.grade_display.split()[0] if sc.labels else '' }}
+          </span>
+          {% else %}
+          <span class="score-badge" style="color: var(--muted)">—</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="card">
+        <h3>SSE Timeline</h3>
+        <div id="timeline" class="timeline">
+          <div class="empty">触发场景后，事件将在此实时滚动</div>
+        </div>
+      </div>
+    </div>
+
+    {% elif tab == 2 %}
+    <div class="scenario-grid">
+      <div class="scenario-card" onclick="triggerScenario('s1')">
+        <h4>S1 · 客服限流 🟢</h4>
+        <p>cs-bot · run_fail + rate_limit · 429 限流</p>
+        <div class="expected">预期 Score: 82–88 🟢 · 可 Retry</div>
+        <button class="btn">触发 S1</button>
+      </div>
+      <div class="scenario-card" onclick="triggerScenario('s2')">
+        <h4>S2 · RAG 空检索 🟡</h4>
+        <p>rag-bot · run_fail + empty_retrieval</p>
+        <div class="expected">预期 Score: 65–75 🟡 · 不建议 Retry</div>
+        <button class="btn btn-secondary">触发 S2</button>
+      </div>
+      <div class="scenario-card" onclick="triggerScenario('s3')">
+        <h4>S3 · 成本超预算 🔴</h4>
+        <p>content-bot · cost_report + over_budget</p>
+        <div class="expected">预期 Score: 50–58 🔴 · 升级 @</div>
+        <button class="btn btn-danger">触发 S3</button>
+      </div>
+    </div>
+    <div id="trigger-result" style="margin-top: 1rem;"></div>
+
+    {% elif tab == 3 %}
+    <div id="decision-panel" class="card decision-panel">
+      <div class="empty">触发场景后查看 Decision Score 详情，或选择历史 incident</div>
+    </div>
+    {% if incidents %}
+    <div class="card" style="margin-top: 1rem;">
+      <h3>历史 Incidents</h3>
+      {% for inc in incidents[:10] %}
+      <div class="agent-item" style="cursor:pointer" onclick="loadDecision('{{ inc.trace_id }}')">
+        <span>{{ inc.agent_id }} · {{ inc.scenario_id }}</span>
+        <span>{{ inc.status }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% elif tab == 4 %}
+    <div class="stats-grid">
+      <div class="card stat-box">
+        <div class="num" id="stat-up">{{ stats.thumbs_up }}</div>
+        <div class="label">👍 有用</div>
+      </div>
+      <div class="card stat-box">
+        <div class="num" id="stat-down">{{ stats.thumbs_down }}</div>
+        <div class="label">👎 无用</div>
+      </div>
+      <div class="card stat-box">
+        <div class="num" id="stat-total">{{ stats.total }}</div>
+        <div class="label">总反馈</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top: 1rem;">
+      <h3>提交反馈</h3>
+      <p style="color: var(--muted); font-size: 0.875rem; margin-bottom: 1rem;">
+        选择最近 incident 后提交 👍/👎，驱动 Ops 手册迭代
+      </p>
+      <select id="feedback-trace" style="width:100%; padding:0.5rem; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:6px;">
+        {% for inc in incidents[:10] %}
+        <option value="{{ inc.trace_id }}">{{ inc.agent_id }} · {{ inc.trace_id }}</option>
+        {% endfor %}
+      </select>
+      <div class="feedback-btns">
+        <button class="btn btn-success" onclick="submitFeedback('up')">👍 有用</button>
+        <button class="btn btn-danger" onclick="submitFeedback('down')">👎 无用</button>
+      </div>
+    </div>
+    {% endif %}
+  </main>
+
+  <script>
+    let currentTraceId = null;
+    let eventSource = null;
+
+    function gradeClass(grade) {
+      return grade || 'needs_confirmation';
+    }
+
+    function appendTimeline(event) {
+      const el = document.getElementById('timeline');
+      if (!el) return;
+      const empty = el.querySelector('.empty');
+      if (empty) empty.remove();
+      const div = document.createElement('div');
+      div.className = 'timeline-entry';
+      div.innerHTML = `<span class="type">${event.type}</span> <span class="ts">${event.ts || ''}</span><pre>${JSON.stringify(event.payload || {}, null, 2).slice(0, 300)}</pre>`;
+      el.appendChild(div);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function connectSSE(traceId) {
+      if (eventSource) eventSource.close();
+      currentTraceId = traceId;
+      eventSource = new EventSource(`/admin/incidents/${traceId}/stream`);
+      eventSource.addEventListener('incident', (e) => {
+        const data = JSON.parse(e.data);
+        appendTimeline(data);
+        if (['score_computed', 'llm_result', 'replay_completed'].includes(data.type)) {
+          loadDecision(traceId);
+        }
+      });
+    }
+
+    async function triggerScenario(id) {
+      const res = await fetch(`/admin/trigger/${id}`, { method: 'POST' });
+      const data = await res.json();
+      const el = document.getElementById('trigger-result');
+      if (el) {
+        el.innerHTML = `<div class="card">状态: ${data.status} · trace_id: <code>${data.trace_id}</code></div>`;
+      }
+      if (data.trace_id && data.status !== 'duplicate') {
+        connectSSE(data.trace_id);
+        window.location.href = '/?tab=1';
+        sessionStorage.setItem('pendingTrace', data.trace_id);
+      }
+    }
+
+    async function loadDecision(traceId) {
+      const res = await fetch(`/admin/incidents/${traceId}`);
+      const inc = await res.json();
+      const panel = document.getElementById('decision-panel');
+      if (!panel || !inc.score_json) return;
+
+      const sc = inc.score_json;
+      const llm = inc.llm_json || {};
+      const grade = sc.grade;
+      panel.className = `card decision-panel ${gradeClass(grade)}`;
+
+      let html = `<h3>Decision Score: ${sc.total} ${sc.labels?.grade_display || ''}</h3>`;
+      html += `<div class="factors">
+        <div class="factor"><div class="label">D 数据完备</div><div class="value">${(sc.factors.data_completeness * 100).toFixed(0)}%</div></div>
+        <div class="factor"><div class="label">P 手册匹配</div><div class="value">${(sc.factors.playbook_match * 100).toFixed(0)}%</div></div>
+        <div class="factor"><div class="label">C 推理一致</div><div class="value">${(sc.factors.reasoning_consistency * 100).toFixed(0)}%</div></div>
+      </div>`;
+
+      {% if demo_mode %}
+      if (sc.clamp_applied) {
+        html += `<div class="footnote">Demo · C 已校准（raw ${sc.factors.reasoning_consistency_raw} → ${sc.factors.reasoning_consistency}）</div>`;
+      }
+      {% endif %}
+
+      if (llm.impact) html += `<p style="margin:1rem 0">${llm.impact}</p>`;
+      if (llm.steps) {
+        html += '<ul class="steps-list">';
+        llm.steps.forEach(s => { html += `<li>[${s.risk}] ${s.action}</li>`; });
+        html += '</ul>';
+      }
+
+      if (grade === 'executable' && llm.retry_recommended) {
+        html += `<button class="btn btn-success" onclick="doRetry('cs-bot')">一键 Retry</button>`;
+      } else if (grade === 'needs_confirmation') {
+        html += `<div class="alert alert-warning">⚠️ 不建议 Retry — 请确认后执行</div>`;
+      } else if (grade === 'escalate') {
+        html += `<div class="alert alert-danger">🔴 升级 {{ escalate_user }} — 高风险步骤不可自动执行</div>`;
+        if (llm.comms_draft) html += `<p style="margin-top:0.5rem;font-size:0.875rem">${llm.comms_draft}</p>`;
+      }
+
+      html += `<div style="margin-top:1rem"><button class="btn btn-secondary" onclick="doReplay('${traceId}')">Replay 审计回放</button></div>`;
+      panel.innerHTML = html;
+    }
+
+    async function doRetry(agentId) {
+      const res = await fetch(`/demo/retry/${agentId}`, { method: 'POST' });
+      const data = await res.json();
+      alert(data.message);
+    }
+
+    async function doReplay(traceId) {
+      await fetch(`/admin/replay/${traceId}`, { method: 'POST' });
+      connectSSE(traceId);
+    }
+
+    async function submitFeedback(rating) {
+      const traceId = document.getElementById('feedback-trace')?.value;
+      if (!traceId) return;
+      await fetch(`/admin/incidents/${traceId}/feedback?rating=${rating}`, { method: 'POST' });
+      const res = await fetch('/admin/stats');
+      const stats = await res.json();
+      document.getElementById('stat-up').textContent = stats.thumbs_up;
+      document.getElementById('stat-down').textContent = stats.thumbs_down;
+      document.getElementById('stat-total').textContent = stats.total;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const pending = sessionStorage.getItem('pendingTrace');
+      if (pending) {
+        sessionStorage.removeItem('pendingTrace');
+        connectSSE(pending);
+        loadDecision(pending);
+      }
+    });
+  </script>
+</body>
+</html>

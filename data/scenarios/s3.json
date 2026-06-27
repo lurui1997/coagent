@@ -1,0 +1,13 @@
+{
+  "event_id": "evt-s3-demo",
+  "agent_id": "content-bot",
+  "agent_name": "内容生成 Agent",
+  "type": "cost_report",
+  "symptom": "over_budget",
+  "error": null,
+  "log_snippet": "[18:00:00] tokens_today=1.2M (+180% vs 7d avg); top_route=marketing-batch",
+  "cost_yuan_today": 28.5,
+  "budget_yuan_daily": 20,
+  "retry_webhook": null,
+  "ts": "2026-06-27T18:00:00+08:00"
+}

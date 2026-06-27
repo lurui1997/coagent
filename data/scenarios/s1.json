@@ -1,0 +1,13 @@
+{
+  "event_id": "evt-s1-demo",
+  "agent_id": "cs-bot",
+  "agent_name": "客服 Agent",
+  "type": "run_fail",
+  "symptom": "rate_limit",
+  "error": "OpenAI 429: Rate limit exceeded for gpt-4o-mini",
+  "log_snippet": "[14:02:11] retry=3/3 failed; model=gpt-4o-mini; concurrent=10",
+  "cost_yuan_today": 8.5,
+  "budget_yuan_daily": 20,
+  "retry_webhook": "http://localhost:8000/demo/retry/cs-bot",
+  "ts": "2026-06-27T14:02:00+08:00"
+}
