@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     feishu_app_secret: str = ""
     feishu_chat_id: str = ""
     feishu_escalate_user_id: str = ""
+    feishu_api_base: str = "https://open.feishu.cn/open-apis"
     demo_mode: bool = True
     mock_llm: bool = False
     database_path: str = "coagent.db"
