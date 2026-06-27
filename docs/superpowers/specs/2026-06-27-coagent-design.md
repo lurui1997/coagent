@@ -54,7 +54,7 @@ Mock Alert → Feishu Card → TriageAgent → RunbookAgent → Thread Replies (
 
 - One alert type: `payment-api` 5xx rate spike
 - Two agents in linear pipeline: TriageAgent → RunbookAgent
-- Feishu interactive card + 3 thread replies + closing card (4 messages total)
+- Feishu: 2 top-level cards (alert + closing) + 2 thread replies (Triage + Runbook) = 4 messages total
 - Mock tools: metrics, service metadata, SOP search
 - Fallback JSON when LLM fails
 - One-click demo script (`scripts/demo.sh`)
@@ -77,8 +77,10 @@ Mock Alert → Feishu Card → TriageAgent → RunbookAgent → Thread Replies (
 flowchart LR
     A[Mock Alert Webhook] --> B[Orchestrator]
     B --> C[TriageAgent]
-    C -->|tool: query_metrics mock| D[RunbookAgent]
-    D -->|tool: search_sop mock| E[Feishu Thread Reply]
+    C -->|tools: metrics + meta| B
+    B --> D[RunbookAgent]
+    D -->|tool: search_sop| B
+    B --> E[Feishu Bot]
     E --> F[Feishu Group Chat]
 ```
 
@@ -205,6 +207,11 @@ Orchestrator validates and normalizes; no LLM involved at this stage.
 - Must call `query_metrics` and `query_service_meta` before concluding
 - Set `escalate: true` when confidence < 0.7
 
+**`escalate` field behavior:**
+- Display-only flag in TriageAgent thread message (e.g., "⚠️ 建议升级")
+- Pipeline always continues to RunbookAgent regardless of `escalate` value
+- No branching logic in v1
+
 **Tools (Mock):**
 
 | Tool | Input | Mock Return |
@@ -258,6 +265,8 @@ CoAgent 已接手，正在 Triage...
 → 移交 RunbookAgent
 ```
 
+When `escalate: true`, prepend `⚠️ 建议升级 |` to the first line.
+
 ### 6.3 Message 3 — Thread: RunbookAgent
 
 ```
@@ -275,10 +284,13 @@ CoAgent 已接手，正在 Triage...
 
 ```
 ✅ CoAgent 处置建议已生成 | 耗时 8s
+trace_id: abc-123
 （Demo 模式：Mock 告警 demo-001）
 ```
 
-Thread replies attach to Message 1 via Feishu reply API.
+**Message placement:**
+- Messages 2–3: thread replies attached to Message 1 (alert card) via Feishu reply API
+- Message 4: new top-level card in group chat (not a thread reply)
 
 ---
 
@@ -321,7 +333,7 @@ sequenceDiagram
 | P0 | LLM returns invalid JSON | Retry once → read fallback JSON |
 | P0 | Feishu send fails | Retry 2x with exponential backoff → write `demo.log` |
 | P1 | Tool call exception | Use hardcoded mock data; do not interrupt pipeline |
-| P2 | Duplicate `alert_id` | Idempotent: ignore duplicates within 10 minutes |
+| P2 | Duplicate `alert_id` | Idempotent: return `200 OK` with `{ "status": "duplicate", "trace_id": "<original>" }`; no new Feishu messages |
 
 **Demo rule:** Never show empty thread. Fallback results are acceptable; mention in pitch as production safety net.
 
@@ -335,8 +347,16 @@ FEISHU_APP_SECRET=
 FEISHU_CHAT_ID=
 LLM_API_KEY=
 LLM_BASE_URL=
+LLM_MODEL=gpt-4o-mini
 DEMO_MODE=true
 ```
+
+**`DEMO_MODE` behavior when `true`:**
+- Append "（Demo 模式）" footer to closing card
+- On LLM failure, use fallback JSON immediately (no retry)
+- Does not skip LLM on happy path
+
+**Webhook security:** localhost-only for hackathon; no auth required. Do not expose publicly without adding signature verification.
 
 Use `.env` locally; never commit secrets.
 
