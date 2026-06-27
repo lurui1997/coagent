@@ -44,7 +44,7 @@
 | A4 | **解读** | 告警消息含：失败步骤、最近日志摘要、LLM 生成的 1–3 条修复建议 |
 | A5 | **重试** | 消息内一键链接触发用户配置的 retry webhook |
 
-**不承诺（v1 不做）：** 自动修、Multi-Agent 编排、企业 CMDB、Decision Score 三因子（那是 CoAgent 企业线）。
+**不承诺（v1 不做）：** 自动修、Multi-Agent 编排、企业 CMDB、把握度评分三因子（那是 CoAgent 企业线）。
 
 ### 3.2 与 CoAgent 的差异
 
@@ -53,7 +53,7 @@
 | 场景 | P1  infra 告警 | Agent/workflow 运行失败 |
 | Buyer | SRE 团队 | OPC 个体 |
 | 价格 | 企业议价 | ¥99/月 |
-| 核心 | Decision Score + runbook | 失败通知 + 修复建议 + 重试 |
+| 核心 | 把握度评分 + runbook | 失败通知 + 修复建议 + 重试 |
 | 数据 | Mock metrics/CMDB | 用户 webhook 日志 + 可选 LLM usage |
 
 ---

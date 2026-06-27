@@ -11,7 +11,7 @@
 | 文件 | 版本 | 说明 |
 |------|------|------|
 | [2026-06-27-coagent-design.md](./2026-06-27-coagent-design.md) | v1 | 飞书双 Agent SRE 值班室 |
-| [2026-06-27-coagent-design-v2.md](./2026-06-27-coagent-design-v2.md) | v2 | Admin + Decision Score + infra 场景 |
+| [2026-06-27-coagent-design-v2.md](./2026-06-27-coagent-design-v2.md) | v2 | Admin + 把握度评分 + infra 场景 |
 | [2026-06-27-opc-agent-ops-design.md](./2026-06-27-opc-agent-ops-design.md) | OPC 草案 | Agent Ops 叙事（已合并入 Final） |
 | [2026-06-27-coagent-design-v3.md](./2026-06-27-coagent-design-v3.md) | v3.1 | Final 的直接前身 |
 

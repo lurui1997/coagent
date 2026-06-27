@@ -18,7 +18,7 @@
 | Agent 模型 | 固定 Triage → Runbook 双 Agent | Scenario Router + 可配置 Playbook（按场景切换，非必须 Multi-Agent） |
 | LLM 使用 | 可 fallback 到静态 JSON | **推理层必须真实调用 LLM**；Mock 仅限外部系统数据 |
 | 交互主通道 | 飞书 thread | **Admin 管理页**；飞书 IM / 飞书文档为同步出口 |
-| 置信度 | LLM 自报 `confidence` | **Decision Score** 三因子可解释评分 |
+| 置信度 | LLM 自报 `confidence` | **把握度评分** 三因子可解释评分 |
 | Demo 场景 | 1 个 | **3 个主场景**，现场可切换 |
 | 统计 | 无 | Dashboard：Score、反馈率、MTTR 代理指标 |
 
@@ -42,7 +42,7 @@
 
 - 告警进入后，**Scenario Router** 按业务场景选择 Playbook  
 - **LLM 推理层**真实完成影响面判断、根因假设、处置步骤生成（非模板伪造）  
-- **Decision Score** 给出可执行的置信评估（数据完备度 + SOP 匹配度 + 推理一致性）  
+- **把握度评分** 给出可执行的置信评估（数据完备度 + SOP 匹配度 + 推理一致性）  
 - **Admin 管理页**作为主交互通道，展示完整决策链路与评分分解  
 - 同步至 **飞书 IM**（通知/升级）与 **飞书文档**（incident 时间线材料）  
 - 人工反馈写入事件库，**Dashboard 驱动持续迭代飞轮**
@@ -69,7 +69,7 @@
 
 | 维度 | 权重 | v2 如何拿分 |
 |------|------|-------------|
-| 场景创新性 | 30% | On-call 决策 copilot + Decision Score + 数据飞轮，非通用 chatbot |
+| 场景创新性 | 30% | On-call 决策 copilot + 把握度评分 + 数据飞轮，非通用 chatbot |
 | 产品完成度 | 25% | Admin 页完整闭环 + 3 场景可演示 + 通道同步 |
 | 技术深度 | 20% | Scenario Router + 真 LLM 推理 + 可解释评分 + 事件数据模型 |
 | 商业潜力 | 15% | SRE/平台团队 buyer；MTTR + 决策质量双 ROI |
@@ -82,7 +82,7 @@
 ### 2.1 范围内
 
 ```
-告警入口 → Scenario Router → Playbook Engine → LLM 推理 → Decision Score
+告警入口 → Scenario Router → Playbook Engine → LLM 推理 → 把握度评分
     → Admin 管理页（主）→ 同步飞书 IM / 飞书文档
     → 人工反馈 → Dashboard 飞轮
 ```
@@ -92,7 +92,7 @@
 - Admin 管理页：Incident 台、场景触发、Decision 面板、基础统计  
 - 3 个主场景 playbook + mock 外部数据  
 - LLM 真实推理（影响面、根因假设、处置步骤）  
-- Decision Score 三因子计算与分级动作  
+- 把握度评分三因子计算与分级动作  
 - 场景 1 飞书 IM 卡片同步  
 - Demo 兜底（通道层 fallback + 预录视频）  
 
@@ -132,7 +132,7 @@ flowchart TB
         SR[Scenario Router]
         PE[Playbook Engine]
         LLM[LLM 推理层]
-        DS[Decision Score]
+        DS[把握度评分]
         OR[Orchestrator]
     end
 
@@ -169,7 +169,7 @@ flowchart TB
 | **Scenario Router** | 根据 `symptom` / `service` 选择 playbook 与 tool 集 |
 | **Playbook Engine** | 加载场景配置：prompt 模板、应调 tools、SOP 标签、评分权重 |
 | **LLM 推理层** | 真实调用 LLM：影响面、根因假设、处置步骤、同步文案 |
-| **Decision Score** | 三因子评分 + 分级动作 |
+| **把握度评分** | 三因子评分 + 分级动作 |
 | **Admin 管理页** | 主交互：触发、timeline、Score 分解、反馈、统计 |
 | **飞书 IM** | 同步出口：告警卡片、Score 摘要、升级 @ |
 | **飞书文档** | 同步出口：incident 结构化时间线（P1） |
@@ -199,7 +199,7 @@ coagent/
 │   │   ├── redis_memory.yaml
 │   │   └── post_deploy.yaml
 │   ├── llm/                    # 推理层 + prompt
-│   ├── scoring/                # Decision Score
+│   ├── scoring/                # 把握度评分
 │   ├── tools/                  # Mock metrics/cmdb/sop
 │   ├── channels/
 │   │   ├── feishu_im.py
@@ -291,7 +291,7 @@ S3 场景额外携带 `"change_id": "deploy-8821"`。
 
 **禁止：** 用静态 JSON 替代上述字段内容（fallback 见 §8）。
 
-### 5.3 Decision Score 输出
+### 5.3 把握度评分 输出
 
 ```json
 {
@@ -341,12 +341,12 @@ CREATE TABLE feedback (
 
 ---
 
-## 6. Decision Score 执行度评估
+## 6. 把握度评分 执行度评估
 
 ### 6.1 公式
 
 ```
-Decision Score = round(100 × (
+把握度评分 = round(100 × (
     0.35 × data_completeness +
     0.35 × sop_match +
     0.30 × reasoning_consistency
@@ -491,7 +491,7 @@ Admin 页必须能**独立完成**以下操作，不依赖飞书：
 
 - 选择场景 / 触发告警  
 - 查看实时决策 timeline  
-- 查看 Decision Score 分解  
+- 查看 把握度评分分解  
 - 提交人工反馈  
 - 查看历史 incident 与统计  
 
@@ -520,7 +520,7 @@ Admin 页必须能**独立完成**以下操作，不依赖飞书：
 #### Tab 4 — 统计飞轮
 
 - 总 incident 数  
-- 平均 Decision Score  
+- 平均 把握度评分  
 - 人工反馈 👍/👎 率  
 - 平均处置耗时（`duration_ms` 代理 MTTR 决策段）  
 - 按场景分布（简单柱状）  
@@ -554,7 +554,7 @@ data: {"type":"<event_type>","trace_id":"...","ts":"ISO8601","payload":{...}}
 | `tool_called` | 每个 mock tool 完成 | `tool`, `status`, `summary` |
 | `llm_reasoning` | LLM 返回 reasoning_chain | `steps[]` 字符串数组 |
 | `llm_result` | LLM 完整 JSON 就绪 | `impact`, `hypothesis`, `steps` |
-| `score_computed` | Decision Score 完成 | `total`, `grade`, `factors` |
+| `score_computed` | 把握度评分 完成 | `total`, `grade`, `factors` |
 | `channel_sync` | 飞书/文档尝试后 | `channel`, `status`, `detail` |
 | `incident_completed` | 全流程结束 | `duration_ms`, `demo_mode` |
 | `incident_failed` | L0 推理失败 | `error`, `retryable: true` |
@@ -570,7 +570,7 @@ data: {"type":"<event_type>","trace_id":"...","ts":"ISO8601","payload":{...}}
 **消息结构（简化）：**
 
 1. **告警卡片** — severity、service、symptom、Score 预告  
-2. **处置卡片** — Top 3 steps + Decision Score + grade 标签  
+2. **处置卡片** — Top 3 steps + 把握度评分 + grade 标签  
 3. **升级 @** — 仅 `grade=escalate` 时  
 
 Admin 页为主；飞书消息从 incident 记录**渲染**，非独立数据源。
@@ -593,7 +593,7 @@ incident 完成后，写入结构化文档：
 ```mermaid
 flowchart LR
     A[告警处置] --> B[Incident 入库]
-    B --> C[Decision Score]
+    B --> C[把握度评分]
     C --> D[Admin 展示]
     D --> E[人工反馈 👍/👎]
     E --> F[Dashboard 统计]
@@ -619,7 +619,7 @@ flowchart LR
 |------|------|
 | 0:00 | 问题：查数据 + 决策慢；runbook 散落 |
 | 0:30 | Admin Tab2 触发 **S1** → Tab1 timeline 实时滚动 |
-| 1:15 | Tab3 Decision Score 分解 → 🟢 可执行（82+） |
+| 1:15 | Tab3 把握度评分分解 → 🟢 可执行（82+） |
 | 1:35 | Tab2 触发 **S2** → Tab3 展示 🟡 需确认（65–75） |
 | 2:00 | Tab2 触发 **S3** → Tab3 Score 🔴 建议升级（<60） |
 | 2:35 | Tab4 提交 👎 反馈 → 统计数字更新 |
@@ -646,7 +646,7 @@ flowchart LR
 |------|------|------|
 | 骨架 | 0–5h | FastAPI + SQLite + Admin 空壳 |
 | 核心推理 | 5–14h | Router + Playbook S1 + 真 LLM + tools |
-| Score | 14–18h | Decision Score 三因子 |
+| Score | 14–18h | 把握度评分三因子 |
 | Admin UI | 18–26h | Incident 台 + 触发 + Decision 面板 |
 | 场景 2/3 | 26–32h | 两个 playbook + mock 数据 |
 | 飞书 S1 | 32–36h | IM 卡片同步 |
@@ -692,7 +692,7 @@ DEMO_MODE=true
 | 页 | 标题 | 要点 |
 |----|------|------|
 | 1 | 问题 | 查数据慢 + 决策慢；runbook 低效不准 |
-| 2 | CoAgent | 决策 copilot；Decision Score；Admin + IM + 文档 |
+| 2 | CoAgent | 决策 copilot；把握度评分；Admin + IM + 文档 |
 | 3 | Live Demo | 3 场景切换 + Score 分级 + 飞轮 |
 | 4 | 技术 | Router + Playbook + 真 LLM + 可解释 Score |
 | 5 | 商业 | SRE buyer；MTTR + 决策质量；飞轮迭代 |
@@ -703,7 +703,7 @@ DEMO_MODE=true
 
 - [ ] Admin 页可触发 S1/S2/S3 并展示完整 timeline  
 - [ ] LLM 推理真实生成 impact / hypothesis / steps（非静态文件）  
-- [ ] Decision Score 三因子可展示；S1/S3 total 与 grade 符合 §6.5（或 clamp 生效）
+- [ ] 把握度评分三因子可展示；S1/S3 total 与 grade 符合 §6.5（或 clamp 生效）
 - [ ] S2 触发后 grade 为 needs_confirmation（65–75 区间或 clamp 生效）
 - [ ] `scripts/calibrate_scores.sh` 三场景预跑通过（见 §6.6）
 - [ ] S1 飞书 IM 同步成功  
