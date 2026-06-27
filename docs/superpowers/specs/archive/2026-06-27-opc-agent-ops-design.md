@@ -1,6 +1,6 @@
 # OPC Agent Ops 设计规格说明
 
-> **⚠️ 已合并入 [CoAgent v3 统一版](./2026-06-27-coagent-design-v3.md)。Hackathon 不再单独推进本线。**
+> **⚠️ 已归档。** 已合并为 Final：[coagent-design-spec.md](../coagent-design-spec.md)
 
 **日期：** 2026-06-27  
 **状态：** 已合并至 v3  

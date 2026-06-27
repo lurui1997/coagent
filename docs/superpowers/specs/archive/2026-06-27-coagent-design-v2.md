@@ -1,6 +1,6 @@
 # CoAgent 设计规格说明 v2
 
-> **⚠️ 已被 [v3 统一版](./2026-06-27-coagent-design-v3.md) 替代。v3 合并 Agent Ops 叙事 + 本版工程深度，Hackathon 仅按 v3 实施。**
+> **⚠️ 已归档。** 当前有效 Spec：[coagent-design-spec.md](../coagent-design-spec.md)
 
 **日期：** 2026-06-27  
 **状态：** 已被 v3 替代  
@@ -727,4 +727,4 @@ DEMO_MODE=true
 
 ## 18. v1 文档处置
 
-[v1 spec](./2026-06-27-coagent-design.md) 保留作历史参考，**一切实现以本文档 v2 为准**。
+[v1 spec](./2026-06-27-coagent-design.md) 保留作历史参考。**当前实现以 [coagent-design-spec.md](../coagent-design-spec.md) 为准。**

@@ -1,11 +1,11 @@
-# CoAgent 设计规格说明 v3.1
+# CoAgent 设计规格说明
 
 **日期：** 2026-06-27  
-**状态：** 已定稿  
-**版本：** v3.1 — **Hackathon 唯一实施基线**  
+**状态：** 最终定稿  
+**版本：** Final  
 **主题：** ToB 场景 AI Agent — **Agent Ops Copilot**
 
-**替代文档：** [v1](./2026-06-27-coagent-design.md) · [v2](./2026-06-27-coagent-design-v2.md) · [OPC 草案](./2026-06-27-opc-agent-ops-design.md)
+> **Hackathon 唯一实施基线。** 历史草案见 [archive/](./archive/README.md)。
 
 ---
 
@@ -17,12 +17,13 @@
 
 ## 0. 文档演进
 
-| 版本 | 核心变化 |
-|------|----------|
-| v1 | 飞书双 Agent SRE 值班室 |
-| v2 | Admin 主通道 + Decision Score + 三 infra 场景 |
-| OPC 草案 | Agent Ops 叙事 + Webhook + Retry + 订阅 |
-| **v3.1** | **Agent Ops 场景 + v2 工程深度 + 用户价值叙事** |
+| 阶段 | 核心变化 | 归档 |
+|------|----------|------|
+| v1 | 飞书双 Agent SRE 值班室 | [archive/2026-06-27-coagent-design.md](./archive/2026-06-27-coagent-design.md) |
+| v2 | Admin 主通道 + Decision Score + 三 infra 场景 | [archive/2026-06-27-coagent-design-v2.md](./archive/2026-06-27-coagent-design-v2.md) |
+| OPC 草案 | Agent Ops 叙事 + Webhook + Retry | [archive/2026-06-27-opc-agent-ops-design.md](./archive/2026-06-27-opc-agent-ops-design.md) |
+| v3.1 | Agent Ops 场景 + 工程深度 + 价值创新叙事 | [archive/2026-06-27-coagent-design-v3.md](./archive/2026-06-27-coagent-design-v3.md) |
+| **Final** | **本文档 — 合并定稿，作为唯一实施基线** | — |
 
 **Hackathon 只实施本文档，不再分线。**
 
@@ -161,14 +162,11 @@ idea.md 要求：**27h 只打磨一条路径，但 Demo 可用多场景展示「
 
 | 约束 | Solo · ~48h · SRE/云/IM 背景 |
 |------|------------------------------|
-
-| 维度 | 权重 | 拿分策略 |
-|------|------|----------|
-| 场景创新 | 30% | §1.5 因果一跳 + 可验证 Score；非告警换壳 |
-| 完成度 | 25% | Admin 闭环 + 3 场景 + Webhook + 飞书 |
-| 技术深度 | 20% | Playbook 因果链 + 三因子 Score + 审计 timeline |
-| 商业潜力 | 15% | 核心问题→价值清晰 + 少漏单/少烧钱 ROI |
-| Demo | 10% | S1→S2→S3 切换 + 👎 飞轮 |
+| 场景创新 | 30% — §1.5 因果一跳 + 可验证 Score |
+| 完成度 | 25% — Admin 闭环 + 3 场景 + Webhook + 飞书 |
+| 技术深度 | 20% — Playbook 因果链 + 三因子 Score + 审计 timeline |
+| 商业潜力 | 15% — 核心问题→价值清晰 + 少漏单/少烧钱 ROI |
+| Demo | 10% — S1→S2→S3 切换 + 👎 飞轮 |
 
 ---
 
@@ -556,8 +554,8 @@ DEMO_MODE=true
 
 ## 17. 文档索引
 
-| 文档 | 状态 |
+| 文档 | 说明 |
 |------|------|
+| **本文档** | Hackathon 唯一实施基线 |
 | [idea.md](../../../idea.md) | 方向收敛 / 切口定位参考 |
-| v1 / v2 / OPC 草案 | 历史 / 已合并 |
-| **v3.1（本文）** | **唯一实施基线** |
+| [archive/](./archive/README.md) | v1 / v2 / v3.1 / OPC 草案历史归档 |

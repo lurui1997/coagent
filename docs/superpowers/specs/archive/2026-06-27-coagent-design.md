@@ -1,6 +1,6 @@
 # CoAgent 设计规格说明（v1，已 superseded）
 
-> **⚠️ 本文档已被 [v2](./2026-06-27-coagent-design-v2.md) 替代，请勿按 v1 实现。**
+> **⚠️ 已归档。** 当前有效 Spec：[coagent-design-spec.md](../coagent-design-spec.md)
 
 **日期：** 2026-06-27  
 **状态：** 已被 v2 替代  
