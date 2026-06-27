@@ -15,7 +15,7 @@
       "expected_score": [82, 88],
       "expected_grade": "executable",
       "retry_recommended": true,
-      "system_prompt": "你是 Agent Ops Copilot。分析客服 Agent API 限流事件，给出因果链和处置步骤。必须覆盖 OPS-101：等待/降并发/换 key。retry_recommended 应为 true。",
+      "system_prompt": "你是 Agent Ops Copilot。分析客服 Agent API 限流事件，给出根因链和处置步骤。必须覆盖 OPS-101：等待/降并发/换 key。retry_recommended 应为 true。",
       "tool_mocks": {
         "query_agent_metrics": {
           "rate_limit_429_count_5min": 47,
@@ -50,7 +50,7 @@
       "expected_score": [65, 75],
       "expected_grade": "needs_confirmation",
       "retry_recommended": false,
-      "system_prompt": "你是 Agent Ops Copilot。分析 RAG 空检索飙升事件。因果链：索引 lag → 空检索 → 错误答复/客诉。禁止盲 Retry，retry_recommended 必须为 false。步骤应含 rebuild 索引或兜底 prompt。",
+      "system_prompt": "你是 Agent Ops Copilot。分析 RAG 空检索飙升事件。根因链：索引 lag → 空检索 → 错误答复/客诉。禁止盲 Retry，retry_recommended 必须为 false。步骤应含 rebuild 索引或兜底 prompt。",
       "tool_mocks": {
         "query_agent_metrics": {
           "empty_retrieval_rate_pct": 35,
@@ -84,7 +84,7 @@
       "expected_score": [50, 58],
       "expected_grade": "escalate",
       "retry_recommended": false,
-      "system_prompt": "你是 Agent Ops Copilot。分析 Agent 日成本超预算事件。因果链：模板/流量↑ → Token↑ → 超预算 → 需负责人止血。retry_recommended 必须为 false。步骤含 high risk 操作（暂停 batch/降级模型），需升级审批。",
+      "system_prompt": "你是 Agent Ops Copilot。分析 Agent 日成本超预算事件。根因链：模板/流量↑ → Token↑ → 超预算 → 需负责人止血。retry_recommended 必须为 false。步骤含 high risk 操作（暂停 batch/降级模型），需升级审批。",
       "tool_mocks": {
         "query_agent_metrics": {
           "tokens_today": 1200000,

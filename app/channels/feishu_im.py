@@ -73,7 +73,7 @@ def build_incident_card(event: AgentEvent, llm: LLMOutput, score: dict) -> dict:
     return {
         "config": {"wide_screen_mode": True},
         "header": {
-            "title": _plain_text(f"Agent 异常 | Score {total} {grade_display}"),
+            "title": _plain_text(f"Agent 异常 | 评分 {total} {grade_display}"),
             "template": _GRADE_HEADER_TEMPLATE.get(grade, "red"),
         },
         "elements": elements,

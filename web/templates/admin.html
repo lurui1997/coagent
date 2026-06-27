@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CoAgent — Agent Ops Copilot</title>
+  <title>CoAgent — Agent 运维助手</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,44 +17,44 @@
       <span class="brand-name">CoAgent</span>
     </a>
     <div class="header-meta">
-      <span class="badge-live" id="header-status">Pipeline ready</span>
+      <span class="badge-live" id="header-status">流水线就绪</span>
       {% if demo_mode %}
-      <span class="badge">Demo Mode</span>
+      <span class="badge">演示模式</span>
       {% endif %}
     </div>
   </header>
 
   <nav class="subnav">
-    <a href="/?tab=1" class="{% if tab == 1 %}active{% endif %}">Overview</a>
-    <a href="/?tab=2" class="{% if tab == 2 %}active{% endif %}">Scenarios</a>
-    <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">Decision Score</a>
-    <a href="/?tab=4" class="{% if tab == 4 %}active{% endif %}">Flywheel</a>
+    <a href="/?tab=1" class="{% if tab == 1 %}active{% endif %}">总览</a>
+    <a href="/?tab=2" class="{% if tab == 2 %}active{% endif %}">场景</a>
+    <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">把握度评分</a>
+    <a href="/?tab=4" class="{% if tab == 4 %}active{% endif %}">飞轮</a>
   </nav>
 
   <div class="page {% if tab == 1 %}tab-overview{% endif %}">
     {% if tab == 1 %}
     <section class="page-hero">
-      <h2>Power <em>autonomous</em> Agent operations.</h2>
-      <p>Webhook 事件 → Playbook → LLM 推理 → Decision Score — 几分钟内知道要不要动、怎么动、有多大把握。</p>
+      <h2>驱动<em>自主</em> Agent 运维</h2>
+      <p>事件回调 → 处置手册 → 大模型推理 → 把握度评分 — 几分钟内知道要不要动、怎么动、有多大把握。</p>
     </section>
 
     <div id="trace-banner" class="trace-banner" style="display:none">
-      <span>当前 incident: <code id="trace-banner-id"></code></span>
+      <span>当前故障: <code id="trace-banner-id"></code></span>
       <a id="trace-banner-link" href="#">查看完整决策链路 →</a>
     </div>
 
     <div class="pipeline-stack">
-      <div class="stack-layer"><span></span>Data · Metrics & Config</div>
-      <div class="stack-layer"><span></span>Router · Scenario Mapping</div>
-      <div class="stack-layer active"><span></span>Playbook Engine · OPS-101/203/305</div>
-      <div class="stack-layer"><span></span>LLM · Reasoning Chain</div>
-      <div class="stack-layer"><span></span>Decision Score · D / P / C</div>
+      <div class="stack-layer"><span></span>数据 · 指标与配置</div>
+      <div class="stack-layer"><span></span>路由 · 场景映射</div>
+      <div class="stack-layer active"><span></span>处置手册引擎 · OPS-101/203/305</div>
+      <div class="stack-layer"><span></span>大模型 · 推理链</div>
+      <div class="stack-layer"><span></span>把握度评分 · 数据 / 手册 / 推理</div>
     </div>
 
     <div class="grid-2">
       <div class="card">
         <div class="card-header">
-          <h3>Agents</h3>
+          <h3>Agent 列表</h3>
           <span class="card-count">{{ agents|length }}</span>
         </div>
         {% for agent in agents %}
@@ -73,13 +73,13 @@
       </div>
       <div class="card">
         <div class="card-header">
-          <h3>Audit Timeline</h3>
+          <h3>审计时间线</h3>
           <span class="card-count" id="timeline-count">—</span>
         </div>
         <div id="timeline" class="timeline">
           <div class="empty">
             <div class="empty-icon">◎</div>
-            在 Scenarios 页触发 S1/S2/S3，事件将在此实时滚动
+            在场景页触发 S1/S2/S3，事件将在此实时滚动
           </div>
         </div>
       </div>
@@ -87,30 +87,30 @@
 
     {% elif tab == 2 %}
     <section class="page-hero">
-      <h2>Run <em>demo scenarios</em></h2>
-      <p>三场景展示同一 Agent Ops 内核：敢动手 → 不敢盲动 → 必须升级。</p>
+      <h2>运行<em>演示场景</em></h2>
+      <p>三场景展示同一 Agent 运维内核：敢动手 → 不敢盲动 → 必须升级。</p>
     </section>
 
     <div class="scenario-grid">
       <div class="scenario-card s1" onclick="triggerScenario('s1')">
-        <div class="scenario-id">Scenario 01 · Executable</div>
+        <div class="scenario-id">场景 01 · 可执行</div>
         <h4>客服 Agent API 限流</h4>
-        <p>cs-bot · run_fail + rate_limit · OpenAI 429 连续失败</p>
-        <div class="expected">Score 82–88 🟢 · Retry 可恢复</div>
+        <p>cs-bot · 运行失败 + 限流 · OpenAI 429 连续失败</p>
+        <div class="expected">评分 82–88 🟢 · 可重试恢复</div>
         <button class="btn" type="button">触发 S1</button>
       </div>
       <div class="scenario-card s2" onclick="triggerScenario('s2')">
-        <div class="scenario-id">Scenario 02 · Confirm</div>
+        <div class="scenario-id">场景 02 · 需确认</div>
         <h4>RAG 空检索飙升</h4>
-        <p>rag-bot · run_fail + empty_retrieval · 索引 lag 致幻觉</p>
-        <div class="expected">Score 65–75 🟡 · 不建议 Retry</div>
+        <p>rag-bot · 运行失败 + 空检索 · 索引滞后致幻觉</p>
+        <div class="expected">评分 65–75 🟡 · 不建议重试</div>
         <button class="btn btn-warning" type="button">触发 S2</button>
       </div>
       <div class="scenario-card s3" onclick="triggerScenario('s3')">
-        <div class="scenario-id">Scenario 03 · Escalate</div>
+        <div class="scenario-id">场景 03 · 需升级</div>
         <h4>Agent 日成本超预算</h4>
-        <p>content-bot · cost_report + over_budget · Token 突增</p>
-        <div class="expected">Score 50–58 🔴 · 升级 @负责人</div>
+        <p>content-bot · 成本上报 + 超预算 · Token 突增</p>
+        <div class="expected">评分 50–58 🔴 · 升级 @负责人</div>
         <button class="btn btn-danger" type="button">触发 S3</button>
       </div>
     </div>
@@ -118,22 +118,22 @@
 
     {% elif tab == 3 %}
     <section class="page-hero">
-      <h2>Verify with <em>Decision Score</em></h2>
-      <p>三因子可验证推理：数据完备 (D) · 手册匹配 (P) · 推理一致 (C) — 非 LLM 自报 confidence。</p>
+      <h2>用<em>把握度评分</em>验证</h2>
+      <p>三因子可验证推理：数据完备 · 手册匹配 · 推理一致 — 非大模型自报置信度。</p>
     </section>
 
     <div id="incident-meta" class="card incident-meta" style="display:none">
-      <div class="meta-item"><span>trace_id · </span><strong id="meta-trace"></strong></div>
-      <div class="meta-item"><span>agent · </span><strong id="meta-agent"></strong></div>
-      <div class="meta-item"><span>scenario · </span><strong id="meta-scenario"></strong></div>
-      <div class="meta-item highlight"><span>status · </span><strong id="meta-status"></strong></div>
+      <div class="meta-item"><span>追踪号 · </span><strong id="meta-trace"></strong></div>
+      <div class="meta-item"><span>Agent · </span><strong id="meta-agent"></strong></div>
+      <div class="meta-item"><span>场景 · </span><strong id="meta-scenario"></strong></div>
+      <div class="meta-item highlight"><span>状态 · </span><strong id="meta-status"></strong></div>
     </div>
 
     <div id="execution-chain" class="card execution-chain" style="display:none">
-      <div class="card-header"><h3>Decision Execution Chain</h3></div>
+      <div class="card-header"><h3>处置执行链</h3></div>
       <div id="pipeline-flow" class="pipeline-flow"></div>
       <div id="causal-chain" class="causal-chain" style="display:none">
-        <h4>因果一跳 · Reasoning Chain</h4>
+        <h4>根因推理 · 推理链</h4>
         <div id="causal-steps" class="causal-steps"></div>
       </div>
     </div>
@@ -141,7 +141,7 @@
     <div class="incident-split">
       <div class="card">
         <div class="card-header">
-          <h3>Audit Timeline</h3>
+          <h3>审计时间线</h3>
           <span class="card-count" id="timeline-count">—</span>
         </div>
         <div id="timeline" class="timeline">
@@ -154,7 +154,7 @@
       <div id="decision-panel" class="card decision-panel">
         <div class="empty">
           <div class="empty-icon">◈</div>
-          触发场景后 Decision 详情将自动展示，或从下方历史 incident 选择
+          触发场景后把握度详情将自动展示，或从下方历史故障中选择
         </div>
       </div>
     </div>
@@ -162,7 +162,7 @@
     {% if incidents %}
     <div class="card" style="margin-top: 1.25rem;">
       <div class="card-header">
-        <h3>Recent Incidents</h3>
+        <h3>最近故障</h3>
         <span class="card-count">{{ incidents|length }}</span>
       </div>
       {% for inc in incidents[:10] %}
@@ -176,8 +176,8 @@
 
     {% elif tab == 4 %}
     <section class="page-hero">
-      <h2>Ops <em>flywheel</em></h2>
-      <p>👍/👎 反馈驱动 Ops 手册与 prompt 迭代 — 处置资产沉淀在团队侧。</p>
+      <h2>运维<em>飞轮</em></h2>
+      <p>👍/👎 反馈驱动运维手册与提示词迭代 — 处置经验沉淀在团队侧。</p>
     </section>
 
     <div class="stats-grid">
@@ -195,9 +195,9 @@
       </div>
     </div>
     <div class="card" style="margin-top: 1.25rem;">
-      <div class="card-header"><h3>Submit Feedback</h3></div>
+      <div class="card-header"><h3>提交反馈</h3></div>
       <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
-        选择最近 incident 提交反馈，驱动 Ops 手册迭代
+        选择最近故障提交反馈，驱动运维手册迭代
       </p>
       <select id="feedback-trace" class="select-field">
         {% for inc in incidents[:10] %}
@@ -217,24 +217,24 @@
     let eventSource = null;
 
     const EVENT_LABELS = {
-      incident_started: 'Event Ingest',
-      tool_called: 'Tool Query',
-      llm_reasoning: 'LLM Reasoning',
-      llm_result: 'LLM Output',
-      score_computed: 'Decision Score',
-      channel_sync: 'Channel Sync',
-      incident_completed: 'Completed',
-      incident_failed: 'Failed',
-      replay_started: 'Replay',
-      replay_completed: 'Replay Done',
+      incident_started: '事件接入',
+      tool_called: '工具查询',
+      llm_reasoning: '大模型推理',
+      llm_result: '大模型输出',
+      score_computed: '把握度评分',
+      channel_sync: '通道同步',
+      incident_completed: '已完成',
+      incident_failed: '已失败',
+      replay_started: '回放开始',
+      replay_completed: '回放完成',
     };
 
     const PIPELINE_STEPS = [
-      { key: 'incident_started', label: 'Event' },
-      { key: 'tool_called', label: 'Tools', multi: true },
-      { key: 'llm_reasoning', label: 'LLM' },
-      { key: 'score_computed', label: 'Score' },
-      { key: 'incident_completed', label: 'Done' },
+      { key: 'incident_started', label: '事件' },
+      { key: 'tool_called', label: '工具', multi: true },
+      { key: 'llm_reasoning', label: '大模型' },
+      { key: 'score_computed', label: '评分' },
+      { key: 'incident_completed', label: '完成' },
     ];
 
     function gradeClass(grade) {
@@ -255,8 +255,8 @@
       const payload = event.payload || {};
       let summary = '';
       if (event.type === 'tool_called') summary = payload.tool || '';
-      else if (event.type === 'score_computed') summary = `total=${payload.total} ${payload.grade || ''}`;
-      else if (event.type === 'llm_reasoning') summary = (payload.reasoning_chain || []).length + ' hops';
+      else if (event.type === 'score_computed') summary = `总分=${payload.total} ${payload.grade || ''}`;
+      else if (event.type === 'llm_reasoning') summary = (payload.reasoning_chain || []).length + ' 步';
       else if (event.type === 'incident_started') summary = payload.agent_id || '';
 
       const div = document.createElement('div');
@@ -272,14 +272,14 @@
       const el = document.getElementById('timeline-count');
       if (!el) return;
       const n = document.querySelectorAll('#timeline .timeline-entry').length;
-      el.textContent = n > 0 ? `${n} events` : '—';
+      el.textContent = n > 0 ? `${n} 条事件` : '—';
     }
 
     function renderTimelineFromIncident(timeline) {
       clearTimeline();
       if (!timeline || timeline.length === 0) {
         const el = document.getElementById('timeline');
-        if (el) el.innerHTML = '<div class="empty"><div class="empty-icon">◎</div>暂无 timeline 数据</div>';
+        if (el) el.innerHTML = '<div class="empty"><div class="empty-icon">◎</div>暂无时间线数据</div>';
         return;
       }
       timeline.forEach(e => appendTimeline({ type: e.type, ts: e.ts, payload: e.payload || {} }));
@@ -319,7 +319,7 @@
       if (causalEl && stepsEl && chain.length) {
         causalEl.style.display = 'block';
         stepsEl.innerHTML = chain.map((text, i) =>
-          `<div class="causal-step"><strong>Hop ${i + 1}</strong>${text}</div>`
+          `<div class="causal-step"><strong>第 ${i + 1} 步</strong>${text}</div>`
         ).join('');
       } else if (causalEl) {
         causalEl.style.display = 'none';
@@ -340,7 +340,7 @@
       const panel = document.getElementById('decision-panel');
       if (!panel || !inc.score_json) {
         if (panel && inc.status === 'running') {
-          panel.innerHTML = '<div class="empty"><div class="empty-icon">◌</div>Pipeline 运行中…</div>';
+          panel.innerHTML = '<div class="empty"><div class="empty-icon">◌</div>流水线运行中…</div>';
         }
         return;
       }
@@ -351,19 +351,19 @@
       panel.className = `card decision-panel ${gradeClass(grade)}`;
 
       let html = `<div class="decision-score-header">
-        <h3>Score ${sc.total}</h3>
+        <h3>评分 ${sc.total}</h3>
         <span class="grade-pill ${gradeClass(grade)}">${sc.labels?.grade_display || grade}</span>
       </div>`;
 
       html += `<div class="factors">
-        <div class="factor"><div class="label">D · Data</div><div class="value">${(sc.factors.data_completeness * 100).toFixed(0)}%</div></div>
-        <div class="factor"><div class="label">P · Playbook</div><div class="value">${(sc.factors.playbook_match * 100).toFixed(0)}%</div></div>
-        <div class="factor"><div class="label">C · Consistency</div><div class="value">${(sc.factors.reasoning_consistency * 100).toFixed(0)}%</div></div>
+        <div class="factor"><div class="label">数据 · 完备度</div><div class="value">${(sc.factors.data_completeness * 100).toFixed(0)}%</div></div>
+        <div class="factor"><div class="label">手册 · 匹配度</div><div class="value">${(sc.factors.playbook_match * 100).toFixed(0)}%</div></div>
+        <div class="factor"><div class="label">推理 · 一致性</div><div class="value">${(sc.factors.reasoning_consistency * 100).toFixed(0)}%</div></div>
       </div>`;
 
       {% if demo_mode %}
       if (sc.clamp_applied) {
-        html += `<div class="footnote">Demo · C calibrated (raw ${sc.factors.reasoning_consistency_raw} → ${sc.factors.reasoning_consistency})</div>`;
+        html += `<div class="footnote">演示模式 · 推理因子已校正 (原始 ${sc.factors.reasoning_consistency_raw} → ${sc.factors.reasoning_consistency})</div>`;
       }
       {% endif %}
 
@@ -378,13 +378,13 @@
 
       html += '<div class="action-row">';
       if (grade === 'executable' && llm.retry_recommended) {
-        html += `<button class="btn btn-success" type="button" onclick="doRetry('cs-bot')">一键 Retry</button>`;
+        html += `<button class="btn btn-success" type="button" onclick="doRetry('cs-bot')">一键重试</button>`;
       } else if (grade === 'needs_confirmation') {
-        html += `<div class="alert alert-warning" style="flex:1;margin:0">不建议 Retry — 请确认后执行</div>`;
+        html += `<div class="alert alert-warning" style="flex:1;margin:0">不建议重试 — 请确认后执行</div>`;
       } else if (grade === 'escalate') {
         html += `<div class="alert alert-danger" style="flex:1;margin:0">升级 {{ escalate_user }} — 高风险步骤不可自动执行</div>`;
       }
-      html += `<button class="btn btn-secondary" type="button" onclick="doReplay('${inc.trace_id}')">Replay 审计回放</button>`;
+      html += `<button class="btn btn-secondary" type="button" onclick="doReplay('${inc.trace_id}')">回放审计</button>`;
       html += '</div>';
 
       if (grade === 'escalate' && llm.comms_draft) {
@@ -415,7 +415,7 @@
       const inc = await res.json();
 
       const statusEl = document.getElementById('header-status');
-      if (statusEl) statusEl.textContent = `Incident ${inc.status}`;
+      if (statusEl) statusEl.textContent = `故障 ${inc.status}`;
 
       renderIncidentMeta(inc);
       renderExecutionChain(inc);
@@ -438,8 +438,8 @@
       const data = await res.json();
       const el = document.getElementById('trigger-result');
       if (el) {
-        const note = data.status === 'duplicate' ? '（幂等命中，展示已有 incident）' : '';
-        el.innerHTML = `<div class="result-banner">Status: <strong>${data.status}</strong>${note} · 跳转 Decision 页…</div>`;
+        const note = data.status === 'duplicate' ? '（幂等命中，展示已有故障）' : '';
+        el.innerHTML = `<div class="result-banner">状态: <strong>${data.status}</strong>${note} · 跳转把握度页…</div>`;
       }
       if (data.trace_id) {
         setTimeout(() => { window.location.href = `/?tab=3&trace=${data.trace_id}`; }, 400);
