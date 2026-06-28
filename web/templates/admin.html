@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="coagent-static-v" content="{{ static_v }}">
-  <title>CoAgent — Agent Ops 运维控制台</title>
+  <title>CoAgent — 运维控制台</title>
   <link rel="stylesheet" href="{{ static_asset('style.css') }}">
   <script src="{{ static_asset('vendor/htmx.min.js') }}" defer></script>
 </head>
@@ -28,7 +28,6 @@
       <div class="pal-hero-media" aria-hidden="true"></div>
       <div class="pal-hero-scrim" aria-hidden="true"></div>
       <div class="pal-hero-content">
-        <p class="pal-hero-eyebrow">Agent Ops</p>
         <h1 class="pal-hero-title">CoAgent 与企业生产 Agent 协作</h1>
         <p class="pal-hero-subtitle">提供异常发现、根因诊断、风险决策、受控处置和审计复盘能力</p>
         <a href="/?tab=2" class="pal-hero-cta">进入处置工作台</a>
@@ -155,7 +154,6 @@
       <div class="pal-hero-media" aria-hidden="true"></div>
       <div class="pal-hero-scrim pal-banner-scrim" aria-hidden="true"></div>
       <div class="pal-page-banner-inner">
-        <p class="pal-hero-eyebrow">Agent Ops</p>
         <h1 class="pal-page-title">处置工作台</h1>
         <p class="pal-page-lead">把握度评分驱动的 Agent 运维处置中心 — 根因推理链、分级决策、What-if 推演与知识图谱关联分析。</p>
       </div>
@@ -280,7 +278,6 @@
       <div class="pal-hero-media" aria-hidden="true"></div>
       <div class="pal-hero-scrim pal-banner-scrim" aria-hidden="true"></div>
       <div class="pal-page-banner-inner">
-        <p class="pal-hero-eyebrow">Agent Ops</p>
         <h1 class="pal-page-title">审计复盘</h1>
         <p class="pal-page-lead">全链路审计留痕、运营反馈闭环与合规导出 — 追溯每一次处置决策，持续优化运维手册。</p>
       </div>
@@ -332,42 +329,6 @@
         <div class="label">总计</div>
       </div>
     </div>
-    {% if audit_detail %}
-    <div class="card audit-detail-panel" id="audit-detail-panel">
-      <div class="card-header">
-        <h3>故障详情 · 审计归档</h3>
-        <a class="btn btn-outline" style="font-size:var(--text-xs);padding:0.35rem 0.75rem;" href="/?tab=3">关闭</a>
-      </div>
-      <div class="audit-detail-grid">
-        <div><span class="audit-detail-label">追踪号</span><code>{{ audit_detail.trace_id }}</code></div>
-        <div><span class="audit-detail-label">Agent</span><strong>{{ audit_detail.agent_id }}</strong></div>
-        <div><span class="audit-detail-label">场景</span><strong>{{ audit_detail.scenario_id|upper }}</strong></div>
-        <div><span class="audit-detail-label">状态</span><span class="status-dot {{ audit_detail.status }}">{{ audit_detail.status }}</span></div>
-        {% set sc = audit_detail.score_json or {} %}
-        <div><span class="audit-detail-label">把握度</span><strong>{{ sc.total or '—' }} {{ sc.grade or '' }}</strong></div>
-        <div><span class="audit-detail-label">耗时</span><strong>{{ audit_detail.duration_ms or '—' }} ms</strong></div>
-      </div>
-      <div class="audit-detail-actions">
-        <a class="btn btn-secondary" href="/?tab=2&amp;trace={{ audit_detail.trace_id }}">查看决策链路</a>
-        <a class="btn btn-outline" href="/admin/audit/export" target="_blank">导出 JSON</a>
-      </div>
-      <div class="audit-detail-timeline">
-        <h4>审计动作链</h4>
-        {% for act in audit_detail.audit_actions %}
-        <div class="audit-detail-step">
-          <span class="audit-step-time">{{ act.created_at | format_cn_time }}</span>
-          <span class="audit-step-type">{{ {'feedback': '飞轮反馈', 'scenario_trigger': '场景触发', 'incident_created': '故障创建', 'incident_completed': '流水线完成', 'duplicate_event': '幂等命中', 'correction_applied': '纠偏应用', 'replay': '审计回放'}.get(act.action_type, act.action_type) }}</span>
-          <span class="audit-step-op">{{ act.operator }}</span>
-          {% if act.payload_json %}
-          <pre class="audit-step-payload">{{ act.payload_json | tojson(indent=2) }}</pre>
-          {% endif %}
-        </div>
-        {% else %}
-        <p class="empty" style="padding:1rem;">暂无审计动作</p>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
     <div class="viz-panel card" style="margin-bottom:1rem;">
       <div class="card-header"><h3>故障场景分布</h3><span class="card-count">{{ incidents|length }} 条</span></div>
       <div class="viz-grouped-bars">
@@ -398,27 +359,69 @@
         <a class="btn btn-outline" href="/admin/audit/export?format=csv" target="_blank">CSV 导出</a>
       </div>
     </div>
-    <div class="card">
-      <div class="card-header audit-log-header">
+    {% if audit_detail %}
+    <details class="card collapsible-card audit-detail-panel" id="audit-detail-panel" open>
+      <summary class="card-header collapsible-summary">
+        <span class="collapse-chevron" aria-hidden="true"></span>
+        <h3>故障详情 · 审计归档</h3>
+        <a class="btn btn-outline btn-sm" href="/?tab=3" onclick="event.stopPropagation()">关闭</a>
+      </summary>
+      <div class="collapsible-body">
+      <div class="audit-detail-grid">
+        <div><span class="audit-detail-label">追踪号</span><code>{{ audit_detail.trace_id }}</code></div>
+        <div><span class="audit-detail-label">Agent</span><strong>{{ audit_detail.agent_id }}</strong></div>
+        <div><span class="audit-detail-label">场景</span><strong>{{ audit_detail.scenario_id|upper }}</strong></div>
+        <div><span class="audit-detail-label">状态</span><span class="status-dot {{ audit_detail.status }}">{{ audit_detail.status }}</span></div>
+        {% set sc = audit_detail.score_json or {} %}
+        <div><span class="audit-detail-label">把握度</span><strong>{{ sc.total or '—' }} {{ sc.grade or '' }}</strong></div>
+        <div><span class="audit-detail-label">耗时</span><strong>{{ audit_detail.duration_ms or '—' }} ms</strong></div>
+      </div>
+      <div class="audit-detail-actions">
+        <a class="btn btn-secondary" href="/?tab=2&amp;trace={{ audit_detail.trace_id }}">查看决策链路</a>
+        <a class="btn btn-outline" href="/admin/audit/export" target="_blank">导出 JSON</a>
+      </div>
+      <div class="audit-detail-timeline">
+        <h4>审计动作链</h4>
+        {% for act in audit_detail.audit_actions %}
+        <div class="audit-detail-step">
+          <span class="audit-step-time">{{ act.created_at | format_cn_time }}</span>
+          <span class="audit-step-type">{{ {'feedback': '飞轮反馈', 'scenario_trigger': '场景触发', 'incident_created': '故障创建', 'incident_completed': '流水线完成', 'duplicate_event': '幂等命中', 'correction_applied': '纠偏应用', 'replay': '审计回放'}.get(act.action_type, act.action_type) }}</span>
+          <span class="audit-step-op">{{ act.operator }}</span>
+          {% if act.payload_json %}
+          <pre class="audit-step-payload">{{ act.payload_json | tojson(indent=2) }}</pre>
+          {% endif %}
+        </div>
+        {% else %}
+        <p class="empty" style="padding:1rem;">暂无审计动作</p>
+        {% endfor %}
+      </div>
+      </div>
+    </details>
+    {% endif %}
+    <details class="card collapsible-card audit-log-collapsible" id="audit-log-section" open>
+      <summary class="card-header collapsible-summary audit-log-header">
+        <span class="collapse-chevron" aria-hidden="true"></span>
         <h3>审计动作日志</h3>
         <span class="card-count" id="audit-log-count">—</span>
+      </summary>
+      <div class="collapsible-body">
         <div class="audit-log-toolbar">
           <span id="audit-feedback-hint" class="audit-feedback-hint">选择日志条目查看详情后可提交反馈</span>
           <button class="btn btn-success btn-sm" type="button" id="btn-feedback-up" disabled onclick="submitAuditFeedback('up')">👍 有用</button>
           <button class="btn btn-outline btn-sm" type="button" id="btn-feedback-down" disabled onclick="submitAuditFeedback('down')">👎 无用</button>
           <button class="btn btn-outline btn-sm" type="button" onclick="loadAuditLog()">刷新</button>
         </div>
-      </div>
       <div id="audit-log-list">
         <div class="empty" style="padding:2rem;">
           <div class="empty-icon">◎</div>
           加载中…
         </div>
       </div>
-      <p style="padding:0 1rem 1rem;font-size:0.75rem;color:var(--text-muted);margin:0;">
+      <p class="audit-log-footnote">
         说明：10 分钟内重复触发同一演练场景将幂等命中（<code>duplicate_event</code>），不新建故障记录，审计日志仍完整保留。
       </p>
-    </div>
+      </div>
+    </details>
     </div>
 
     {% endif %}
