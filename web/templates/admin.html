@@ -29,14 +29,25 @@
     <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">把握度评分</a>
     <a href="/?tab=4" class="{% if tab == 4 %}active{% endif %}">飞轮</a>
     <a href="/?tab=5" class="{% if tab == 5 %}active{% endif %}">企业审计</a>
-    <a href="/?tab=6" class="{% if tab == 6 %}active{% endif %}">Ultra</a>
   </nav>
 
   <div class="page {% if tab == 1 %}tab-overview{% endif %}">
     {% if tab == 1 %}
-    <section class="page-hero">
-      <h2>驱动<em>自主</em> Agent 运维</h2>
-      <p>事件回调 → 处置手册 → 大模型推理 → 把握度评分 — 几分钟内知道要不要动、怎么动、有多大把握。</p>
+    <section class="pitch-hero">
+      <div class="pitch-hero-copy">
+        <span class="pitch-badge">Hackathon Demo · Agent Ops Copilot</span>
+        <h2>Agent 出错时，<em>90 秒内</em>知道要不要动、怎么动、有多大把握</h2>
+        <p class="pitch-lead">PagerDuty 管基础设施，Chatbot 管问答——中间缺一层「Agent 运行态运维」。CoAgent 用可验证把握度评分，把告警变成敢执行的处置决策。</p>
+        <div class="pitch-cta">
+          <a href="/?tab=2" class="btn btn-lg">开始 5 分钟演示 →</a>
+          <span class="pitch-meta">S1 限流 · S2 空检索 · S3 超预算</span>
+        </div>
+      </div>
+      <div class="pitch-metrics">
+        <div class="pitch-metric"><span class="pitch-metric-val">90s</span><span class="pitch-metric-label">拿到结论</span></div>
+        <div class="pitch-metric"><span class="pitch-metric-val">3</span><span class="pitch-metric-label">演示场景</span></div>
+        <div class="pitch-metric"><span class="pitch-metric-val">🟢🟡🔴</span><span class="pitch-metric-label">处置边界</span></div>
+      </div>
     </section>
 
     <div id="trace-banner" class="trace-banner" style="display:none">
@@ -44,117 +55,170 @@
       <a id="trace-banner-link" href="#">查看完整决策链路 →</a>
     </div>
 
-    <div class="pipeline-stack">
-      <div class="stack-layer"><span></span>数据 · 指标与配置</div>
-      <div class="stack-layer"><span></span>路由 · 场景映射</div>
-      <div class="stack-layer active"><span></span>处置手册引擎 · OPS-101/203/305</div>
-      <div class="stack-layer"><span></span>大模型 · 推理链</div>
-      <div class="stack-layer"><span></span>把握度评分 · 数据 / 手册 / 推理</div>
-    </div>
+    <section class="pitch-narrative" aria-label="问题、方案与效果">
+      <article class="pitch-pillar pitch-problem">
+        <span class="pitch-pillar-tag">01 · 要解决的问题</span>
+        <h3>Agent 进了业务，运维还没跟上</h3>
+        <ul class="pain-list">
+          <li><strong>静默失败</strong><span>429 / 空检索挂了，客户先发现</span></li>
+          <li><strong>不会处置</strong><span>不知先重试、改 prompt 还是换模型</span></li>
+          <li><strong>成本失控</strong><span>Token 单日超预算无分级响应</span></li>
+          <li><strong>不敢执行</strong><span>不知道 AI 建议靠不靠谱</span></li>
+          <li><strong>无法复盘</strong><span>说不清当时建议了什么、谁批准的</span></li>
+        </ul>
+      </article>
+      <article class="pitch-pillar pitch-solution">
+        <span class="pitch-pillar-tag">02 · 我们的方案</span>
+        <h3>可验证处置闭环</h3>
+        <div class="solution-flow">
+          <div class="solution-step"><span class="solution-num">1</span><div><strong>听见异常</strong><span>Webhook + 管理台实时告警</span></div></div>
+          <div class="solution-arrow">→</div>
+          <div class="solution-step"><span class="solution-num">2</span><div><strong>根因推理</strong><span>处置手册约束 · 非日志关联</span></div></div>
+          <div class="solution-arrow">→</div>
+          <div class="solution-step"><span class="solution-num">3</span><div><strong>把握度评分</strong><span>数据·手册·推理 三因子可追问</span></div></div>
+          <div class="solution-arrow">→</div>
+          <div class="solution-step"><span class="solution-num">4</span><div><strong>人工把关</strong><span>🟢敢动 / 🟡确认 / 🔴升级</span></div></div>
+        </div>
+        <p class="pitch-formula"><code>总分 = round(100 × (0.35×数据 + 0.35×手册 + 0.30×推理))</code></p>
+      </article>
+      <article class="pitch-pillar pitch-impact">
+        <span class="pitch-pillar-tag">03 · 实现的效果</span>
+        <h3>同一内核，三种处置边界</h3>
+        <div class="impact-grid">
+          <div class="impact-item green">
+            <span class="impact-score">87</span>
+            <strong>S1 限流</strong>
+            <span>47 次/5min · 失败率 38% → 分钟级发现，敢重试</span>
+          </div>
+          <div class="impact-item amber">
+            <span class="impact-score">72</span>
+            <strong>S2 空检索</strong>
+            <span>空检索 35% → 禁止盲重试，须改知识库</span>
+          </div>
+          <div class="impact-item red">
+            <span class="impact-score">58</span>
+            <strong>S3 超预算</strong>
+            <span>¥28.5 / ¥20 → 强制升级 @负责人</span>
+          </div>
+        </div>
+        <p class="impact-footnote">评分定义「敢不敢动」——同样 run_fail，S1 能重试，S2 不能</p>
+      </article>
+    </section>
 
-    <div class="viz-panel card">
+    <section class="demo-script card">
       <div class="card-header">
-        <h3>Agent 把握度概览</h3>
-        <span class="card-count">三因子加权</span>
+        <h3>5 分钟答辩节奏</h3>
+        <a href="/?tab=2" class="btn btn-secondary" style="font-size:var(--text-xs);padding:0.35rem 0.75rem;">去场景页演示</a>
       </div>
-      <div class="viz-bar-chart">
-        {% for agent in agents %}
-        {% set sc = latest_scores.get(agent.agent_id) %}
-        {% set pct = sc.total if sc else 0 %}
-        {% set tone = 'green' if pct >= 80 else ('amber' if pct >= 60 else ('red' if pct else 'muted')) %}
-        <div class="viz-bar-row">
-          <span class="viz-bar-label">{{ agent.agent_id }}</span>
-          <div class="viz-bar-track"><div class="viz-bar-fill {{ tone }}" style="width: {{ pct }}%"></div></div>
-          <span class="viz-bar-value">{{ sc.total if sc else '—' }}</span>
-        </div>
-        {% endfor %}
-      </div>
-      <div class="viz-sparkline" aria-hidden="true">
-        <svg viewBox="0 0 320 48" preserveAspectRatio="none">
-          <polyline points="0,38 40,35 80,32 120,28 160,22 200,18 240,14 280,12 320,8" fill="none" stroke="var(--brand-400)" stroke-width="2" opacity="0.7"/>
-          <polyline points="0,38 40,35 80,32 120,28 160,22 200,18 240,14 280,12 320,8 320,48 0,48" fill="var(--brand)" opacity="0.08"/>
-        </svg>
-        <span class="viz-sparkline-caption">近 7 日处置吞吐趋势</span>
-      </div>
-    </div>
+      <ol class="demo-steps">
+        <li><span class="demo-time">0:00</span><span>痛点 + 一句话价值（本页）</span></li>
+        <li><span class="demo-time">0:30</span><span>场景页 → <strong>S1</strong> → 把握度页 🟢 + 重试</span></li>
+        <li><span class="demo-time">1:40</span><span>场景页 → <strong>S2</strong> → 把握度页 🟡 无重试</span></li>
+        <li><span class="demo-time">2:05</span><span>场景页 → <strong>S3</strong> → 把握度页 🔴 升级</span></li>
+        <li><span class="demo-time">2:40</span><span>飞轮页 👎 → 统计更新</span></li>
+        <li><span class="demo-time">3:10</span><span>飞书 S1 卡片（可选）</span></li>
+        <li><span class="demo-time">4:00</span><span>三件套 + 投资回报 + 「越用越准」</span></li>
+      </ol>
+    </section>
 
-    <div class="grid-2">
+    <div class="grid-2 pitch-live">
       <div class="card">
         <div class="card-header">
-          <h3>Agent 列表</h3>
-          <span class="card-count">{{ agents|length }}</span>
+          <h3>Agent 把握度 · 实时状态</h3>
+          <span class="card-count">触发场景后更新</span>
         </div>
-        {% for agent in agents %}
-        <div class="agent-item">
-          <span class="agent-id">{{ agent.agent_id }}</span>
+        <div class="viz-bar-chart">
+          {% for agent in agents %}
           {% set sc = latest_scores.get(agent.agent_id) %}
-          {% if sc %}
-          <span class="score-badge score-{{ 'green' if sc.total >= 80 else ('amber' if sc.total >= 60 else 'red') }}">
-            {{ sc.total }} {{ sc.labels.grade_display.split()[0] if sc.labels else '' }}
-          </span>
-          {% else %}
-          <span class="score-badge" style="color: var(--text-muted); background: var(--bg)">—</span>
-          {% endif %}
+          {% set pct = sc.total if sc else 0 %}
+          {% set tone = 'green' if pct >= 80 else ('amber' if pct >= 60 else ('red' if pct else 'muted')) %}
+          <div class="viz-bar-row">
+            <span class="viz-bar-label">{{ agent.agent_id }}</span>
+            <div class="viz-bar-track"><div class="viz-bar-fill {{ tone }}" style="width: {{ pct }}%"></div></div>
+            <span class="viz-bar-value">{{ sc.total if sc else '—' }}</span>
+          </div>
+          {% endfor %}
         </div>
-        {% endfor %}
       </div>
       <div class="card">
         <div class="card-header">
-          <h3>流水线时间线</h3>
+          <h3>流水线时间线 · 实时演示</h3>
           <span class="card-count" id="timeline-count">—</span>
         </div>
         <div id="timeline" class="timeline">
           <div class="empty">
             <div class="empty-icon">◎</div>
-            在场景页触发 S1/S2/S3，处置链路将在此实时滚动
+            切换到「场景」页触发 S1/S2/S3，处置链路将在此实时滚动
           </div>
         </div>
       </div>
     </div>
 
     {% elif tab == 2 %}
-    <section class="page-hero">
-      <h2>运行<em>演示场景</em></h2>
-      <p>三场景展示同一 Agent 运维内核：敢动手 → 不敢盲动 → 必须升级。</p>
+    <section class="page-hero page-hero-demo">
+      <h2>点击触发 · 看<em>问题→方案→效果</em></h2>
+      <p>三场景共用同一处置流水线，评分决定「敢不敢动」——触发后切到「把握度评分」Tab 查看完整决策链。</p>
     </section>
+
+    <div class="demo-hint card">
+      <div class="demo-hint-steps">
+        <span class="demo-hint-step active">① 本页触发场景</span>
+        <span class="demo-hint-arrow">→</span>
+        <span class="demo-hint-step">② 把握度评分 Tab</span>
+        <span class="demo-hint-arrow">→</span>
+        <span class="demo-hint-step">③ 飞轮 / 审计 Tab</span>
+      </div>
+    </div>
 
     <div class="scenario-grid">
       <div class="scenario-card s1" onclick="triggerScenario('s1')">
         <div class="scenario-card-bg" aria-hidden="true"></div>
         <div class="scenario-card-content">
-          <div class="scenario-id">场景 01 · 可执行</div>
+          <div class="scenario-id">场景 01 · 🟢 可执行</div>
           <h4>客服 Agent API 限流</h4>
-          <p>cs-bot · 运行失败 + 限流 · OpenAI 429 连续失败</p>
           <div class="scenario-chart-panel" aria-hidden="true">
-            <img src="/static/images/scenario-s1.svg" alt="" class="scenario-chart-img">
+            <img src="/static/images/scenario-s1.svg" alt="429 限流趋势图" class="scenario-chart-img">
           </div>
-          <div class="expected">评分 82–88 🟢 · 可重试恢复</div>
+          <dl class="scenario-pso">
+            <div class="pso-row"><dt>问题</dt><dd>大促并发 5→10，OpenAI 429，失败率 38%，客户先发现</dd></div>
+            <div class="pso-row"><dt>方案</dt><dd>根因推理 → OPS-101 手册 → 把握度三因子评分</dd></div>
+            <div class="pso-row pso-impact"><dt>效果</dt><dd><strong>87 分 🟢</strong> · 敢重试 · 飞书卡片同步</dd></div>
+          </dl>
+          <div class="expected">答辩话术：「限流是配额打满——评分 87，可以先重试」</div>
           <button class="btn" type="button">触发 S1</button>
         </div>
       </div>
       <div class="scenario-card s2" onclick="triggerScenario('s2')">
         <div class="scenario-card-bg" aria-hidden="true"></div>
         <div class="scenario-card-content">
-          <div class="scenario-id">场景 02 · 需确认</div>
+          <div class="scenario-id">场景 02 · 🟡 需确认</div>
           <h4>RAG 空检索飙升</h4>
-          <p>rag-bot · 运行失败 + 空检索 · 索引滞后致幻觉</p>
           <div class="scenario-chart-panel" aria-hidden="true">
-            <img src="/static/images/scenario-s2.svg" alt="" class="scenario-chart-img">
+            <img src="/static/images/scenario-s2.svg" alt="空检索率飙升图" class="scenario-chart-img">
           </div>
-          <div class="expected">评分 65–75 🟡 · 不建议重试</div>
+          <dl class="scenario-pso">
+            <div class="pso-row"><dt>问题</dt><dd>索引 lag 1 天，空检索 5%→35%，幻觉答复客诉 +12</dd></div>
+            <div class="pso-row"><dt>方案</dt><dd>根因链：索引滞后 → 空检索 → 幻觉 · OPS-203 手册</dd></div>
+            <div class="pso-row pso-impact"><dt>效果</dt><dd><strong>72 分 🟡</strong> · ⚠ 不建议重试 · 须改知识库</dd></div>
+          </dl>
+          <div class="expected">答辩话术：「同样 run_fail，S1 能重试 S2 不能——评分定义边界」</div>
           <button class="btn btn-warning" type="button">触发 S2</button>
         </div>
       </div>
       <div class="scenario-card s3" onclick="triggerScenario('s3')">
         <div class="scenario-card-bg" aria-hidden="true"></div>
         <div class="scenario-card-content">
-          <div class="scenario-id">场景 03 · 需升级</div>
+          <div class="scenario-id">场景 03 · 🔴 需升级</div>
           <h4>Agent 日成本超预算</h4>
-          <p>content-bot · 成本上报 + 超预算 · Token 突增</p>
           <div class="scenario-chart-panel" aria-hidden="true">
-            <img src="/static/images/scenario-s3.svg" alt="" class="scenario-chart-img">
+            <img src="/static/images/scenario-s3.svg" alt="日成本超预算图" class="scenario-chart-img">
           </div>
-          <div class="expected">评分 50–58 🔴 · 升级 @负责人</div>
+          <dl class="scenario-pso">
+            <div class="pso-row"><dt>问题</dt><dd>新模板发布，Token +180%，日成本 ¥28.5 超预算 ¥20</dd></div>
+            <div class="pso-row"><dt>方案</dt><dd>非报错型事件 · OPS-305 限流/降级/暂停 · 评分 &lt;60</dd></div>
+            <div class="pso-row pso-impact"><dt>效果</dt><dd><strong>58 分 🔴</strong> · 不可自动执行 · @负责人升级</dd></div>
+          </dl>
+          <div class="expected">答辩话术：「不是坏了，是烧钱——评分 58 告诉你不该自己动」</div>
           <button class="btn btn-danger" type="button">触发 S3</button>
         </div>
       </div>
@@ -163,8 +227,8 @@
 
     {% elif tab == 3 %}
     <section class="page-hero">
-      <h2>用<em>把握度评分</em>验证</h2>
-      <p>三因子可验证推理：数据完备 · 手册匹配 · 推理一致 — 非大模型自报置信度。</p>
+      <h2>用<em>把握度评分</em>验证效果</h2>
+      <p>三因子可验证推理 — 向评委展示「为什么敢动 / 为什么不敢动」。数据 · 手册 · 推理，均可追问公式。</p>
     </section>
 
     <div class="viz-panel card" style="margin-bottom:1.25rem;">
@@ -189,12 +253,8 @@
     </div>
 
     <div id="execution-chain" class="card execution-chain" style="display:none">
-      <div class="card-header"><h3>处置执行链</h3></div>
-      <div id="pipeline-flow" class="pipeline-flow"></div>
-      <div id="causal-chain" class="causal-chain" style="display:none">
-        <h4>根因推理 · 推理链</h4>
-        <div id="causal-steps" class="causal-steps"></div>
-      </div>
+      <div class="card-header"><h3>处置执行链 · 逻辑链</h3></div>
+      <div id="execution-chain-body" class="whatif-panel"></div>
     </div>
 
     <div class="incident-split">
@@ -213,25 +273,54 @@
       <div id="decision-panel" class="card decision-panel">
         <div class="empty">
           <div class="empty-icon">◈</div>
-          触发场景后把握度详情将自动展示，或从下方历史故障中选择
+          触发场景后把握度详情将自动展示
         </div>
       </div>
     </div>
 
-    {% if incidents %}
-    <div class="card" style="margin-top: 1.25rem;">
-      <div class="card-header">
-        <h3>最近故障</h3>
-        <span class="card-count">{{ incidents|length }}</span>
+    <div id="advanced-panels" class="advanced-panels" style="display:none">
+      <div id="ultra-api-hint" class="alert alert-warning" style="display:none;margin-bottom:1rem;"></div>
+      <div class="grid-2">
+        <div class="card kg-card">
+          <div class="card-header">
+            <h3>知识图谱 · 因果拓扑</h3>
+            <span class="card-count" id="kg-stats">—</span>
+          </div>
+          <div class="kg-legend">
+            <span><i class="kg-dot agent"></i>Agent</span>
+            <span><i class="kg-dot incident"></i>故障</span>
+            <span><i class="kg-dot playbook"></i>手册</span>
+            <span><i class="kg-dot root_cause"></i>根因</span>
+            <span><i class="kg-dot action"></i>处置</span>
+            <span><i class="kg-dot score"></i>评分</span>
+          </div>
+          <div id="kg-topology-wrap" class="kg-topology-wrap">
+            <div id="kg-topology" class="kg-readable-graph" aria-label="知识图谱拓扑"></div>
+          </div>
+        </div>
+        <div class="advanced-side">
+          <div class="card">
+            <div class="card-header"><h3>Agent-Team 编排</h3></div>
+            <div id="team-plan" class="advanced-panel-body">触发场景后自动加载编排计划</div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>相似历史事故</h3></div>
+            <div id="similar-incidents" class="advanced-panel-body">触发场景后自动检索相似事故</div>
+          </div>
+        </div>
       </div>
-      {% for inc in incidents[:10] %}
-      <div class="incident-row" data-trace="{{ inc.trace_id }}" onclick="selectIncident('{{ inc.trace_id }}')">
-        <span><span class="agent-id">{{ inc.agent_id }}</span> · {{ inc.scenario_id }}</span>
-        <span class="status-dot {{ inc.status }}">{{ inc.status }}</span>
+      <div class="card" style="margin-top:1rem;">
+        <div class="card-header"><h3>What-if 推演 · 逻辑链</h3></div>
+        <div class="whatif-controls">
+          <select id="whatif-scenario" class="select-field" style="width:auto;">
+            <option value="log_snippet:concurrent=5 rate_limit recovered stable">S1 · 降并发后日志恢复</option>
+            <option value="budget_yuan_daily:30">S3 · 日预算 → ¥30</option>
+          </select>
+          <button class="btn" type="button" onclick="runWhatIf()">运行推演</button>
+        </div>
+        <div id="whatif-result" class="whatif-panel"></div>
       </div>
-      {% endfor %}
     </div>
-    {% endif %}
 
     {% elif tab == 4 %}
     <section class="page-hero">
@@ -239,30 +328,29 @@
       <p>👍/👎 反馈驱动运维手册与提示词迭代 — 处置经验沉淀在团队侧。</p>
     </section>
 
-    <div class="viz-panel card" style="margin-bottom:1.25rem;">
-      <div class="card-header"><h3>反馈分布</h3></div>
-      <div class="viz-donut-row">
-        <div class="viz-donut" style="--pct-up: {{ (stats.thumbs_up / stats.total * 100) if stats.total else 50 }}; --pct-down: {{ (stats.thumbs_down / stats.total * 100) if stats.total else 50 }};">
-          <div class="viz-donut-ring"></div>
-          <div class="viz-donut-center">{{ stats.total }}</div>
-        </div>
-        <div class="viz-donut-legend">
-          <div><span class="viz-dot green"></span>有用 {{ stats.thumbs_up }}</div>
-          <div><span class="viz-dot red"></span>无用 {{ stats.thumbs_down }}</div>
+    <div class="flywheel-stats-row">
+      <div class="card flywheel-donut-card">
+        <div class="card-header"><h3>反馈分布</h3></div>
+        <div class="viz-donut-row flywheel-donut-inner">
+          <div class="viz-donut" style="--pct-up: {{ (stats.thumbs_up / stats.total * 100) if stats.total else 50 }}; --pct-down: {{ (stats.thumbs_down / stats.total * 100) if stats.total else 50 }};">
+            <div class="viz-donut-ring"></div>
+            <div class="viz-donut-center">{{ stats.total }}</div>
+          </div>
+          <div class="viz-donut-legend">
+            <div><span class="viz-dot green"></span>有用 {{ stats.thumbs_up }}</div>
+            <div><span class="viz-dot red"></span>无用 {{ stats.thumbs_down }}</div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="stats-grid">
-      <div class="card stat-box stat-up">
+      <div class="card stat-box stat-up stat-box-inline">
         <div class="num" id="stat-up">{{ stats.thumbs_up }}</div>
         <div class="label">有用反馈</div>
       </div>
-      <div class="card stat-box stat-down">
+      <div class="card stat-box stat-down stat-box-inline">
         <div class="num" id="stat-down">{{ stats.thumbs_down }}</div>
         <div class="label">无用反馈</div>
       </div>
-      <div class="card stat-box">
+      <div class="card stat-box stat-box-inline">
         <div class="num" id="stat-total">{{ stats.total }}</div>
         <div class="label">总计</div>
       </div>
@@ -351,6 +439,18 @@
     </div>
     {% endif %}
     <div class="viz-panel card" style="margin-bottom:1rem;">
+      <div class="card-header"><h3>故障场景分布</h3><span class="card-count">{{ incidents|length }} 条</span></div>
+      <div class="viz-grouped-bars">
+        {% set s1c = incidents|selectattr('scenario_id', 'equalto', 's1')|list|length %}
+        {% set s2c = incidents|selectattr('scenario_id', 'equalto', 's2')|list|length %}
+        {% set s3c = incidents|selectattr('scenario_id', 'equalto', 's3')|list|length %}
+        {% set maxc = [s1c, s2c, s3c, 1]|max %}
+        <div class="viz-group"><span class="viz-group-label">S1</span><div class="viz-bar-track"><div class="viz-bar-fill green" style="width:{{ (s1c / maxc * 100)|int }}%"></div></div><span>{{ s1c }}</span></div>
+        <div class="viz-group"><span class="viz-group-label">S2</span><div class="viz-bar-track"><div class="viz-bar-fill amber" style="width:{{ (s2c / maxc * 100)|int }}%"></div></div><span>{{ s2c }}</span></div>
+        <div class="viz-group"><span class="viz-group-label">S3</span><div class="viz-bar-track"><div class="viz-bar-fill red" style="width:{{ (s3c / maxc * 100)|int }}%"></div></div><span>{{ s3c }}</span></div>
+      </div>
+    </div>
+    <div class="viz-panel card" style="margin-bottom:1rem;">
       <div class="card-header"><h3>审计动作分布</h3></div>
       <div class="viz-stacked-bars" id="audit-viz-bars">
         <div class="viz-stack-row"><span>scenario_trigger</span><div class="viz-bar-track"><div class="viz-bar-fill brand" style="width:45%"></div></div></div>
@@ -385,71 +485,6 @@
       </p>
     </div>
 
-    {% elif tab == 6 %}
-    <section class="page-hero">
-      <h2>Ultra · <em>智能编排</em></h2>
-      <p>知识图谱 · 相似事故 · What-if 推演 · Agent-Team 编排。请先在「场景」页触发 S1/S2/S3，再回到此页查看。</p>
-    </section>
-    <div id="ultra-api-hint" class="alert alert-warning" style="display:none;margin-bottom:1rem;"></div>
-    <div class="viz-panel card" style="margin-bottom:1rem;">
-      <div class="card-header"><h3>故障场景分布</h3><span class="card-count">{{ incidents|length }} 条</span></div>
-      <div class="viz-grouped-bars">
-        {% set s1c = incidents|selectattr('scenario_id', 'equalto', 's1')|list|length %}
-        {% set s2c = incidents|selectattr('scenario_id', 'equalto', 's2')|list|length %}
-        {% set s3c = incidents|selectattr('scenario_id', 'equalto', 's3')|list|length %}
-        {% set maxc = [s1c, s2c, s3c, 1]|max %}
-        <div class="viz-group"><span class="viz-group-label">S1</span><div class="viz-bar-track"><div class="viz-bar-fill green" style="width:{{ (s1c / maxc * 100)|int }}%"></div></div><span>{{ s1c }}</span></div>
-        <div class="viz-group"><span class="viz-group-label">S2</span><div class="viz-bar-track"><div class="viz-bar-fill amber" style="width:{{ (s2c / maxc * 100)|int }}%"></div></div><span>{{ s2c }}</span></div>
-        <div class="viz-group"><span class="viz-group-label">S3</span><div class="viz-bar-track"><div class="viz-bar-fill red" style="width:{{ (s3c / maxc * 100)|int }}%"></div></div><span>{{ s3c }}</span></div>
-      </div>
-    </div>
-    <div class="card kg-card" style="margin-bottom:1rem;">
-      <div class="card-header">
-        <h3>知识图谱 · 拓扑</h3>
-        <span class="card-count" id="kg-stats">—</span>
-      </div>
-      <div class="kg-legend">
-        <span><i class="kg-dot agent"></i>Agent</span>
-        <span><i class="kg-dot incident"></i>故障</span>
-        <span><i class="kg-dot playbook"></i>手册</span>
-        <span><i class="kg-dot root_cause"></i>根因</span>
-        <span><i class="kg-dot action"></i>处置</span>
-        <span><i class="kg-dot score"></i>评分</span>
-      </div>
-      <div id="kg-topology-wrap" class="kg-topology-wrap">
-        <div id="kg-topology" class="kg-readable-graph" aria-label="知识图谱拓扑"></div>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-header"><h3>故障选择</h3></div>
-        <select id="ultra-trace" class="select-field" style="margin:0 1rem 1rem;">
-          {% for inc in incidents[:10] %}
-          <option value="{{ inc.trace_id }}">{{ inc.agent_id }} · {{ inc.scenario_id }} · {{ inc.trace_id }}</option>
-          {% endfor %}
-        </select>
-        <p style="padding:0 1rem 1rem;font-size:0.75rem;color:var(--text-muted);margin:0;">切换故障可查看该事件的因果链与处置步骤</p>
-      </div>
-      <div class="card">
-        <div class="card-header"><h3>Agent-Team 编排</h3></div>
-        <div id="team-plan" style="padding:0 1rem 1rem;font-size:0.875rem;color:var(--text-secondary)">选择故障查看编排计划</div>
-      </div>
-    </div>
-    <div class="card" style="margin-top:1rem;">
-      <div class="card-header"><h3>What-if 推演 · 逻辑链</h3></div>
-      <div style="padding:0 1rem 1rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
-        <select id="whatif-scenario" class="select-field" style="width:auto;">
-          <option value="log_snippet:concurrent=5 rate_limit recovered stable">S1 · 降并发后日志恢复</option>
-          <option value="budget_yuan_daily:30">S3 · 日预算 → ¥30</option>
-        </select>
-        <button class="btn" type="button" onclick="runWhatIf()">运行推演</button>
-      </div>
-      <div id="whatif-result" class="whatif-panel"></div>
-    </div>
-    <div class="card" style="margin-top:1rem;">
-      <div class="card-header"><h3>相似历史事故</h3></div>
-      <div id="similar-incidents" style="padding:0 1rem 1rem;font-size:0.875rem;color:var(--text-secondary)">选择故障后自动加载</div>
-    </div>
     {% endif %}
   </div>
 
@@ -494,14 +529,6 @@
       replay_started: '回放开始',
       replay_completed: '回放完成',
     };
-
-    const PIPELINE_STEPS = [
-      { key: 'incident_started', label: '事件' },
-      { key: 'tool_called', label: '工具', multi: true },
-      { key: 'llm_reasoning', label: '大模型' },
-      { key: 'score_computed', label: '评分' },
-      { key: 'incident_completed', label: '完成' },
-    ];
 
     function gradeClass(grade) {
       return grade || 'needs_confirmation';
@@ -552,45 +579,174 @@
       timeline.forEach(e => appendTimeline({ type: e.type, ts: e.ts, payload: e.payload || {} }));
     }
 
+    function buildExecutionLogicChain(inc) {
+      const timeline = inc.timeline_json || [];
+      const event = inc.event_json || {};
+      const llm = inc.llm_json || {};
+      const sc = inc.score_json || {};
+      const gradeLabels = {
+        executable: '🟢 可执行',
+        needs_confirmation: '🟡 需确认',
+        escalate: '🔴 需升级',
+      };
+
+      const toolEvents = timeline.filter(e => e.type === 'tool_called');
+      const toolNames = toolEvents.map(e => e.payload?.tool).filter(Boolean);
+
+      const chain = [
+        {
+          step: 1,
+          key: 'intake',
+          title: '事件接入',
+          summary: `${inc.agent_id || event.agent_id || '—'} · ${inc.scenario_id || '—'} · ${event.type || 'run_fail'}`,
+          links: [
+            { rel: 'Agent', to: inc.agent_id || event.agent_id || '—' },
+            { rel: '场景', to: (inc.scenario_id || '—').toUpperCase() },
+            { rel: '症状', to: event.symptom || '—' },
+            { rel: '追踪号', to: inc.trace_id || '—' },
+          ],
+        },
+      ];
+
+      if (toolNames.length) {
+        chain.push({
+          step: 2,
+          key: 'tools',
+          title: '工具查询',
+          summary: `处置手册驱动 · ${toolNames.length} 次工具调用`,
+          links: toolNames.map((name, i) => ({ rel: `工具 ${i + 1}`, to: name })),
+        });
+      }
+
+      const reasoningChain = llm.reasoning_chain || [];
+      if (reasoningChain.length || llm.hypothesis?.length) {
+        chain.push({
+          step: chain.length + 1,
+          key: 'reasoning',
+          title: '根因推理',
+          summary: llm.impact || '大模型生成根因链与处置假设',
+          reasoning_chain: reasoningChain.length
+            ? reasoningChain
+            : (llm.hypothesis || []).map(h => `假设：${h}`),
+          links: llm.hypothesis?.length
+            ? llm.hypothesis.map((h, i) => ({ rel: `假设 ${i + 1}`, to: h }))
+            : [],
+        });
+      }
+
+      if (sc.total != null) {
+        const f = sc.factors || {};
+        chain.push({
+          step: chain.length + 1,
+          key: 'score',
+          title: '把握度评分',
+          summary: `总分 ${sc.total} · ${sc.labels?.grade_display || gradeLabels[sc.grade] || sc.grade || '—'}`,
+          links: [
+            { rel: '数据完备', to: f.data_completeness != null ? `${(f.data_completeness * 100).toFixed(0)}%` : '—' },
+            { rel: '手册匹配', to: f.playbook_match != null ? `${(f.playbook_match * 100).toFixed(0)}%` : '—' },
+            { rel: '推理一致', to: f.reasoning_consistency != null ? `${(f.reasoning_consistency * 100).toFixed(0)}%` : '—' },
+            { rel: '分级', to: gradeLabels[sc.grade] || sc.grade || '—' },
+          ],
+        });
+      }
+
+      const steps = llm.steps || [];
+      if (steps.length || sc.grade) {
+        const actionLinks = steps.map((s, i) => ({
+          rel: `步骤 ${i + 1} · ${s.risk || 'low'}`,
+          to: s.action || '—',
+        }));
+        let disposition = '等待人工确认';
+        if (sc.grade === 'executable' && llm.retry_recommended) disposition = '建议执行 · 可一键重试';
+        else if (sc.grade === 'needs_confirmation') disposition = '⚠ 不建议盲重试 · 须负责人确认';
+        else if (sc.grade === 'escalate') disposition = '🔴 须升级 @负责人 · 禁止自动执行';
+
+        chain.push({
+          step: chain.length + 1,
+          key: 'action',
+          title: '处置决策',
+          summary: disposition,
+          links: actionLinks.length ? actionLinks : [{ rel: '动作权限', to: disposition }],
+        });
+      }
+
+      const completed = timeline.find(e => e.type === 'incident_completed');
+      const failed = timeline.find(e => e.type === 'incident_failed');
+      if (completed || failed || inc.status) {
+        chain.push({
+          step: chain.length + 1,
+          key: 'done',
+          title: failed ? '流水线失败' : '处置完成',
+          summary: failed
+            ? (failed.payload?.error || '流水线异常终止')
+            : `状态 ${inc.status || 'ok'}${inc.duration_ms ? ` · 耗时 ${inc.duration_ms} ms` : ''}`,
+          links: [
+            { rel: '状态', to: inc.status || '—' },
+            ...(inc.duration_ms ? [{ rel: '耗时', to: `${inc.duration_ms} ms` }] : []),
+            ...(timeline.some(e => e.type === 'channel_sync') ? [{ rel: '通道', to: '飞书 IM 已同步' }] : []),
+          ],
+        });
+      }
+
+      return chain;
+    }
+
+    function renderLogicRail(container, steps, footerHtml) {
+      if (!container || !steps?.length) return;
+
+      let html = '<div class="logic-ontology-rail">';
+      steps.forEach((step, i) => {
+        const isLast = i === steps.length - 1;
+        html += `<div class="logic-rail-step">
+          <div class="logic-rail-marker"><span>${step.step}</span></div>
+          <div class="logic-rail-body">
+            <div class="logic-rail-head"><strong>${step.title}</strong><span>${step.summary}</span></div>`;
+        if (step.reasoning_chain?.length) {
+          html += '<div class="logic-rail-chain">';
+          step.reasoning_chain.forEach((t, j) => {
+            html += `<div class="logic-rail-node root">${j + 1}. ${t}</div>`;
+            if (j < step.reasoning_chain.length - 1) html += '<div class="logic-rail-link">↓ 因果传导</div>';
+          });
+          html += '</div>';
+        }
+        if (step.links?.length) {
+          html += '<div class="logic-rail-links">';
+          step.links.forEach(link => {
+            if (link.from !== undefined && link.to !== undefined) {
+              html += `<div class="logic-rail-flow"><span class="logic-link-rel">${link.rel}</span><span class="logic-rail-pill">${link.from}</span><span class="pipeline-arrow">→</span><span class="logic-rail-pill accent">${link.to}</span></div>`;
+            } else {
+              html += `<div class="logic-rail-flow"><span class="logic-link-rel">${link.rel}</span><span class="logic-rail-pill">${link.to || ''}</span></div>`;
+            }
+          });
+          html += '</div>';
+        }
+        html += '</div></div>';
+        if (!isLast) html += '<div class="logic-rail-connector"><span>↓</span></div>';
+      });
+      html += '</div>';
+      if (footerHtml) html += footerHtml;
+      container.innerHTML = html;
+    }
+
     function renderExecutionChain(inc) {
       const chainEl = document.getElementById('execution-chain');
-      const flowEl = document.getElementById('pipeline-flow');
-      if (!chainEl || !flowEl) return;
+      const bodyEl = document.getElementById('execution-chain-body');
+      if (!chainEl || !bodyEl) return;
 
-      const timeline = inc.timeline_json || [];
-      const types = timeline.map(e => e.type);
-      const toolCount = types.filter(t => t === 'tool_called').length;
+      const logicChain = buildExecutionLogicChain(inc);
+      if (!logicChain.length) {
+        chainEl.style.display = 'none';
+        return;
+      }
 
       chainEl.style.display = 'block';
-      flowEl.innerHTML = '';
-
-      PIPELINE_STEPS.forEach((step, i) => {
-        if (i > 0) {
-          const arrow = document.createElement('span');
-          arrow.className = 'pipeline-arrow';
-          arrow.textContent = '→';
-          flowEl.appendChild(arrow);
-        }
-        const hit = step.multi
-          ? toolCount > 0
-          : types.includes(step.key);
-        const div = document.createElement('div');
-        div.className = 'pipeline-step' + (hit ? ' done' : '');
-        div.textContent = step.multi && toolCount ? `${step.label} ×${toolCount}` : step.label;
-        flowEl.appendChild(div);
-      });
-
-      const causalEl = document.getElementById('causal-chain');
-      const stepsEl = document.getElementById('causal-steps');
-      const chain = inc.llm_json?.reasoning_chain || [];
-      if (causalEl && stepsEl && chain.length) {
-        causalEl.style.display = 'block';
-        stepsEl.innerHTML = chain.map((text, i) =>
-          `<div class="causal-step"><strong>第 ${i + 1} 步</strong>${text}</div>`
-        ).join('');
-      } else if (causalEl) {
-        causalEl.style.display = 'none';
-      }
+      const sc = inc.score_json || {};
+      const grade = sc.grade || 'needs_confirmation';
+      const alertClass = grade === 'executable' ? 'success' : (grade === 'escalate' ? 'danger' : 'warning');
+      const footer = sc.total != null
+        ? `<div class="alert alert-${alertClass}" style="margin-top:1rem">把握度 ${sc.total} · ${sc.labels?.grade_display || grade} — 评分驱动动作权限，全程可审计追溯</div>`
+        : '';
+      renderLogicRail(bodyEl, logicChain, footer);
     }
 
     function renderIncidentMeta(inc) {
@@ -690,6 +846,7 @@
       renderDecision(inc);
       highlightIncidentRow(traceId);
       showTraceBanner(traceId);
+      await loadAdvancedPanels(traceId);
     }
 
     async function applyCorrection(traceId) {
@@ -949,60 +1106,31 @@
       const el = document.getElementById('whatif-result');
       if (!el || !data.logic_chain) return;
 
-      let html = '<div class="logic-ontology-rail">';
-      data.logic_chain.forEach((step, i) => {
-        const isLast = i === data.logic_chain.length - 1;
-        html += `<div class="logic-rail-step">
-          <div class="logic-rail-marker"><span>${step.step}</span></div>
-          <div class="logic-rail-body">
-            <div class="logic-rail-head"><strong>${step.title}</strong><span>${step.summary}</span></div>`;
-        if (step.reasoning_chain?.length) {
-          html += '<div class="logic-rail-chain">';
-          step.reasoning_chain.forEach((t, j) => {
-            html += `<div class="logic-rail-node root">${j + 1}. ${t}</div>`;
-            if (j < step.reasoning_chain.length - 1) html += '<div class="logic-rail-link">↓ 因果传导</div>';
-          });
-          html += '</div>';
-        }
-        if (step.links?.length) {
-          html += '<div class="logic-rail-links">';
-          step.links.forEach(link => {
-            if (link.from !== undefined && link.to !== undefined) {
-              html += `<div class="logic-rail-flow"><span class="logic-link-rel">${link.rel}</span><span class="logic-rail-pill">${link.from}</span><span class="pipeline-arrow">→</span><span class="logic-rail-pill accent">${link.to}</span></div>`;
-            } else {
-              html += `<div class="logic-rail-flow"><span class="logic-link-rel">${link.rel}</span><span class="logic-rail-pill">${link.to || ''}</span></div>`;
-            }
-          });
-          html += '</div>';
-        }
-        html += '</div></div>';
-        if (!isLast) html += '<div class="logic-rail-connector"><span>↓</span></div>';
-      });
-      html += '</div>';
-
       const gradeChanged = data.grade_changed;
-      html += `<div class="alert alert-${gradeChanged ? 'warning' : 'success'}" style="margin-top:1rem">${data.narrative}</div>`;
-      el.innerHTML = html;
+      const footer = `<div class="alert alert-${gradeChanged ? 'warning' : 'success'}" style="margin-top:1rem">${data.narrative}</div>`;
+      renderLogicRail(el, data.logic_chain, footer);
     }
 
-    async function loadUltraPanel() {
+    async function loadAdvancedPanels(traceId) {
+      const panel = document.getElementById('advanced-panels');
+      if (!panel) return;
+      panel.style.display = traceId ? 'block' : 'none';
+      if (!traceId) return;
+
       const hint = document.getElementById('ultra-api-hint');
       const graphRes = await fetch('/admin/ultra/graph');
       if (graphRes.status === 404 && hint) {
         hint.style.display = 'block';
-        hint.textContent = 'Ultra API 不可用：请重启 uvicorn 以加载 app/ultra 模块（当前代码未生效）。';
+        hint.textContent = '高级分析 API 不可用：请重启 uvicorn 以加载 app/ultra 模块。';
         return;
       }
+      if (hint) hint.style.display = 'none';
       if (graphRes.ok) {
         kgGraphData = await graphRes.json();
-        const traceSel = document.getElementById('ultra-trace');
-        renderKnowledgeGraphTopology(kgGraphData, traceSel?.value || null);
+        renderKnowledgeGraphTopology(kgGraphData, traceId);
       }
-      const traceSel = document.getElementById('ultra-trace');
-      if (traceSel?.value) {
-        await loadTeamPlan(traceSel.value);
-        await loadSimilar(traceSel.value);
-      }
+      await loadTeamPlan(traceId);
+      await loadSimilar(traceId);
     }
 
     async function loadTeamPlan(traceId) {
@@ -1030,7 +1158,8 @@
     }
 
     async function runWhatIf() {
-      const traceId = document.getElementById('ultra-trace')?.value;
+      const traceId = currentTraceId;
+      if (!traceId) { alert('请先在场景页触发 S1/S2/S3'); return; }
       const spec = document.getElementById('whatif-scenario')?.value || 'log_snippet:concurrent=5 rate_limit recovered';
       const colon = spec.indexOf(':');
       const key = spec.slice(0, colon);
@@ -1062,14 +1191,6 @@
         if (params.get('trace')) {
           document.getElementById('audit-detail-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-      }
-      if (tab === 6) {
-        loadUltraPanel();
-        document.getElementById('ultra-trace')?.addEventListener('change', (e) => {
-          renderKnowledgeGraphTopology(kgGraphData, e.target.value);
-          loadTeamPlan(e.target.value);
-          loadSimilar(e.target.value);
-        });
       }
     });
   </script>
