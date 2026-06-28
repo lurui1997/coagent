@@ -30,6 +30,9 @@
       --radius: 14px;
       --font: "DM Sans", "PingFang SC", "Hiragino Sans GB", sans-serif;
       --display: "Syne", "PingFang SC", sans-serif;
+      --edge-color: rgba(147, 197, 253, 0.72);
+      --edge-color-dim: rgba(147, 197, 253, 0.38);
+      --edge-dash: 8 6;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -394,14 +397,8 @@
       left: 6%;
       right: 6%;
       top: 50%;
-      height: 2px;
-      background: linear-gradient(
-        90deg,
-        rgba(77, 142, 247, 0.05),
-        rgba(77, 142, 247, 0.45) 20%,
-        rgba(77, 142, 247, 0.45) 80%,
-        rgba(77, 142, 247, 0.05)
-      );
+      height: 0;
+      border-top: 2px dashed var(--edge-color-dim);
       z-index: 1;
       pointer-events: none;
     }
@@ -413,7 +410,7 @@
       top: 50%;
       transform: translateY(-52%);
       font-size: 0.65rem;
-      color: rgba(147, 197, 253, 0.55);
+      color: var(--edge-color-dim);
       z-index: 4;
       pointer-events: none;
     }
@@ -464,13 +461,15 @@
 
     .flow-line {
       fill: none;
+      stroke: var(--edge-color);
+      stroke-dasharray: var(--edge-dash);
       stroke-linecap: round;
       stroke-linejoin: round;
       transition: opacity 0.25s, stroke-width 0.25s;
     }
 
     .flow-line.kind-primary {
-      stroke-width: 2.5;
+      stroke-width: 2;
       opacity: 0.72;
     }
 
@@ -478,7 +477,6 @@
     .flow-line.kind-feedback {
       stroke-width: 1.5;
       opacity: 0;
-      stroke-dasharray: 5 6;
       transition: opacity 0.2s;
     }
 
@@ -489,23 +487,20 @@
 
     .flow-line.kind-external {
       stroke-width: 2;
-      opacity: 0.55;
+      opacity: 0.6;
     }
 
     .flow-line.dimmed { opacity: 0.08 !important; }
 
     .flow-line.lit {
       opacity: 1 !important;
-      stroke-width: 3;
+      stroke-width: 2.5;
+      stroke: var(--edge-color);
+      stroke-dasharray: var(--edge-dash);
     }
 
-    .flow-line.lit.kind-primary {
-      stroke-dasharray: none;
-    }
-
-    .flow-line.lit.kind-primary.hover-flow {
-      stroke-dasharray: 10 8;
-      animation: dash 1s linear infinite;
+    .flow-line.lit.hover-flow {
+      animation: dash 1.2s linear infinite;
     }
 
     @keyframes dash {
@@ -609,9 +604,10 @@
     .flow-step p { font-size: 0.75rem; color: var(--muted); line-height: 1.45; }
 
     .flow-connector {
-      width: 2px;
+      width: 0;
       height: 28px;
-      background: linear-gradient(to bottom, var(--accent), transparent);
+      border-left: 2px dashed var(--edge-color-dim);
+      margin: 0 auto;
       position: relative;
     }
 
@@ -622,8 +618,8 @@
       left: 50%;
       transform: translateX(-50%);
       border: 5px solid transparent;
-      border-top-color: var(--accent);
-      opacity: 0.6;
+      border-top-color: var(--edge-color-dim);
+      opacity: 0.85;
     }
 
     .branch-row {
@@ -1160,23 +1156,24 @@
     };
 
     /** always=true 默认显示；false 仅悬停相关节点时显示 */
+    const LINE_COLOR = "rgba(147, 197, 253, 0.72)";
     const EDGES = [
-      { id: "e1", from: "agent", to: "api", fromSide: "right", toSide: "left", kind: "external", color: "#f59e42", label: "POST /events", route: "cross-column", always: true },
-      { id: "e2", from: "admin", to: "api", fromSide: "right", toSide: "left", kind: "primary", color: "#4d8ef7", label: "HTMX", route: "horizontal", always: true },
-      { id: "e3", from: "api", to: "orch", fromSide: "bottom", toSide: "top", kind: "primary", color: "#4d8ef7", route: "vertical", always: true },
-      { id: "e4", from: "orch", to: "router", fromSide: "bottom", toSide: "top", kind: "primary", color: "#f59e42", route: "vertical", always: true },
-      { id: "e4b", from: "router", to: "playbook", fromSide: "right", toSide: "left", kind: "primary", color: "#f59e42", route: "horizontal", always: true },
-      { id: "e5", from: "playbook", to: "diag", fromSide: "right", toSide: "left", kind: "primary", color: "#9b7bff", route: "horizontal", always: true },
-      { id: "e6", from: "diag", to: "llm", fromSide: "right", toSide: "left", kind: "primary", color: "#9b7bff", route: "horizontal", always: true },
-      { id: "e7", from: "llm", to: "scorer", fromSide: "right", toSide: "left", kind: "primary", color: "#3dd68c", route: "horizontal", always: true },
-      { id: "e8", from: "llm-ext", to: "llm", fromSide: "right", toSide: "left", kind: "external", color: "#9b7bff", label: "httpx", route: "cross-column", always: true },
-      { id: "e9", from: "scorer", to: "channel", fromSide: "bottom", toSide: "top", kind: "feedback", color: "#64748b", label: "P1", route: "vertical", always: false },
-      { id: "e14", from: "channel", to: "feishu", fromSide: "left", toSide: "right", kind: "external", color: "#64748b", route: "cross-column", always: false },
-      { id: "e15", from: "scorer", to: "ultra", fromSide: "bottom", toSide: "top", kind: "secondary", color: "#64748b", route: "vertical", always: false },
-      { id: "e11", from: "sse", to: "admin", fromSide: "top", toSide: "bottom", kind: "feedback", color: "#64748b", label: "SSE", route: "left-rail", always: false },
-      { id: "e10", from: "orch", to: "sse", fromSide: "bottom", toSide: "top", kind: "secondary", color: "#64748b", route: "right-rail", always: false },
-      { id: "e12", from: "orch", to: "db", fromSide: "bottom", toSide: "top", kind: "secondary", color: "#64748b", route: "right-rail-db", always: false },
-      { id: "e13", from: "playbook", to: "data", fromSide: "bottom", toSide: "top", kind: "secondary", color: "#64748b", route: "vertical", always: false },
+      { id: "e1", from: "agent", to: "api", fromSide: "right", toSide: "left", kind: "external", label: "POST /events", route: "cross-column", always: true },
+      { id: "e2", from: "admin", to: "api", fromSide: "right", toSide: "left", kind: "primary", label: "HTMX", route: "horizontal", always: true },
+      { id: "e3", from: "api", to: "orch", fromSide: "bottom", toSide: "top", kind: "primary", route: "vertical", always: true },
+      { id: "e4", from: "orch", to: "router", fromSide: "bottom", toSide: "top", kind: "primary", route: "vertical", always: true },
+      { id: "e4b", from: "router", to: "playbook", fromSide: "right", toSide: "left", kind: "primary", route: "horizontal", always: true },
+      { id: "e5", from: "playbook", to: "diag", fromSide: "right", toSide: "left", kind: "primary", route: "horizontal", always: true },
+      { id: "e6", from: "diag", to: "llm", fromSide: "right", toSide: "left", kind: "primary", route: "horizontal", always: true },
+      { id: "e7", from: "llm", to: "scorer", fromSide: "right", toSide: "left", kind: "primary", route: "horizontal", always: true },
+      { id: "e8", from: "llm-ext", to: "llm", fromSide: "right", toSide: "left", kind: "external", label: "httpx", route: "cross-column", always: true },
+      { id: "e9", from: "scorer", to: "channel", fromSide: "bottom", toSide: "top", kind: "feedback", label: "P1", route: "vertical", always: false },
+      { id: "e14", from: "channel", to: "feishu", fromSide: "left", toSide: "right", kind: "external", route: "cross-column", always: false },
+      { id: "e15", from: "scorer", to: "ultra", fromSide: "bottom", toSide: "top", kind: "secondary", route: "vertical", always: false },
+      { id: "e11", from: "sse", to: "admin", fromSide: "top", toSide: "bottom", kind: "feedback", label: "SSE", route: "left-rail", always: false },
+      { id: "e10", from: "orch", to: "sse", fromSide: "bottom", toSide: "top", kind: "secondary", route: "right-rail", always: false },
+      { id: "e12", from: "orch", to: "db", fromSide: "bottom", toSide: "top", kind: "secondary", route: "right-rail-db", always: false },
+      { id: "e13", from: "playbook", to: "data", fromSide: "bottom", toSide: "top", kind: "secondary", route: "vertical", always: false },
     ];
 
     let activeNode = null;
@@ -1328,7 +1325,7 @@
           const [lx, ly] = labelPoint(d);
           labels = `<text class="edge-label lit" x="${lx}" y="${ly - 6}" text-anchor="middle">${edge.label}</text>`;
         }
-        return `<path class="${cls}" d="${d}" stroke="${edge.color}" marker-end="url(#arrow)" data-edge="${edge.id}"/>${labels}`;
+        return `<path class="${cls}" d="${d}" stroke="${LINE_COLOR}" marker-end="url(#arrow)" data-edge="${edge.id}"/>${labels}`;
       });
 
       svg.innerHTML = defs + parts.join("");
