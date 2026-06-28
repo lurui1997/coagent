@@ -36,12 +36,19 @@ class Orchestrator:
         self.engine = PlaybookEngine()
         self.llm = LLMClient()
 
-    async def process_event(
+    def prepare_incident(
         self,
         event: AgentEvent,
         scenario_id: str | None = None,
         operator: str = "system",
     ) -> dict[str, Any]:
+        """幂等检查 + 路由 + 建 incident，立即返回 trace_id（不跑 pipeline）。
+
+        返回 dict：
+          - 幂等命中: {"status": "duplicate", "trace_id": ...}
+          - 新建成功: {"status": "prepared", "trace_id", "incident_id", "playbook_id", "scenario_id"}
+        路由失败抛 ValueError（与原行为一致）。
+        """
         existing = find_duplicate_event(event.event_id)
         if existing:
             insert_audit_action(
@@ -68,6 +75,26 @@ class Orchestrator:
             trace_id, event.event_id, event.agent_id, scenario_id, event.model_dump(), operator=operator
         )
         insert_audit_action(trace_id, "incident_created", operator, {"event_id": event.event_id})
+        return {
+            "status": "prepared",
+            "trace_id": trace_id,
+            "incident_id": incident_id,
+            "playbook_id": playbook_id,
+            "scenario_id": scenario_id,
+        }
+
+    async def run_pipeline_bg(
+        self,
+        trace_id: str,
+        incident_id: int,
+        event: AgentEvent,
+        playbook_id: str,
+        operator: str = "system",
+    ) -> dict[str, Any]:
+        """执行流水线主体并落库（可在后台任务中运行）。
+
+        incident 必须已由 prepare_incident 创建。结束时写入 completed/failed。
+        """
         timeline: list[dict] = []
         start_ms = time.time()
 
@@ -91,6 +118,24 @@ class Orchestrator:
             await record("incident_failed", {"error": str(e)})
             update_incident(trace_id, status="failed", timeline_json=timeline)
             return {"status": "failed", "trace_id": trace_id, "error": str(e)}
+
+    async def process_event(
+        self,
+        event: AgentEvent,
+        scenario_id: str | None = None,
+        operator: str = "system",
+    ) -> dict[str, Any]:
+        """同步全流程：建 incident 后直接 await pipeline（供 webhook / 脚本使用）。"""
+        prepared = self.prepare_incident(event, scenario_id=scenario_id, operator=operator)
+        if prepared["status"] == "duplicate":
+            return {"status": "duplicate", "trace_id": prepared["trace_id"]}
+        return await self.run_pipeline_bg(
+            prepared["trace_id"],
+            prepared["incident_id"],
+            event,
+            prepared["playbook_id"],
+            operator=operator,
+        )
 
     async def _run_pipeline(
         self,

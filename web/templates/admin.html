@@ -771,7 +771,7 @@
     async function hydrateIncident(traceId) {
       currentTraceId = traceId;
       const res = await fetch(`/admin/incidents/${traceId}`);
-      if (!res.ok) return;
+      if (!res.ok) return null;
       const inc = await res.json();
 
       renderIncidentMeta(inc);
@@ -781,6 +781,35 @@
       highlightIncidentRow(traceId);
       showTraceBanner(traceId);
       await loadAdvancedPanels(traceId);
+      return inc;
+    }
+
+    // 实时订阅一条故障的流水线进度。incident 仍在 running 时挂 SSE，
+    // 收到 incident_completed / incident_failed 后重新 hydrate 渲染最终结果。
+    async function watchIncident(traceId) {
+      const inc = await hydrateIncident(traceId);
+      if (!inc) return;
+      if (inc.status !== 'running') return; // 已完成/失败，快照即终态，无需订阅
+
+      if (eventSource) eventSource.close();
+      // 流水线进行中：以 SSE 流为时间线唯一来源（stream 会先补发已有事件再推增量），
+      // 先清空快照渲染的时间线，避免与流回放重复。
+      clearTimeline();
+      eventSource = new EventSource(`/admin/incidents/${traceId}/stream`);
+      eventSource.addEventListener('incident', (e) => {
+        const data = JSON.parse(e.data);
+        appendTimeline(data);
+        if (data.type === 'incident_completed' || data.type === 'incident_failed' || data.type === 'replay_completed') {
+          eventSource.close();
+          eventSource = null;
+          hydrateIncident(traceId);
+        }
+      });
+      eventSource.onerror = () => {
+        // 连接中断后回退到一次性快照刷新（流水线可能已在后台完成）
+        if (eventSource) { eventSource.close(); eventSource = null; }
+        hydrateIncident(traceId);
+      };
     }
 
     async function applyCorrection(traceId) {
@@ -812,8 +841,9 @@
       const data = await res.json();
       const el = document.getElementById('trigger-result');
       if (el) {
-        const note = data.status === 'duplicate' ? '（幂等命中，展示已有故障）' : '';
-        el.innerHTML = `<span class="demo-result-text">状态: <strong>${data.status}</strong>${note}</span>`;
+        const statusLabel = { started: '已触发，进入决策页…', duplicate: '幂等命中', ok: '已完成' }[data.status] || data.status;
+        const note = data.status === 'duplicate' ? '（展示已有故障）' : '';
+        el.innerHTML = `<span class="demo-result-text">状态: <strong>${statusLabel}</strong>${note}</span>`;
       }
       if (data.trace_id) {
         setTimeout(() => { window.location.href = `/?tab=2&trace=${data.trace_id}`; }, 400);
@@ -1254,7 +1284,7 @@
       const tab = parseInt(params.get('tab') || '1', 10);
       const trace = params.get('trace') || {% if active_trace %}'{{ active_trace }}'{% else %}null{% endif %};
       if (trace && tab === 2) {
-        hydrateIncident(trace);
+        watchIncident(trace);
       } else if (tab === 1 && document.getElementById('timeline')) {
         loadLatestTimeline();
       }

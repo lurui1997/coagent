@@ -5,7 +5,7 @@ import json
 import logging
 
 import httpx
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException
 from fastapi.responses import StreamingResponse
 
 from app.config import settings
@@ -32,20 +32,46 @@ def _operator(x_operator: str | None) -> str:
 
 
 @router.post("/trigger/{scenario_id}")
-async def trigger_scenario(scenario_id: str, x_operator: str | None = Header(None, alias="X-Operator")):
+async def trigger_scenario(
+    scenario_id: str,
+    background_tasks: BackgroundTasks,
+    x_operator: str | None = Header(None, alias="X-Operator"),
+):
     if scenario_id not in ("s1", "s2", "s3"):
         raise HTTPException(404, "Unknown scenario")
     event = orchestrator.load_scenario(scenario_id)
     operator = _operator(x_operator)
-    result = await orchestrator.process_event(event, scenario_id=scenario_id, operator=operator)
-    if result.get("trace_id"):
+    prepared = orchestrator.prepare_incident(event, scenario_id=scenario_id, operator=operator)
+
+    if prepared["status"] == "duplicate":
+        # 幂等命中：已有故障，无需再跑流水线
+        trace_id = prepared["trace_id"]
         insert_audit_action(
-            result["trace_id"],
+            trace_id,
             "scenario_trigger",
             operator,
-            {"scenario_id": scenario_id, "pipeline_status": result.get("status")},
+            {"scenario_id": scenario_id, "pipeline_status": "duplicate"},
         )
-    return result
+        return {"status": "duplicate", "trace_id": trace_id, "scenario_id": scenario_id}
+
+    trace_id = prepared["trace_id"]
+    # 流水线放后台异步执行：立即返回 trace_id，前端经 SSE 流接收进度，
+    # 避免同步等待 35–60s 的 LLM 推理被反向代理 60s 默认超时掐断。
+    background_tasks.add_task(
+        orchestrator.run_pipeline_bg,
+        trace_id,
+        prepared["incident_id"],
+        event,
+        prepared["playbook_id"],
+        operator,
+    )
+    insert_audit_action(
+        trace_id,
+        "scenario_trigger",
+        operator,
+        {"scenario_id": scenario_id, "pipeline_status": "started"},
+    )
+    return {"status": "started", "trace_id": trace_id, "scenario_id": scenario_id}
 
 
 @router.get("/incidents")
