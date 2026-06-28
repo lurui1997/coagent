@@ -18,5 +18,10 @@ async def demo_retry(agent_id: str, x_operator: str | None = Header(None, alias=
         "status": "ok",
         "agent_id": agent_id,
         "operator": operator,
-        "message": "retry scheduled (demo)",
+        "message": "重试已执行，Agent 开始恢复",
+        "steps": [
+            {"id": "config", "label": "降低 concurrent 10 → 5", "status": "done"},
+            {"id": "webhook", "label": "触发 Retry Webhook", "status": "done"},
+            {"id": "verify", "label": "验证失败率回落", "status": "done"},
+        ],
     }

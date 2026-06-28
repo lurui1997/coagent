@@ -4,26 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="coagent-static-v" content="{{ static_v }}">
-  <title>CoAgent — Agent 运维控制台</title>
-  <script>(function(){try{var t=localStorage.getItem('coagent-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <title>CoAgent — Agent Ops 运维控制台</title>
   <link rel="stylesheet" href="{{ static_asset('style.css') }}">
   <script src="{{ static_asset('vendor/htmx.min.js') }}" defer></script>
 </head>
-<body class="{% if tab == 1 %}page-landing{% endif %}">
+<body class="page-app">
   <header class="site-header">
     <a href="/?tab=1" class="brand">
       <div class="brand-mark">C</div>
       <span class="brand-name">CoAgent</span>
     </a>
-    <div class="header-actions">
-      {% if tab == 1 %}
-      <a href="/?tab=2" class="header-cta">开始使用</a>
-      {% endif %}
-      <button type="button" class="theme-toggle" data-theme-toggle aria-label="切换显示模式" aria-pressed="false">
-        <span class="theme-toggle-icon" aria-hidden="true">◐</span>
-        <span class="theme-toggle-label">夜间</span>
-      </button>
-    </div>
   </header>
 
   <nav class="subnav">
@@ -32,14 +22,15 @@
     <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">审计复盘</a>
   </nav>
 
-  <div class="page {% if tab == 1 %}tab-overview{% endif %}">
+  <div class="page {% if tab == 1 %}tab-overview{% elif tab == 2 %}tab-workspace{% elif tab == 3 %}tab-audit{% endif %}">
     {% if tab == 1 %}
     <section class="pitch-hero pal-hero" aria-label="CoAgent 平台概览">
       <div class="pal-hero-media" aria-hidden="true"></div>
       <div class="pal-hero-scrim" aria-hidden="true"></div>
       <div class="pal-hero-content">
-        <p class="pal-hero-eyebrow">Agent Ops Copilot</p>
-        <h1 class="pal-hero-title">AI 驱动的 Agent 运维<br><span>让每一个处置决策可验证</span></h1>
+        <p class="pal-hero-eyebrow">Agent Ops</p>
+        <h1 class="pal-hero-title">CoAgent 与企业级生产环境中运行的 Agent 协作</h1>
+        <p class="pal-hero-subtitle">提供异常发现、根因诊断、风险决策、受控处置和审计复盘能力</p>
         <a href="/?tab=2" class="pal-hero-cta">进入处置工作台</a>
       </div>
       <a href="#overview-content" class="pal-hero-scroll" aria-label="向下滚动">
@@ -160,10 +151,16 @@
     </div>
 
     {% elif tab == 2 %}
-    <section class="page-hero">
-      <h2>处置<em>工作台</em></h2>
-      <p>把握度评分驱动的 Agent 运维处置中心 — 根因推理链、分级决策、What-if 推演与知识图谱关联分析。</p>
+    <section class="pal-page-banner" aria-label="处置工作台">
+      <div class="pal-hero-media" aria-hidden="true"></div>
+      <div class="pal-hero-scrim pal-banner-scrim" aria-hidden="true"></div>
+      <div class="pal-page-banner-inner">
+        <p class="pal-hero-eyebrow">Agent Ops</p>
+        <h1 class="pal-page-title">处置工作台</h1>
+        <p class="pal-page-lead">把握度评分驱动的 Agent 运维处置中心 — 根因推理链、分级决策、What-if 推演与知识图谱关联分析。</p>
+      </div>
     </section>
+    <div class="page-content">
 
     <div class="demo-control-bar" role="region" aria-label="场景触发">
       <div class="demo-control-actions">
@@ -233,9 +230,9 @@
       </div>
     </div>
 
-    <div id="advanced-panels" class="advanced-panels" style="display:none">
+      <div id="advanced-panels" class="advanced-panels" style="display:none">
       <div id="ultra-api-hint" class="alert alert-warning" style="display:none;margin-bottom:1rem;"></div>
-      <div class="grid-2">
+      <div class="grid-2 kg-layout">
         <div class="card kg-card">
           <div class="card-header">
             <h3>知识图谱 · 因果拓扑</h3>
@@ -276,11 +273,36 @@
         <div id="whatif-result" class="whatif-panel"></div>
       </div>
     </div>
+    </div>
 
     {% elif tab == 3 %}
-    <section class="page-hero">
-      <h2>审计<em>复盘</em></h2>
-      <p>全链路审计留痕、运营反馈闭环与合规导出 — 追溯每一次处置决策，持续优化运维手册。</p>
+    <section class="pal-page-banner" aria-label="审计复盘">
+      <div class="pal-hero-media" aria-hidden="true"></div>
+      <div class="pal-hero-scrim pal-banner-scrim" aria-hidden="true"></div>
+      <div class="pal-page-banner-inner">
+        <p class="pal-hero-eyebrow">Agent Ops</p>
+        <h1 class="pal-page-title">审计复盘</h1>
+        <p class="pal-page-lead">全链路审计留痕、运营反馈闭环与合规导出 — 追溯每一次处置决策，持续优化运维手册。</p>
+      </div>
+    </section>
+    <div class="page-content">
+
+    <section class="flywheel-loop-card card" aria-label="反馈迭代飞轮">
+      <div class="card-header">
+        <h3>反馈迭代飞轮</h3>
+        <span class="card-count">闭环驱动手册持续优化</span>
+      </div>
+      <div class="flywheel-track" id="flywheel-track">
+        <div class="flywheel-node" data-step="1"><span class="flywheel-num">1</span><strong>处置决策</strong><small>把握度分级 · 执行/确认/升级</small></div>
+        <div class="flywheel-arrow" aria-hidden="true">→</div>
+        <div class="flywheel-node" data-step="2"><span class="flywheel-num">2</span><strong>审计留痕</strong><small>全链路动作 · 可追溯</small></div>
+        <div class="flywheel-arrow" aria-hidden="true">→</div>
+        <div class="flywheel-node flywheel-node-accent" data-step="3"><span class="flywheel-num">3</span><strong>运营反馈</strong><small>👍/👎 写入审计日志</small></div>
+        <div class="flywheel-arrow" aria-hidden="true">→</div>
+        <div class="flywheel-node" data-step="4"><span class="flywheel-num">4</span><strong>手册迭代</strong><small>纠偏建议 · Playbook 更新</small></div>
+        <div class="flywheel-arrow flywheel-arrow-return" aria-hidden="true">↻</div>
+      </div>
+      <p class="flywheel-loop-foot">每次反馈都会沉淀为审计动作，推动下一轮处置更准、更快。</p>
     </section>
 
     <div class="flywheel-stats-row">
@@ -308,48 +330,6 @@
       <div class="card stat-box stat-box-inline">
         <div class="num" id="stat-total">{{ stats.total }}</div>
         <div class="label">总计</div>
-      </div>
-    </div>
-    <div class="card" style="margin-top: 1.25rem;">
-      <div class="card-header"><h3>提交反馈</h3></div>
-      <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
-        选择故障事件提交运营反馈，数据将写入审计日志并驱动手册迭代
-      </p>
-      <select id="feedback-trace" class="select-field">
-        {% for inc in incidents[:10] %}
-        <option value="{{ inc.trace_id }}">{{ inc.agent_id }} · {{ inc.trace_id }}</option>
-        {% endfor %}
-      </select>
-      <div class="feedback-btns">
-        <button class="btn btn-success" type="button" onclick="submitFeedback('up')">👍 有用</button>
-        <button class="btn btn-outline" type="button" onclick="submitFeedback('down')">👎 无用</button>
-      </div>
-    </div>
-    <div class="card" style="margin-top: 1.25rem;">
-      <div class="card-header">
-        <h3>反馈历史</h3>
-        <span class="card-count" id="feedback-history-count">{{ feedback_history|length }}</span>
-      </div>
-      <div id="feedback-history-list" class="flywheel-history">
-        {% if feedback_history %}
-        {% for fb in feedback_history %}
-        <div class="flywheel-history-row">
-          <span class="flywheel-rating {{ 'up' if fb.rating == 'up' else 'down' }}">{{ '👍 有用' if fb.rating == 'up' else '👎 无用' }}</span>
-          <span class="flywheel-meta">
-            <code>{{ fb.trace_id }}</code>
-            · {{ fb.agent_id }} · {{ fb.scenario_id|upper }}
-            {% if fb.score_json and fb.score_json.total %} · 评分 {{ fb.score_json.total }}{% endif %}
-          </span>
-          <span class="flywheel-time">{{ fb.created_at | format_cn_time }}</span>
-          <a class="flywheel-detail-link" href="/?tab=3&amp;trace={{ fb.trace_id }}">故障详情 →</a>
-        </div>
-        {% endfor %}
-        {% else %}
-        <div class="empty" style="padding:2rem;">
-          <div class="empty-icon">◎</div>
-          暂无反馈记录。提交运营反馈后将在此展示，并同步写入审计日志
-        </div>
-        {% endif %}
       </div>
     </div>
     {% if audit_detail %}
@@ -419,10 +399,15 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-header">
+      <div class="card-header audit-log-header">
         <h3>审计动作日志</h3>
         <span class="card-count" id="audit-log-count">—</span>
-        <button class="btn btn-outline" type="button" style="margin-left:auto;font-size:0.75rem;padding:0.25rem 0.75rem;" onclick="loadAuditLog()">刷新</button>
+        <div class="audit-log-toolbar">
+          <span id="audit-feedback-hint" class="audit-feedback-hint">选择日志条目查看详情后可提交反馈</span>
+          <button class="btn btn-success btn-sm" type="button" id="btn-feedback-up" disabled onclick="submitAuditFeedback('up')">👍 有用</button>
+          <button class="btn btn-outline btn-sm" type="button" id="btn-feedback-down" disabled onclick="submitAuditFeedback('down')">👎 无用</button>
+          <button class="btn btn-outline btn-sm" type="button" onclick="loadAuditLog()">刷新</button>
+        </div>
       </div>
       <div id="audit-log-list">
         <div class="empty" style="padding:2rem;">
@@ -433,6 +418,7 @@
       <p style="padding:0 1rem 1rem;font-size:0.75rem;color:var(--text-muted);margin:0;">
         说明：10 分钟内重复触发同一演练场景将幂等命中（<code>duplicate_event</code>），不新建故障记录，审计日志仍完整保留。
       </p>
+    </div>
     </div>
 
     {% endif %}
@@ -761,7 +747,7 @@
       } else if (grade === 'escalate') {
         html += `<div class="alert alert-danger" style="flex:1;margin:0">升级 {{ escalate_user }} — 高风险步骤不可自动执行</div>`;
       }
-      html += `<button class="btn btn-secondary" type="button" onclick="doReplay('${inc.trace_id}')">回放审计</button>`;
+      html += `<a class="btn btn-secondary" href="/?tab=3&trace=${encodeURIComponent(inc.trace_id)}">审计复盘</a>`;
       if (inc.correction_suggestions?.length) {
         html += `<button class="btn btn-outline" type="button" onclick="applyCorrection('${inc.trace_id}')">应用纠偏建议 (${inc.correction_suggestions.length})</button>`;
       }
@@ -844,9 +830,72 @@
     }
 
     async function doRetry(agentId) {
-      const res = await fetch(`/demo/retry/${agentId}`, { method: 'POST' });
+      const panel = document.getElementById('decision-panel');
+      if (!panel) return;
+
+      let execPanel = document.getElementById('retry-exec-panel');
+      if (!execPanel) {
+        execPanel = document.createElement('div');
+        execPanel.id = 'retry-exec-panel';
+        execPanel.className = 'retry-exec-panel';
+        panel.appendChild(execPanel);
+      }
+
+      const stepDefs = [
+        { id: 'config', label: '降低 concurrent 10 → 5' },
+        { id: 'webhook', label: '触发 Retry Webhook' },
+        { id: 'verify', label: '验证失败率回落' },
+      ];
+
+      execPanel.style.display = 'block';
+      execPanel.innerHTML = `
+        <div class="retry-exec-header">
+          <strong>一键重试 · 执行中</strong>
+          <span class="retry-exec-status" id="retry-exec-status">运行中…</span>
+        </div>
+        <ol class="retry-exec-steps">
+          ${stepDefs.map(s => `<li data-step="${s.id}" class="pending">${s.label}</li>`).join('')}
+        </ol>`;
+
+      const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+      const fetchPromise = fetch(`/demo/retry/${agentId}`, {
+        method: 'POST',
+        headers: { 'X-Operator': 'admin-ui' },
+      });
+
+      for (const step of stepDefs) {
+        const li = execPanel.querySelector(`[data-step="${step.id}"]`);
+        li.classList.remove('pending');
+        li.classList.add('running');
+        await sleep(step.id === 'config' ? 450 : 650);
+        li.classList.remove('running');
+        li.classList.add('done');
+      }
+
+      const res = await fetchPromise;
       const data = await res.json();
-      alert(data.message);
+
+      (data.steps || []).forEach((step) => {
+        const li = execPanel.querySelector(`[data-step="${step.id}"]`);
+        if (li && step.label) li.textContent = step.label;
+      });
+
+      const statusEl = document.getElementById('retry-exec-status');
+      const headerEl = execPanel.querySelector('.retry-exec-header');
+      if (res.ok) {
+        if (statusEl) statusEl.textContent = '已完成';
+        headerEl?.classList.add('success');
+        execPanel.classList.add('retry-exec-done');
+      } else {
+        if (statusEl) statusEl.textContent = '失败';
+        headerEl?.classList.add('failed');
+        execPanel.classList.add('retry-exec-failed');
+      }
+
+      const note = document.createElement('p');
+      note.className = 'retry-exec-note';
+      note.textContent = data.message || (res.ok ? '重试已执行' : '重试失败');
+      execPanel.appendChild(note);
     }
 
     async function doReplay(traceId) {
@@ -864,39 +913,71 @@
       await fetch(`/admin/replay/${traceId}`, { method: 'POST' });
     }
 
-    async function submitFeedback(rating) {
-      const traceId = document.getElementById('feedback-trace')?.value;
+    function syncAuditFeedbackTrace() {
+      const trace = new URLSearchParams(location.search).get('trace');
+      const hint = document.getElementById('audit-feedback-hint');
+      const up = document.getElementById('btn-feedback-up');
+      const down = document.getElementById('btn-feedback-down');
+      if (!hint || !up || !down) return;
+      if (trace) {
+        hint.textContent = `反馈目标 · ${trace}`;
+        up.disabled = false;
+        down.disabled = false;
+      } else {
+        hint.textContent = '选择日志条目查看详情后可提交反馈';
+        up.disabled = true;
+        down.disabled = true;
+      }
+    }
+
+    async function refreshFlywheelStats() {
+      const res = await fetch('/admin/stats');
+      if (!res.ok) return;
+      const stats = await res.json();
+      const upEl = document.getElementById('stat-up');
+      const downEl = document.getElementById('stat-down');
+      const totalEl = document.getElementById('stat-total');
+      if (upEl) upEl.textContent = stats.thumbs_up;
+      if (downEl) downEl.textContent = stats.thumbs_down;
+      if (totalEl) totalEl.textContent = stats.total;
+      const donut = document.querySelector('.flywheel-donut-card .viz-donut');
+      if (donut && stats.total) {
+        donut.style.setProperty('--pct-up', String(stats.thumbs_up / stats.total * 100));
+        donut.style.setProperty('--pct-down', String(stats.thumbs_down / stats.total * 100));
+      }
+    }
+
+    function pulseFlywheelStep(step) {
+      document.querySelectorAll('.flywheel-node').forEach(n => n.classList.remove('flywheel-pulse'));
+      const node = document.querySelector(`.flywheel-node[data-step="${step}"]`);
+      node?.classList.add('flywheel-pulse');
+    }
+
+    async function submitAuditFeedback(rating) {
+      const traceId = new URLSearchParams(location.search).get('trace');
       if (!traceId) return;
+      const up = document.getElementById('btn-feedback-up');
+      const down = document.getElementById('btn-feedback-down');
+      if (up) up.disabled = true;
+      if (down) down.disabled = true;
+
+      pulseFlywheelStep('3');
       await fetch(`/admin/incidents/${traceId}/feedback?rating=${rating}`, {
         method: 'POST',
         headers: { 'X-Operator': 'admin-ui' },
       });
-      const res = await fetch('/admin/stats');
-      const stats = await res.json();
-      document.getElementById('stat-up').textContent = stats.thumbs_up;
-      document.getElementById('stat-down').textContent = stats.thumbs_down;
-      document.getElementById('stat-total').textContent = stats.total;
-      await loadFeedbackHistory();
-    }
+      await refreshFlywheelStats();
+      await loadAuditLog();
+      pulseFlywheelStep('4');
 
-    async function loadFeedbackHistory() {
-      const listEl = document.getElementById('feedback-history-list');
-      const countEl = document.getElementById('feedback-history-count');
-      if (!listEl) return;
-      const res = await fetch('/admin/feedback/history?limit=30');
-      if (!res.ok) return;
-      const data = await res.json();
-      if (countEl) countEl.textContent = String(data.count);
-      if (!data.history?.length) {
-        listEl.innerHTML = '<div class="empty" style="padding:2rem;"><div class="empty-icon">◎</div>暂无反馈记录。提交运营反馈后将在此展示，并同步写入审计日志</div>';
-        return;
+      const hint = document.getElementById('audit-feedback-hint');
+      if (hint) {
+        hint.textContent = rating === 'up'
+          ? `已提交 👍 有用 · ${traceId}（已写入审计日志）`
+          : `已提交 👎 无用 · ${traceId}（已写入审计日志）`;
       }
-      listEl.innerHTML = data.history.map(fb => {
-        const ts = formatCnTime(fb.created_at);
-        const rating = fb.rating === 'up' ? '<span class="flywheel-rating up">👍 有用</span>' : '<span class="flywheel-rating down">👎 无用</span>';
-        const score = fb.score_json?.total ? ` · 评分 ${fb.score_json.total}` : '';
-        return `<div class="flywheel-history-row">${rating}<span class="flywheel-meta"><code>${fb.trace_id}</code> · ${fb.agent_id} · ${(fb.scenario_id || '').toUpperCase()}${score}</span><span class="flywheel-time">${ts}</span><a class="flywheel-detail-link" href="/?tab=3&trace=${fb.trace_id}">故障详情 →</a></div>`;
-      }).join('');
+      if (up) up.disabled = false;
+      if (down) down.disabled = false;
     }
 
     const AUDIT_ACTION_LABELS = {
@@ -1147,6 +1228,7 @@
         loadLatestTimeline();
       }
       if (tab === 3) {
+        syncAuditFeedbackTrace();
         loadAuditLog();
         if (params.get('trace')) {
           document.getElementById('audit-detail-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1154,6 +1236,5 @@
       }
     });
   </script>
-  <script src="{{ static_asset('theme.js') }}"></script>
 </body>
 </html>

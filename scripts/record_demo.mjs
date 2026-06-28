@@ -100,19 +100,23 @@ try {
   await scrollTo(page, '#advanced-panels');
   await pause(page, 2000);
 
-  // ── 5. 审计复盘 · 飞轮 ──
+  // 审计复盘 · 飞轮
   console.log('→ 审计复盘');
   await page.goto(`${BASE}/?tab=3`, { waitUntil: 'networkidle' });
-  await pause(page, 2000);
-  await scrollTo(page, '.flywheel-stats-row');
   await pause(page, 1500);
+  await scrollTo(page, '.flywheel-loop-card');
+  await pause(page, 2000);
 
-  const trace = new URL(page.url()).searchParams.get('trace');
-  const feedbackTrace = page.locator('#feedback-trace');
-  if (await feedbackTrace.count()) {
-    await feedbackTrace.selectOption({ index: 0 });
-    await page.locator('button:has-text("无用")').click();
-    await pause(page, 2000);
+  const auditRow = page.locator('.audit-row-link').first();
+  if (await auditRow.count()) {
+    await auditRow.click();
+    await page.waitForURL(/trace=/, { timeout: 15000 });
+    await pause(page, 1000);
+    const feedbackUp = page.locator('#btn-feedback-up');
+    if (await feedbackUp.count() && !(await feedbackUp.isDisabled())) {
+      await feedbackUp.click();
+      await pause(page, 1500);
+    }
   }
 
   await scrollTo(page, '#audit-log-list');
