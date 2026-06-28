@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_base_url: str = "https://api.openai.com/v1"
     llm_model: str = "gpt-4o-mini"
+    llm_fallback_model: str = ""
+    llm_respect_playbook_model: bool = False
     feishu_app_id: str = ""
     feishu_app_secret: str = ""
     feishu_chat_id: str = ""
@@ -16,6 +18,8 @@ class Settings(BaseSettings):
     feishu_api_base: str = "https://open.feishu.cn/open-apis"
     demo_mode: bool = True
     mock_llm: bool = False
+    diagnostic_agent: bool = True
+    diagnostic_max_steps: int = 8
     database_path: str = "coagent.db"
     data_dir: Path = Path("data")
 

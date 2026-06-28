@@ -156,11 +156,7 @@
       <p>把握度评分驱动的 Agent 运维处置中心 — 根因推理链、分级决策、What-if 推演与知识图谱关联分析。</p>
     </section>
 
-    <div class="demo-control-bar" role="region" aria-label="场景演练">
-      <div class="demo-control-meta">
-        <span class="demo-control-tag">场景演练</span>
-        <span class="demo-control-desc">预置场景用于验证与培训；生产环境请通过 POST /events Webhook 接入</span>
-      </div>
+    <div class="demo-control-bar" role="region" aria-label="场景触发">
       <div class="demo-control-actions">
         <button type="button" class="demo-scenario-btn s1" data-demo-scenario="s1" onclick="triggerScenario('s1')">
           <span class="demo-scenario-id">S1</span>
@@ -463,6 +459,8 @@
 
     const EVENT_LABELS = {
       incident_started: '事件接入',
+      diagnostic_agent_started: 'Diagnostic Agent 启动',
+      agent_thought: 'Agent 推理',
       tool_called: '工具查询',
       llm_reasoning: '大模型推理',
       llm_result: '大模型输出',
@@ -496,6 +494,8 @@
       else if (event.type === 'score_computed') summary = `总分=${payload.total} ${payload.grade || ''}`;
       else if (event.type === 'team_orchestration') summary = payload.mode_label || payload.mode || '';
       else if (event.type === 'llm_reasoning') summary = (payload.reasoning_chain || []).length + ' 步';
+      else if (event.type === 'agent_thought') summary = (payload.thought || '').slice(0, 40);
+      else if (event.type === 'diagnostic_agent_started') summary = (payload.tools || []).join(', ');
       else if (event.type === 'incident_started') summary = payload.agent_id || '';
 
       const div = document.createElement('div');

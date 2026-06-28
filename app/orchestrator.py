@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from app.config import settings
+from app.diagnostic_agent import DiagnosticAgent
 from app.db import (
     find_duplicate_event,
     get_incident,
@@ -102,38 +103,25 @@ class Orchestrator:
 
         await record("incident_started", {"event_id": event.event_id, "agent_id": event.agent_id})
 
-        tool_results = []
-        try:
-            tool_results = await asyncio.wait_for(
-                self.engine.run_tools(playbook_id, event),
-                timeout=settings.tool_timeout_s,
-            )
-        except asyncio.TimeoutError:
-            pb = self.engine.get(playbook_id)
-            tool_results = [
-                {"tool": t, "result": pb["tool_mocks"].get(t, {}), "success": False, "degraded": True}
-                for t in pb["required_tools"]
-            ]
+        tool_results: list[dict]
+        llm_output: LLMOutput
+        llm_model: str
 
-        for tr in tool_results:
-            await record("tool_called", tr)
-
-        messages = self.engine.build_llm_messages(playbook_id, event, tool_results)
-        playbook_cfg = self.engine.get(playbook_id)
-        llm_output: LLMOutput | None = None
-        llm_model = settings.llm_model
-        try:
-            llm_output, llm_model = await asyncio.wait_for(
-                self.llm.generate_with_retry(
-                    messages,
-                    playbook_id,
-                    playbook=playbook_cfg,
-                    event_type=event.type,
-                ),
-                timeout=settings.llm_timeout_s,
+        if settings.diagnostic_agent:
+            try:
+                agent = DiagnosticAgent(self.engine, self.llm)
+                tool_results, llm_output, llm_model = await agent.run(
+                    event, playbook_id, record
+                )
+            except Exception as e:
+                logger.warning("DiagnosticAgent failed, falling back to legacy pipeline: %s", e)
+                tool_results, llm_output, llm_model = await self._run_legacy_llm_pipeline(
+                    event, playbook_id, record
+                )
+        else:
+            tool_results, llm_output, llm_model = await self._run_legacy_llm_pipeline(
+                event, playbook_id, record
             )
-        except Exception as e:
-            raise RuntimeError(f"LLM failed: {e}") from e
 
         await record("llm_reasoning", {"reasoning_chain": llm_output.reasoning_chain, "model": llm_model})
         llm_dict = llm_output.model_dump()
@@ -165,6 +153,44 @@ class Orchestrator:
                 await record("channel_sync", {"channel": "feishu", "status": "failed", "error": str(e)})
 
         await record("incident_completed", {"trace_id": trace_id})
+
+    async def _run_legacy_llm_pipeline(
+        self,
+        event: AgentEvent,
+        playbook_id: str,
+        record: Any,
+    ) -> tuple[list[dict], LLMOutput, str]:
+        tool_results: list[dict] = []
+        try:
+            tool_results = await asyncio.wait_for(
+                self.engine.run_tools(playbook_id, event),
+                timeout=settings.tool_timeout_s,
+            )
+        except asyncio.TimeoutError:
+            pb = self.engine.get(playbook_id)
+            tool_results = [
+                {"tool": t, "result": pb["tool_mocks"].get(t, {}), "success": False, "degraded": True}
+                for t in pb["required_tools"]
+            ]
+
+        for tr in tool_results:
+            await record("tool_called", tr)
+
+        messages = self.engine.build_llm_messages(playbook_id, event, tool_results)
+        playbook_cfg = self.engine.get(playbook_id)
+        try:
+            llm_output, llm_model = await asyncio.wait_for(
+                self.llm.generate_with_retry(
+                    messages,
+                    playbook_id,
+                    playbook=playbook_cfg,
+                    event_type=event.type,
+                ),
+                timeout=settings.llm_timeout_s,
+            )
+        except Exception as e:
+            raise RuntimeError(f"LLM failed: {e}") from e
+        return tool_results, llm_output, llm_model
 
     async def replay(self, trace_id: str) -> dict[str, Any]:
         incident = get_incident(trace_id)

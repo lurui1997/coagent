@@ -23,6 +23,17 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="CoAgent", description="ToB Agent Ops Copilot", lifespan=lifespan)
 
+
+@app.middleware("http")
+async def disable_html_cache(request: Request, call_next):
+    response = await call_next(request)
+    content_type = response.headers.get("content-type", "")
+    if "text/html" in content_type:
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+    return response
+
+
 app.include_router(events.router)
 app.include_router(agents.router)
 app.include_router(admin.router)

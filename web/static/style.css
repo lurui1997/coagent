@@ -576,7 +576,7 @@ body {
   font-size: var(--text-sm);
 }
 
-/* ── Demo 控制条（非产品主功能） ── */
+/* ── 场景触发条 ── */
 .demo-control-bar {
   display: flex;
   flex-wrap: wrap;
@@ -584,9 +584,10 @@ body {
   gap: 0.75rem 1rem;
   margin-bottom: 1.25rem;
   padding: 0.75rem 1rem;
-  background: color-mix(in srgb, var(--amber-bg) 55%, var(--surface));
-  border: 1px dashed color-mix(in srgb, var(--amber) 35%, var(--border));
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .demo-control-meta {
