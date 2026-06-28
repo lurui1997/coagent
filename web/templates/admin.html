@@ -617,7 +617,7 @@
           links: [
             { rel: '状态', to: inc.status || '—' },
             ...(inc.duration_ms ? [{ rel: '耗时', to: `${inc.duration_ms} ms` }] : []),
-            ...(timeline.some(e => e.type === 'channel_sync') ? [{ rel: '通道', to: '飞书 IM 已同步' }] : []),
+            ...(timeline.some(e => e.type === 'channel_sync') ? [{ rel: '通道', to: '通道占位（飞书未对接）' }] : []),
           ],
         });
       }

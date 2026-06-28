@@ -190,6 +190,11 @@
 
     .chip:hover { transform: translateY(-2px); }
 
+    .chip.pipeline-active {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
     .chip.orange { background: var(--orange-soft); border-color: rgba(245,158,66,0.35); color: #fbbf72; }
     .chip.yellow { background: var(--yellow-soft); border-color: rgba(232,197,71,0.35); color: #f0d060; }
     .chip.blue { background: rgba(77,142,247,0.12); border-color: rgba(77,142,247,0.35); color: #93c5fd; }
@@ -741,8 +746,8 @@
           </div>
           <div class="ext-node green" data-node="feishu" tabindex="0">
             <h3>飞书 IM</h3>
-            <p>S1 🟢 卡片 + 一键 Retry · L2 通道降级</p>
-            <span class="tag">S1 only · S2/S3 Pro</span>
+            <p>规划中 · S1 卡片 + 一键 Retry</p>
+            <span class="tag">P1 · 骨架 feishu_im.py</span>
           </div>
         </aside>
 
@@ -901,7 +906,7 @@
           <div class="branch-card g">
             <div class="score">87</div>
             <h4>🟢 可执行</h4>
-            <p>S1 限流 · ≥80 · 敢重试 · 飞书卡片</p>
+            <p>S1 限流 · ≥80 · 敢重试 · 管理台一键重试</p>
           </div>
           <div class="branch-card y">
             <div class="score">72</div>
@@ -917,7 +922,7 @@
 
         <div class="side-card">
           <h4 style="font-size:0.85rem;margin-bottom:0.35rem">人工把关 · 飞轮</h4>
-          <p style="font-size:0.72rem;color:var(--muted)">评分驱动动作权限 · S1 飞书 Retry · Tab4 👍/👎 反馈迭代</p>
+          <p style="font-size:0.72rem;color:var(--muted)">评分驱动动作权限 · Tab2 模拟 Retry · Tab3 👍/👎 反馈迭代</p>
         </div>
       </div>
     </section>
@@ -1131,18 +1136,58 @@
       activeNode = null;
       document.querySelectorAll(".highlight").forEach(el => el.classList.remove("highlight"));
       document.querySelectorAll(".chip[data-link]").forEach(el => {
+        el.classList.remove("pipeline-active");
         el.style.boxShadow = "";
         el.style.transform = "";
       });
       renderEdges(null);
     }
 
+    const PIPELINE_STEPS = ["agent", "router", "playbook", "llm", "scorer", "admin"];
+    let pipelineIdx = 0;
+    let pipelineAutoPlay = true;
+
+    function setPipelineChipActive(linkId) {
+      document.querySelectorAll(".chip[data-link]").forEach(el => {
+        el.classList.toggle("pipeline-active", !!linkId && el.dataset.link === linkId);
+        if (linkId && el.dataset.link === linkId) {
+          el.style.boxShadow = "0 0 16px var(--accent-glow)";
+          el.style.transform = "translateY(-2px) scale(1.05)";
+        } else {
+          el.style.boxShadow = "";
+          el.style.transform = "";
+        }
+      });
+    }
+
+    function tickPipelineAutoPlay() {
+      if (!pipelineAutoPlay) return;
+      const step = PIPELINE_STEPS[pipelineIdx];
+      highlight(step);
+      setPipelineChipActive(step);
+      pipelineIdx = (pipelineIdx + 1) % PIPELINE_STEPS.length;
+    }
+
     document.querySelectorAll("[data-node], .chip[data-link]").forEach(el => {
       const id = el.dataset.node || el.dataset.link;
-      el.addEventListener("mouseenter", () => highlight(id));
-      el.addEventListener("focus", () => highlight(id));
-      el.addEventListener("mouseleave", clearHighlight);
-      el.addEventListener("blur", clearHighlight);
+      el.addEventListener("mouseenter", () => {
+        pipelineAutoPlay = false;
+        highlight(id);
+        setPipelineChipActive(id);
+      });
+      el.addEventListener("focus", () => {
+        pipelineAutoPlay = false;
+        highlight(id);
+        setPipelineChipActive(id);
+      });
+      el.addEventListener("mouseleave", () => {
+        pipelineAutoPlay = true;
+        clearHighlight();
+      });
+      el.addEventListener("blur", () => {
+        pipelineAutoPlay = true;
+        clearHighlight();
+      });
     });
 
     document.querySelectorAll(".view-tabs button").forEach(btn => {
@@ -1163,6 +1208,9 @@
       sseItems.forEach((li, i) => li.classList.toggle("active", i === sseIdx));
       sseIdx = (sseIdx + 1) % sseItems.length;
     }, 900);
+
+    setInterval(tickPipelineAutoPlay, 1200);
+    tickPipelineAutoPlay();
 
     let resizeTimer;
     function onResize() {
