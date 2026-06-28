@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     llm_timeout_s: float = 15.0
     feishu_timeout_s: float = 5.0
     pipeline_timeout_s: float = 30.0
+    correction_webhook_url: str = ""
 
     @property
     def use_mock_llm(self) -> bool:

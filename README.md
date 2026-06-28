@@ -18,6 +18,7 @@ MOCK_LLM=true DEMO_MODE=true uvicorn app.main:app --reload --port 8000
 打开 http://localhost:8000/ → Tab2 触发 S1/S2/S3 Demo。
 
 ```bash
-python -m pytest tests/ -m "not live_llm" -q
+bash scripts/run_tests.sh -q
+# 或: .venv/bin/python3 -m pytest tests/ -m "not live_llm" -q
 bash scripts/demo.sh
 ```

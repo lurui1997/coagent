@@ -1,4 +1,8 @@
 import os
+
+# 部分 shell 环境 PYTEST_ADDOPTS 会导致 0 tests collected
+os.environ.pop("PYTEST_ADDOPTS", None)
+
 import tempfile
 
 import pytest

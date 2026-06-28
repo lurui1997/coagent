@@ -44,6 +44,17 @@ CREATE TABLE IF NOT EXISTS agent_daily_stats (
   cost_yuan REAL DEFAULT 0,
   PRIMARY KEY (agent_id, date)
 );
+
+CREATE TABLE IF NOT EXISTS audit_actions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  trace_id TEXT NOT NULL,
+  action_type TEXT NOT NULL,
+  operator TEXT NOT NULL DEFAULT 'system',
+  payload_json TEXT,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_actions_trace ON audit_actions(trace_id);
 """
 
 
@@ -66,6 +77,15 @@ def get_db():
 def init_db() -> None:
     with get_db() as conn:
         conn.executescript(SCHEMA)
+        _migrate_incidents_operator(conn)
+
+
+def _migrate_incidents_operator(conn: sqlite3.Connection) -> None:
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(incidents)").fetchall()}
+    if "operator" not in cols:
+        conn.execute("ALTER TABLE incidents ADD COLUMN operator TEXT DEFAULT 'system'")
+    if "llm_model" not in cols:
+        conn.execute("ALTER TABLE incidents ADD COLUMN llm_model TEXT")
 
 
 def utc_now_iso() -> str:
@@ -92,12 +112,21 @@ def insert_incident(
     agent_id: str,
     scenario_id: str,
     event_json: dict[str, Any],
+    operator: str = "system",
 ) -> int:
     with get_db() as conn:
         cur = conn.execute(
-            """INSERT INTO incidents (trace_id, event_id, agent_id, scenario_id, status, event_json, timeline_json, started_at)
-               VALUES (?, ?, ?, ?, 'running', ?, '[]', ?)""",
-            (trace_id, event_id, agent_id, scenario_id, json.dumps(event_json, ensure_ascii=False), utc_now_iso()),
+            """INSERT INTO incidents (trace_id, event_id, agent_id, scenario_id, status, event_json, timeline_json, started_at, operator)
+               VALUES (?, ?, ?, ?, 'running', ?, '[]', ?, ?)""",
+            (
+                trace_id,
+                event_id,
+                agent_id,
+                scenario_id,
+                json.dumps(event_json, ensure_ascii=False),
+                utc_now_iso(),
+                operator,
+            ),
         )
         return cur.lastrowid
 
@@ -111,6 +140,7 @@ def update_incident(
     timeline_json: list | None = None,
     feishu_msg_id: str | None = None,
     duration_ms: int | None = None,
+    llm_model: str | None = None,
 ) -> None:
     fields: list[str] = []
     values: list[Any] = []
@@ -135,6 +165,9 @@ def update_incident(
     if duration_ms is not None:
         fields.append("duration_ms = ?")
         values.append(duration_ms)
+    if llm_model is not None:
+        fields.append("llm_model = ?")
+        values.append(llm_model)
     if not fields:
         return
     values.append(trace_id)
@@ -206,6 +239,81 @@ def insert_feedback(incident_id: int, rating: str, comment: str | None = None) -
             "INSERT INTO feedback (incident_id, rating, comment, created_at) VALUES (?, ?, ?, ?)",
             (incident_id, rating, comment, utc_now_iso()),
         )
+
+
+def insert_audit_action(
+    trace_id: str,
+    action_type: str,
+    operator: str,
+    payload: dict[str, Any] | None = None,
+) -> None:
+    with get_db() as conn:
+        conn.execute(
+            """INSERT INTO audit_actions (trace_id, action_type, operator, payload_json, created_at)
+               VALUES (?, ?, ?, ?, ?)""",
+            (
+                trace_id,
+                action_type,
+                operator,
+                json.dumps(payload or {}, ensure_ascii=False),
+                utc_now_iso(),
+            ),
+        )
+
+
+def list_audit_actions(trace_id: str | None = None, limit: int = 100) -> list[dict]:
+    with get_db() as conn:
+        if trace_id:
+            rows = conn.execute(
+                """SELECT * FROM audit_actions WHERE trace_id = ? ORDER BY created_at DESC LIMIT ?""",
+                (trace_id, limit),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                """SELECT * FROM audit_actions ORDER BY created_at DESC LIMIT ?""",
+                (limit,),
+            ).fetchall()
+    result = []
+    for row in rows:
+        d = dict(row)
+        if d.get("payload_json"):
+            d["payload_json"] = json.loads(d["payload_json"])
+        else:
+            d["payload_json"] = {}
+        result.append(d)
+    return result
+
+
+def export_audit_records(limit: int = 500) -> list[dict]:
+    """合并 incident + audit_actions 供企业审计导出。"""
+    incidents = list_incidents(limit)
+    records = []
+    for inc in incidents:
+        actions = list_audit_actions(inc["trace_id"])
+        records.append({
+            "trace_id": inc["trace_id"],
+            "event_id": inc["event_id"],
+            "agent_id": inc["agent_id"],
+            "scenario_id": inc["scenario_id"],
+            "status": inc["status"],
+            "operator": inc.get("operator") or "system",
+            "llm_model": inc.get("llm_model"),
+            "started_at": inc["started_at"],
+            "completed_at": inc.get("completed_at"),
+            "duration_ms": inc.get("duration_ms"),
+            "score_total": (inc.get("score_json") or {}).get("total"),
+            "score_grade": (inc.get("score_json") or {}).get("grade"),
+            "audit_actions": [
+                {
+                    "action_type": a["action_type"],
+                    "operator": a["operator"],
+                    "created_at": a["created_at"],
+                    "payload": a["payload_json"],
+                }
+                for a in actions
+            ],
+        })
+    return records
 
 
 def get_feedback_stats() -> dict:

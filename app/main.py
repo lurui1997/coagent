@@ -1,4 +1,5 @@
 import json
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -10,7 +11,14 @@ from app.api import admin, demo, events
 from app.config import settings
 from app.db import get_feedback_stats, get_latest_scores, init_db, list_incidents
 
-app = FastAPI(title="CoAgent", description="ToB Agent Ops Copilot")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(title="CoAgent", description="ToB Agent Ops Copilot", lifespan=lifespan)
 
 app.include_router(events.router)
 app.include_router(admin.router)
@@ -22,11 +30,6 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "web" / "templates"))
 static_dir = BASE_DIR / "web" / "static"
 static_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
-
-
-@app.on_event("startup")
-def startup():
-    init_db()
 
 
 @app.get("/", response_class=HTMLResponse)

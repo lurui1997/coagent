@@ -5,6 +5,7 @@ from typing import Any
 import httpx
 
 from app.config import settings
+from app.llm.model_router import ModelRouter
 from app.models.llm_output import LLMOutput, Step
 
 logger = logging.getLogger(__name__)
@@ -63,9 +64,25 @@ MOCK_RESPONSES = {
 
 
 class LLMClient:
-    async def generate(self, messages: list[dict], playbook_id: str) -> LLMOutput:
+    def __init__(self):
+        self.router = ModelRouter()
+
+    async def generate(
+        self,
+        messages: list[dict],
+        playbook_id: str,
+        *,
+        playbook: dict | None = None,
+        event_type: str | None = None,
+        use_fallback: bool = False,
+    ) -> tuple[LLMOutput, str]:
+        model = self.router.resolve(
+            playbook or {},
+            event_type=event_type,
+            use_fallback=use_fallback,
+        )
         if settings.use_mock_llm:
-            return MOCK_RESPONSES[playbook_id]
+            return MOCK_RESPONSES[playbook_id], model
 
         schema_hint = (
             '{"impact":"string","hypothesis":["string"],'
@@ -82,7 +99,7 @@ class LLMClient:
                 f"{settings.llm_base_url.rstrip('/')}/chat/completions",
                 headers={"Authorization": f"Bearer {settings.llm_api_key}"},
                 json={
-                    "model": settings.llm_model,
+                    "model": model,
                     "messages": messages,
                     "response_format": {"type": "json_object"},
                     "temperature": 0.3,
@@ -91,11 +108,29 @@ class LLMClient:
             resp.raise_for_status()
             content = resp.json()["choices"][0]["message"]["content"]
             data = json.loads(content)
-            return LLMOutput.model_validate(data)
+            return LLMOutput.model_validate(data), model
 
-    async def generate_with_retry(self, messages: list[dict], playbook_id: str) -> LLMOutput:
+    async def generate_with_retry(
+        self,
+        messages: list[dict],
+        playbook_id: str,
+        *,
+        playbook: dict | None = None,
+        event_type: str | None = None,
+    ) -> tuple[LLMOutput, str]:
         try:
-            return await self.generate(messages, playbook_id)
+            return await self.generate(
+                messages,
+                playbook_id,
+                playbook=playbook,
+                event_type=event_type,
+            )
         except Exception as e:
             logger.warning("LLM first attempt failed: %s", e)
-            return await self.generate(messages, playbook_id)
+            return await self.generate(
+                messages,
+                playbook_id,
+                playbook=playbook,
+                event_type=event_type,
+                use_fallback=True,
+            )

@@ -385,6 +385,9 @@
         html += `<div class="alert alert-danger" style="flex:1;margin:0">升级 {{ escalate_user }} — 高风险步骤不可自动执行</div>`;
       }
       html += `<button class="btn btn-secondary" type="button" onclick="doReplay('${inc.trace_id}')">回放审计</button>`;
+      if (inc.correction_suggestions?.length) {
+        html += `<button class="btn btn-outline" type="button" onclick="applyCorrection('${inc.trace_id}')">应用纠偏建议 (${inc.correction_suggestions.length})</button>`;
+      }
       html += '</div>';
 
       if (grade === 'escalate' && llm.comms_draft) {
@@ -423,6 +426,19 @@
       renderDecision(inc);
       highlightIncidentRow(traceId);
       showTraceBanner(traceId);
+    }
+
+    async function applyCorrection(traceId) {
+      const res = await fetch(`/admin/incidents/${traceId}/apply-correction`, {
+        method: 'POST',
+        headers: { 'X-Operator': 'admin-ui' },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`已应用 ${data.suggestions_applied} 条纠偏建议 (操作人: ${data.operator})`);
+      } else {
+        alert(data.detail || '应用失败');
+      }
     }
 
     function selectIncident(traceId) {

@@ -9,6 +9,7 @@ from app.config import settings
 from app.db import (
     find_duplicate_event,
     get_incident,
+    insert_audit_action,
     insert_incident,
     new_trace_id,
     update_incident,
@@ -33,7 +34,12 @@ class Orchestrator:
         self.engine = PlaybookEngine()
         self.llm = LLMClient()
 
-    async def process_event(self, event: AgentEvent, scenario_id: str | None = None) -> dict[str, Any]:
+    async def process_event(
+        self,
+        event: AgentEvent,
+        scenario_id: str | None = None,
+        operator: str = "system",
+    ) -> dict[str, Any]:
         existing = find_duplicate_event(event.event_id)
         if existing:
             return {"status": "duplicate", "trace_id": existing}
@@ -50,7 +56,10 @@ class Orchestrator:
             scenario_id = scenario_id or playbook_id
 
         trace_id = new_trace_id()
-        incident_id = insert_incident(trace_id, event.event_id, event.agent_id, scenario_id, event.model_dump())
+        incident_id = insert_incident(
+            trace_id, event.event_id, event.agent_id, scenario_id, event.model_dump(), operator=operator
+        )
+        insert_audit_action(trace_id, "incident_created", operator, {"event_id": event.event_id})
         timeline: list[dict] = []
         start_ms = time.time()
 
@@ -102,19 +111,26 @@ class Orchestrator:
             await record("tool_called", tr)
 
         messages = self.engine.build_llm_messages(playbook_id, event, tool_results)
+        playbook_cfg = self.engine.get(playbook_id)
         llm_output: LLMOutput | None = None
+        llm_model = settings.llm_model
         try:
-            llm_output = await asyncio.wait_for(
-                self.llm.generate_with_retry(messages, playbook_id),
+            llm_output, llm_model = await asyncio.wait_for(
+                self.llm.generate_with_retry(
+                    messages,
+                    playbook_id,
+                    playbook=playbook_cfg,
+                    event_type=event.type,
+                ),
                 timeout=settings.llm_timeout_s,
             )
         except Exception as e:
             raise RuntimeError(f"LLM failed: {e}") from e
 
-        await record("llm_reasoning", {"reasoning_chain": llm_output.reasoning_chain})
+        await record("llm_reasoning", {"reasoning_chain": llm_output.reasoning_chain, "model": llm_model})
         llm_dict = llm_output.model_dump()
         await record("llm_result", llm_dict)
-        update_incident(trace_id, llm_json=llm_dict)
+        update_incident(trace_id, llm_json=llm_dict, llm_model=llm_model)
 
         playbook = self.engine.get_playbook_for_scoring(playbook_id)
         score = compute_score(event, llm_output, playbook, tool_results)
