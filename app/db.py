@@ -1,12 +1,13 @@
 import json
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
 from app.config import settings
+from app.timeutil import now_cn, now_iso, today_cn_str
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS incidents (
@@ -89,7 +90,7 @@ def _migrate_incidents_operator(conn: sqlite3.Connection) -> None:
 
 
 def utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return now_iso()
 
 
 def new_trace_id() -> str:
@@ -97,7 +98,7 @@ def new_trace_id() -> str:
 
 
 def find_duplicate_event(event_id: str, within_seconds: int = 600) -> str | None:
-    cutoff = (datetime.now(timezone.utc) - timedelta(seconds=within_seconds)).isoformat()
+    cutoff = (now_cn() - timedelta(seconds=within_seconds)).isoformat(timespec="seconds")
     with get_db() as conn:
         row = conn.execute(
             "SELECT trace_id FROM incidents WHERE event_id = ? AND started_at > ? ORDER BY started_at DESC LIMIT 1",
@@ -202,7 +203,7 @@ def _row_to_incident(row: sqlite3.Row) -> dict:
 
 
 def upsert_agent_stats(agent_id: str, event_type: str, cost_yuan_today: float) -> None:
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today = today_cn_str()
     with get_db() as conn:
         conn.execute(
             """INSERT INTO agent_daily_stats (agent_id, date, run_count, fail_count, cost_yuan)
@@ -314,6 +315,28 @@ def export_audit_records(limit: int = 500) -> list[dict]:
             ],
         })
     return records
+
+
+def list_feedback_history(limit: int = 50) -> list[dict]:
+    with get_db() as conn:
+        rows = conn.execute(
+            """SELECT f.rating, f.comment, f.created_at,
+                      i.trace_id, i.agent_id, i.scenario_id, i.status, i.score_json
+               FROM feedback f
+               JOIN incidents i ON i.id = f.incident_id
+               ORDER BY f.created_at DESC
+               LIMIT ?""",
+            (limit,),
+        ).fetchall()
+    result = []
+    for row in rows:
+        d = dict(row)
+        if d.get("score_json"):
+            d["score_json"] = json.loads(d["score_json"])
+        else:
+            d["score_json"] = {}
+        result.append(d)
+    return result
 
 
 def get_feedback_stats() -> dict:

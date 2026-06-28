@@ -53,3 +53,21 @@ async def test_feedback_records_audit(client):
     record = next(r for r in export.json()["records"] if r["trace_id"] == trace_id)
     action_types = [a["action_type"] for a in record["audit_actions"]]
     assert "feedback" in action_types
+    fb = next(a for a in record["audit_actions"] if a["action_type"] == "feedback")
+    assert fb["payload"].get("agent_id")
+    assert fb["payload"].get("rating") == "up"
+
+
+@pytest.mark.asyncio
+async def test_feedback_history(client):
+    trigger = await client.post("/admin/trigger/s1", headers={"X-Operator": "flywheel-user"})
+    trace_id = trigger.json()["trace_id"]
+    await client.post(
+        f"/admin/incidents/{trace_id}/feedback?rating=down",
+        headers={"X-Operator": "flywheel-user"},
+    )
+    resp = await client.get("/admin/feedback/history?limit=10")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["count"] >= 1
+    assert any(h["trace_id"] == trace_id for h in data["history"])

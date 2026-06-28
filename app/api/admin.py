@@ -17,6 +17,7 @@ from app.db import (
     insert_audit_action,
     insert_feedback,
     list_audit_actions,
+    list_feedback_history,
     list_incidents,
 )
 from app.orchestrator import orchestrator
@@ -107,9 +108,29 @@ async def submit_feedback(
     if rating not in ("up", "down"):
         raise HTTPException(400, "rating must be up or down")
     operator = _operator(x_operator)
+    score = incident.get("score_json") or {}
     insert_feedback(incident["id"], rating, comment)
-    insert_audit_action(trace_id, "feedback", operator, {"rating": rating, "comment": comment})
-    return {"status": "ok"}
+    insert_audit_action(
+        trace_id,
+        "feedback",
+        operator,
+        {
+            "rating": rating,
+            "comment": comment,
+            "agent_id": incident.get("agent_id"),
+            "scenario_id": incident.get("scenario_id"),
+            "status": incident.get("status"),
+            "score_total": score.get("total"),
+            "grade": score.get("grade"),
+        },
+    )
+    return {"status": "ok", "trace_id": trace_id}
+
+
+@router.get("/feedback/history")
+async def get_feedback_history(limit: int = 30):
+    history = list_feedback_history(limit=limit)
+    return {"history": history, "count": len(history)}
 
 
 @router.get("/stats")

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" fill="none">
+  <rect width="400" height="240" fill="#fffbeb"/>
+  <g opacity="0.12" stroke="#d97706" stroke-width="0.5">
+    <path d="M0 60h400M0 120h400M0 180h400"/>
+  </g>
+  <rect x="55" y="50" width="36" height="130" rx="4" fill="#fde68a" opacity="0.5"/>
+  <rect x="105" y="70" width="36" height="110" rx="4" fill="#fcd34d" opacity="0.55"/>
+  <rect x="155" y="95" width="36" height="85" rx="4" fill="#fbbf24" opacity="0.6"/>
+  <rect x="205" y="130" width="36" height="50" rx="4" fill="#f59e0b" opacity="0.65"/>
+  <rect x="255" y="168" width="36" height="12" rx="4" fill="#d97706" opacity="0.7"/>
+  <rect x="305" y="172" width="36" height="8" rx="4" fill="#b45309"/>
+  <path d="M55 180 L341 180" stroke="#64748b" stroke-width="1" stroke-dasharray="5 4" opacity="0.5"/>
+  <circle cx="320" cy="100" r="28" stroke="#0284c7" stroke-width="2" opacity="0.4"/>
+  <path d="M308 100h24M320 88v24" stroke="#0284c7" stroke-width="2" opacity="0.3"/>
+  <text x="320" y="148" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#64748b">0 chunks</text>
+  <text x="48" y="28" font-family="system-ui,sans-serif" font-size="11" fill="#92400e">¿"}-á</text>
+  <text x="270" y="28" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#d97706">35% z¿"</text>
+</svg>

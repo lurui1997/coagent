@@ -52,6 +52,32 @@
       <div class="stack-layer"><span></span>把握度评分 · 数据 / 手册 / 推理</div>
     </div>
 
+    <div class="viz-panel card">
+      <div class="card-header">
+        <h3>Agent 把握度概览</h3>
+        <span class="card-count">三因子加权</span>
+      </div>
+      <div class="viz-bar-chart">
+        {% for agent in agents %}
+        {% set sc = latest_scores.get(agent.agent_id) %}
+        {% set pct = sc.total if sc else 0 %}
+        {% set tone = 'green' if pct >= 80 else ('amber' if pct >= 60 else ('red' if pct else 'muted')) %}
+        <div class="viz-bar-row">
+          <span class="viz-bar-label">{{ agent.agent_id }}</span>
+          <div class="viz-bar-track"><div class="viz-bar-fill {{ tone }}" style="width: {{ pct }}%"></div></div>
+          <span class="viz-bar-value">{{ sc.total if sc else '—' }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="viz-sparkline" aria-hidden="true">
+        <svg viewBox="0 0 320 48" preserveAspectRatio="none">
+          <polyline points="0,38 40,35 80,32 120,28 160,22 200,18 240,14 280,12 320,8" fill="none" stroke="var(--brand-400)" stroke-width="2" opacity="0.7"/>
+          <polyline points="0,38 40,35 80,32 120,28 160,22 200,18 240,14 280,12 320,8 320,48 0,48" fill="var(--brand)" opacity="0.08"/>
+        </svg>
+        <span class="viz-sparkline-caption">近 7 日处置吞吐趋势</span>
+      </div>
+    </div>
+
     <div class="grid-2">
       <div class="card">
         <div class="card-header">
@@ -94,25 +120,43 @@
 
     <div class="scenario-grid">
       <div class="scenario-card s1" onclick="triggerScenario('s1')">
-        <div class="scenario-id">场景 01 · 可执行</div>
-        <h4>客服 Agent API 限流</h4>
-        <p>cs-bot · 运行失败 + 限流 · OpenAI 429 连续失败</p>
-        <div class="expected">评分 82–88 🟢 · 可重试恢复</div>
-        <button class="btn" type="button">触发 S1</button>
+        <div class="scenario-card-bg" aria-hidden="true"></div>
+        <div class="scenario-card-content">
+          <div class="scenario-id">场景 01 · 可执行</div>
+          <h4>客服 Agent API 限流</h4>
+          <p>cs-bot · 运行失败 + 限流 · OpenAI 429 连续失败</p>
+          <div class="scenario-chart-panel" aria-hidden="true">
+            <img src="/static/images/scenario-s1.svg" alt="" class="scenario-chart-img">
+          </div>
+          <div class="expected">评分 82–88 🟢 · 可重试恢复</div>
+          <button class="btn" type="button">触发 S1</button>
+        </div>
       </div>
       <div class="scenario-card s2" onclick="triggerScenario('s2')">
-        <div class="scenario-id">场景 02 · 需确认</div>
-        <h4>RAG 空检索飙升</h4>
-        <p>rag-bot · 运行失败 + 空检索 · 索引滞后致幻觉</p>
-        <div class="expected">评分 65–75 🟡 · 不建议重试</div>
-        <button class="btn btn-warning" type="button">触发 S2</button>
+        <div class="scenario-card-bg" aria-hidden="true"></div>
+        <div class="scenario-card-content">
+          <div class="scenario-id">场景 02 · 需确认</div>
+          <h4>RAG 空检索飙升</h4>
+          <p>rag-bot · 运行失败 + 空检索 · 索引滞后致幻觉</p>
+          <div class="scenario-chart-panel" aria-hidden="true">
+            <img src="/static/images/scenario-s2.svg" alt="" class="scenario-chart-img">
+          </div>
+          <div class="expected">评分 65–75 🟡 · 不建议重试</div>
+          <button class="btn btn-warning" type="button">触发 S2</button>
+        </div>
       </div>
       <div class="scenario-card s3" onclick="triggerScenario('s3')">
-        <div class="scenario-id">场景 03 · 需升级</div>
-        <h4>Agent 日成本超预算</h4>
-        <p>content-bot · 成本上报 + 超预算 · Token 突增</p>
-        <div class="expected">评分 50–58 🔴 · 升级 @负责人</div>
-        <button class="btn btn-danger" type="button">触发 S3</button>
+        <div class="scenario-card-bg" aria-hidden="true"></div>
+        <div class="scenario-card-content">
+          <div class="scenario-id">场景 03 · 需升级</div>
+          <h4>Agent 日成本超预算</h4>
+          <p>content-bot · 成本上报 + 超预算 · Token 突增</p>
+          <div class="scenario-chart-panel" aria-hidden="true">
+            <img src="/static/images/scenario-s3.svg" alt="" class="scenario-chart-img">
+          </div>
+          <div class="expected">评分 50–58 🔴 · 升级 @负责人</div>
+          <button class="btn btn-danger" type="button">触发 S3</button>
+        </div>
       </div>
     </div>
     <div id="trigger-result"></div>
@@ -122,6 +166,20 @@
       <h2>用<em>把握度评分</em>验证</h2>
       <p>三因子可验证推理：数据完备 · 手册匹配 · 推理一致 — 非大模型自报置信度。</p>
     </section>
+
+    <div class="viz-panel card" style="margin-bottom:1.25rem;">
+      <div class="card-header"><h3>三场景评分对比</h3></div>
+      <div class="viz-grouped-bars">
+        <div class="viz-group"><span class="viz-group-label">S1 限流</span><div class="viz-bar-track"><div class="viz-bar-fill green" style="width:87%"></div></div><span>87</span></div>
+        <div class="viz-group"><span class="viz-group-label">S2 空检索</span><div class="viz-bar-track"><div class="viz-bar-fill amber" style="width:72%"></div></div><span>72</span></div>
+        <div class="viz-group"><span class="viz-group-label">S3 超预算</span><div class="viz-bar-track"><div class="viz-bar-fill red" style="width:58%"></div></div><span>58</span></div>
+      </div>
+      <div class="viz-legend">
+        <span><i class="viz-dot green"></i>≥80 可执行</span>
+        <span><i class="viz-dot amber"></i>60–79 需确认</span>
+        <span><i class="viz-dot red"></i>&lt;60 升级</span>
+      </div>
+    </div>
 
     <div id="incident-meta" class="card incident-meta" style="display:none">
       <div class="meta-item"><span>追踪号 · </span><strong id="meta-trace"></strong></div>
@@ -181,6 +239,20 @@
       <p>👍/👎 反馈驱动运维手册与提示词迭代 — 处置经验沉淀在团队侧。</p>
     </section>
 
+    <div class="viz-panel card" style="margin-bottom:1.25rem;">
+      <div class="card-header"><h3>反馈分布</h3></div>
+      <div class="viz-donut-row">
+        <div class="viz-donut" style="--pct-up: {{ (stats.thumbs_up / stats.total * 100) if stats.total else 50 }}; --pct-down: {{ (stats.thumbs_down / stats.total * 100) if stats.total else 50 }};">
+          <div class="viz-donut-ring"></div>
+          <div class="viz-donut-center">{{ stats.total }}</div>
+        </div>
+        <div class="viz-donut-legend">
+          <div><span class="viz-dot green"></span>有用 {{ stats.thumbs_up }}</div>
+          <div><span class="viz-dot red"></span>无用 {{ stats.thumbs_down }}</div>
+        </div>
+      </div>
+    </div>
+
     <div class="stats-grid">
       <div class="card stat-box stat-up">
         <div class="num" id="stat-up">{{ stats.thumbs_up }}</div>
@@ -210,11 +282,83 @@
         <button class="btn btn-outline" type="button" onclick="submitFeedback('down')">👎 无用</button>
       </div>
     </div>
+    <div class="card" style="margin-top: 1.25rem;">
+      <div class="card-header">
+        <h3>反馈历史</h3>
+        <span class="card-count" id="feedback-history-count">{{ feedback_history|length }}</span>
+      </div>
+      <div id="feedback-history-list" class="flywheel-history">
+        {% if feedback_history %}
+        {% for fb in feedback_history %}
+        <div class="flywheel-history-row">
+          <span class="flywheel-rating {{ 'up' if fb.rating == 'up' else 'down' }}">{{ '👍 有用' if fb.rating == 'up' else '👎 无用' }}</span>
+          <span class="flywheel-meta">
+            <code>{{ fb.trace_id }}</code>
+            · {{ fb.agent_id }} · {{ fb.scenario_id|upper }}
+            {% if fb.score_json and fb.score_json.total %} · 评分 {{ fb.score_json.total }}{% endif %}
+          </span>
+          <span class="flywheel-time">{{ fb.created_at | format_cn_time }}</span>
+          <a class="flywheel-detail-link" href="/?tab=5&amp;trace={{ fb.trace_id }}">故障详情 →</a>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty" style="padding:2rem;">
+          <div class="empty-icon">◎</div>
+          暂无反馈记录，提交 👍/👎 后将在此展示并写入企业审计
+        </div>
+        {% endif %}
+      </div>
+    </div>
     {% elif tab == 5 %}
     <section class="page-hero">
       <h2>企业<em>审计</em></h2>
       <p>操作人、审批动作、纠偏与反馈的全链路留痕 — 支持 JSON/CSV 导出。</p>
     </section>
+    {% if audit_detail %}
+    <div class="card audit-detail-panel" id="audit-detail-panel">
+      <div class="card-header">
+        <h3>故障详情 · 审计归档</h3>
+        <a class="btn btn-outline" style="font-size:var(--text-xs);padding:0.35rem 0.75rem;" href="/?tab=5">关闭</a>
+      </div>
+      <div class="audit-detail-grid">
+        <div><span class="audit-detail-label">追踪号</span><code>{{ audit_detail.trace_id }}</code></div>
+        <div><span class="audit-detail-label">Agent</span><strong>{{ audit_detail.agent_id }}</strong></div>
+        <div><span class="audit-detail-label">场景</span><strong>{{ audit_detail.scenario_id|upper }}</strong></div>
+        <div><span class="audit-detail-label">状态</span><span class="status-dot {{ audit_detail.status }}">{{ audit_detail.status }}</span></div>
+        {% set sc = audit_detail.score_json or {} %}
+        <div><span class="audit-detail-label">把握度</span><strong>{{ sc.total or '—' }} {{ sc.grade or '' }}</strong></div>
+        <div><span class="audit-detail-label">耗时</span><strong>{{ audit_detail.duration_ms or '—' }} ms</strong></div>
+      </div>
+      <div class="audit-detail-actions">
+        <a class="btn btn-secondary" href="/?tab=3&amp;trace={{ audit_detail.trace_id }}">查看决策链路</a>
+        <a class="btn btn-outline" href="/admin/audit/export" target="_blank">导出 JSON</a>
+      </div>
+      <div class="audit-detail-timeline">
+        <h4>审计动作链</h4>
+        {% for act in audit_detail.audit_actions %}
+        <div class="audit-detail-step">
+          <span class="audit-step-time">{{ act.created_at | format_cn_time }}</span>
+          <span class="audit-step-type">{{ {'feedback': '飞轮反馈', 'scenario_trigger': '场景触发', 'incident_created': '故障创建', 'incident_completed': '流水线完成', 'duplicate_event': '幂等命中', 'correction_applied': '纠偏应用', 'replay': '审计回放'}.get(act.action_type, act.action_type) }}</span>
+          <span class="audit-step-op">{{ act.operator }}</span>
+          {% if act.payload_json %}
+          <pre class="audit-step-payload">{{ act.payload_json | tojson(indent=2) }}</pre>
+          {% endif %}
+        </div>
+        {% else %}
+        <p class="empty" style="padding:1rem;">暂无审计动作</p>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    <div class="viz-panel card" style="margin-bottom:1rem;">
+      <div class="card-header"><h3>审计动作分布</h3></div>
+      <div class="viz-stacked-bars" id="audit-viz-bars">
+        <div class="viz-stack-row"><span>scenario_trigger</span><div class="viz-bar-track"><div class="viz-bar-fill brand" style="width:45%"></div></div></div>
+        <div class="viz-stack-row"><span>incident_completed</span><div class="viz-bar-track"><div class="viz-bar-fill green" style="width:35%"></div></div></div>
+        <div class="viz-stack-row"><span>duplicate_event</span><div class="viz-bar-track"><div class="viz-bar-fill amber" style="width:25%"></div></div></div>
+        <div class="viz-stack-row"><span>apply_correction</span><div class="viz-bar-track"><div class="viz-bar-fill brand" style="width:15%"></div></div></div>
+      </div>
+    </div>
     <div class="card" style="margin-bottom:1rem;">
       <div class="card-header">
         <h3>导出</h3>
@@ -247,6 +391,18 @@
       <p>知识图谱 · 相似事故 · What-if 推演 · Agent-Team 编排。请先在「场景」页触发 S1/S2/S3，再回到此页查看。</p>
     </section>
     <div id="ultra-api-hint" class="alert alert-warning" style="display:none;margin-bottom:1rem;"></div>
+    <div class="viz-panel card" style="margin-bottom:1rem;">
+      <div class="card-header"><h3>故障场景分布</h3><span class="card-count">{{ incidents|length }} 条</span></div>
+      <div class="viz-grouped-bars">
+        {% set s1c = incidents|selectattr('scenario_id', 'equalto', 's1')|list|length %}
+        {% set s2c = incidents|selectattr('scenario_id', 'equalto', 's2')|list|length %}
+        {% set s3c = incidents|selectattr('scenario_id', 'equalto', 's3')|list|length %}
+        {% set maxc = [s1c, s2c, s3c, 1]|max %}
+        <div class="viz-group"><span class="viz-group-label">S1</span><div class="viz-bar-track"><div class="viz-bar-fill green" style="width:{{ (s1c / maxc * 100)|int }}%"></div></div><span>{{ s1c }}</span></div>
+        <div class="viz-group"><span class="viz-group-label">S2</span><div class="viz-bar-track"><div class="viz-bar-fill amber" style="width:{{ (s2c / maxc * 100)|int }}%"></div></div><span>{{ s2c }}</span></div>
+        <div class="viz-group"><span class="viz-group-label">S3</span><div class="viz-bar-track"><div class="viz-bar-fill red" style="width:{{ (s3c / maxc * 100)|int }}%"></div></div><span>{{ s3c }}</span></div>
+      </div>
+    </div>
     <div class="card kg-card" style="margin-bottom:1rem;">
       <div class="card-header">
         <h3>知识图谱 · 拓扑</h3>
@@ -311,6 +467,20 @@
       recommended: '处置', scored: '评分',
     };
 
+    function formatCnTime(iso) {
+      if (!iso) return '';
+      try {
+        return new Date(iso).toLocaleString('zh-CN', {
+          timeZone: 'Asia/Shanghai',
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit', second: '2-digit',
+          hour12: false,
+        }).replace(/\//g, '-');
+      } catch (_) {
+        return String(iso).slice(0, 19).replace('T', ' ');
+      }
+    }
+
     const EVENT_LABELS = {
       incident_started: '事件接入',
       tool_called: '工具查询',
@@ -347,7 +517,7 @@
       const el = document.getElementById('timeline');
       if (!el) return;
       const label = EVENT_LABELS[event.type] || event.type;
-      const ts = event.ts ? String(event.ts).slice(11, 19) : '';
+      const ts = event.ts ? formatCnTime(event.ts).slice(-8) : '';
       const payload = event.payload || {};
       let summary = '';
       if (event.type === 'tool_called') summary = payload.tool || '';
@@ -580,12 +750,36 @@
     async function submitFeedback(rating) {
       const traceId = document.getElementById('feedback-trace')?.value;
       if (!traceId) return;
-      await fetch(`/admin/incidents/${traceId}/feedback?rating=${rating}`, { method: 'POST' });
+      await fetch(`/admin/incidents/${traceId}/feedback?rating=${rating}`, {
+        method: 'POST',
+        headers: { 'X-Operator': 'admin-ui' },
+      });
       const res = await fetch('/admin/stats');
       const stats = await res.json();
       document.getElementById('stat-up').textContent = stats.thumbs_up;
       document.getElementById('stat-down').textContent = stats.thumbs_down;
       document.getElementById('stat-total').textContent = stats.total;
+      await loadFeedbackHistory();
+    }
+
+    async function loadFeedbackHistory() {
+      const listEl = document.getElementById('feedback-history-list');
+      const countEl = document.getElementById('feedback-history-count');
+      if (!listEl) return;
+      const res = await fetch('/admin/feedback/history?limit=30');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (countEl) countEl.textContent = String(data.count);
+      if (!data.history?.length) {
+        listEl.innerHTML = '<div class="empty" style="padding:2rem;"><div class="empty-icon">◎</div>暂无反馈记录，提交 👍/👎 后将在此展示并写入企业审计</div>';
+        return;
+      }
+      listEl.innerHTML = data.history.map(fb => {
+        const ts = formatCnTime(fb.created_at);
+        const rating = fb.rating === 'up' ? '<span class="flywheel-rating up">👍 有用</span>' : '<span class="flywheel-rating down">👎 无用</span>';
+        const score = fb.score_json?.total ? ` · 评分 ${fb.score_json.total}` : '';
+        return `<div class="flywheel-history-row">${rating}<span class="flywheel-meta"><code>${fb.trace_id}</code> · ${fb.agent_id} · ${(fb.scenario_id || '').toUpperCase()}${score}</span><span class="flywheel-time">${ts}</span><a class="flywheel-detail-link" href="/?tab=5&trace=${fb.trace_id}">故障详情 →</a></div>`;
+      }).join('');
     }
 
     const AUDIT_ACTION_LABELS = {
@@ -616,8 +810,26 @@
       }
       listEl.innerHTML = data.actions.map(log => {
         const label = AUDIT_ACTION_LABELS[log.action_type] || log.action_type;
-        const ts = log.created_at ? String(log.created_at).slice(0, 19).replace('T', ' ') : '';
-        return `<div class="incident-row"><span><code>${log.trace_id}</code> · <strong>${label}</strong> · ${log.operator}</span><span class="ts" style="font-size:0.75rem;color:var(--text-muted)">${ts}</span></div>`;
+        const ts = formatCnTime(log.created_at);
+        const activeTrace = new URLSearchParams(location.search).get('trace');
+        const hl = activeTrace && log.trace_id === activeTrace ? ' audit-row-highlight' : '';
+        return `<a class="incident-row audit-row-link${hl}" href="/?tab=5&trace=${encodeURIComponent(log.trace_id)}"><span><code>${log.trace_id}</code> · <strong>${label}</strong> · ${log.operator}</span><span class="ts" style="font-size:0.75rem;color:var(--text-muted)">${ts} · 详情 →</span></a>`;
+      }).join('');
+      updateAuditViz(data.actions);
+    }
+
+    function updateAuditViz(actions) {
+      const el = document.getElementById('audit-viz-bars');
+      if (!el || !actions?.length) return;
+      const counts = {};
+      actions.forEach(a => { counts[a.action_type] = (counts[a.action_type] || 0) + 1; });
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      const max = sorted[0]?.[1] || 1;
+      el.innerHTML = sorted.map(([type, n]) => {
+        const label = AUDIT_ACTION_LABELS[type] || type;
+        const pct = Math.round(n / max * 100);
+        const tone = type.includes('completed') ? 'green' : (type.includes('duplicate') ? 'amber' : 'brand');
+        return `<div class="viz-stack-row"><span>${label}</span><div class="viz-bar-track"><div class="viz-bar-fill ${tone}" style="width:${pct}%"></div></div><span class="viz-bar-value">${n}</span></div>`;
       }).join('');
     }
 
@@ -847,6 +1059,9 @@
       }
       if (tab === 5) {
         loadAuditLog();
+        if (params.get('trace')) {
+          document.getElementById('audit-detail-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
       }
       if (tab === 6) {
         loadUltraPanel();

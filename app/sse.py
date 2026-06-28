@@ -1,8 +1,7 @@
 import asyncio
 import json
 import logging
-from datetime import datetime, timezone
-from typing import Any, Callable, Awaitable
+from app.timeutil import now_iso
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +26,7 @@ class SSEManager:
         event = {
             "type": event_type,
             "trace_id": trace_id,
-            "ts": datetime.now(timezone.utc).isoformat(),
+            "ts": now_iso(),
             "payload": payload,
         }
         for q in self._subscribers.get(trace_id, []):
