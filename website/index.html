@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="CoAgent — Agent 出错或烧钱时，90 秒内拿到该信什么、该做什么、有多把握。面向企业的 Agent Ops Copilot。">
   <title>CoAgent — Agent Ops Copilot</title>
+  <script>(function(){try{var t=localStorage.getItem('coagent-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -29,6 +30,10 @@
       </nav>
 
       <div class="header-actions">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="切换显示模式" aria-pressed="false">
+          <span class="theme-toggle-icon" aria-hidden="true">◐</span>
+          <span class="theme-toggle-label">夜间</span>
+        </button>
         <a href="https://github.com/lurui1997/coagent" class="btn btn-ghost" target="_blank" rel="noopener">GitHub</a>
         <a href="http://localhost:8000/" class="btn btn-primary">打开控制台</a>
         <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-nav">
@@ -497,6 +502,7 @@
     </div>
   </footer>
 
+  <script src="theme.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

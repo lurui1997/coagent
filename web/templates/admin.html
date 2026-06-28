@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoAgent — Agent 运维助手</title>
+  <script>(function(){try{var t=localStorage.getItem('coagent-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
@@ -16,9 +17,10 @@
       <div class="brand-mark">C</div>
       <span class="brand-name">CoAgent</span>
     </a>
-    <div class="header-meta">
-      <span class="badge-live" id="header-status">流水线就绪</span>
-    </div>
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="切换显示模式" aria-pressed="false">
+      <span class="theme-toggle-icon" aria-hidden="true">◐</span>
+      <span class="theme-toggle-label">夜间</span>
+    </button>
   </header>
 
   <nav class="subnav">
@@ -512,9 +514,6 @@
       if (!res.ok) return;
       const inc = await res.json();
 
-      const statusEl = document.getElementById('header-status');
-      if (statusEl) statusEl.textContent = `故障 ${inc.status}`;
-
       renderIncidentMeta(inc);
       renderExecutionChain(inc);
       renderTimelineFromIncident(inc.timeline_json);
@@ -859,5 +858,6 @@
       }
     });
   </script>
+  <script src="/static/theme.js"></script>
 </body>
 </html>

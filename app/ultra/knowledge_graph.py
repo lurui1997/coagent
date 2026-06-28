@@ -13,7 +13,7 @@ REL_LABELS = {
 }
 
 NODE_COLORS = {
-    "agent": "#6d28d9",
+    "agent": "#0284c7",
     "incident": "#2563eb",
     "playbook": "#d97706",
     "root_cause": "#dc2626",
