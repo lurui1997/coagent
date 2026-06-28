@@ -9,16 +9,21 @@
   <link rel="stylesheet" href="{{ static_asset('style.css') }}">
   <script src="{{ static_asset('vendor/htmx.min.js') }}" defer></script>
 </head>
-<body>
+<body class="{% if tab == 1 %}page-landing{% endif %}">
   <header class="site-header">
     <a href="/?tab=1" class="brand">
       <div class="brand-mark">C</div>
       <span class="brand-name">CoAgent</span>
     </a>
-    <button type="button" class="theme-toggle" data-theme-toggle aria-label="切换显示模式" aria-pressed="false">
-      <span class="theme-toggle-icon" aria-hidden="true">◐</span>
-      <span class="theme-toggle-label">夜间</span>
-    </button>
+    <div class="header-actions">
+      {% if tab == 1 %}
+      <a href="/?tab=2" class="header-cta">开始使用</a>
+      {% endif %}
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="切换显示模式" aria-pressed="false">
+        <span class="theme-toggle-icon" aria-hidden="true">◐</span>
+        <span class="theme-toggle-label">夜间</span>
+      </button>
+    </div>
   </header>
 
   <nav class="subnav">
@@ -29,21 +34,24 @@
 
   <div class="page {% if tab == 1 %}tab-overview{% endif %}">
     {% if tab == 1 %}
-    <section class="pitch-hero">
-      <div class="pitch-hero-copy">
-        <span class="pitch-badge">Agent Ops Copilot · 企业运维平台</span>
-        <h2>Agent 异常时，<em>90 秒内</em>完成根因研判、把握度评估与处置决策</h2>
-        <p class="pitch-lead">面向生产环境的 Agent 运行态运维平台：从事件接入、手册约束推理到可验证把握度评分，将告警转化为可审计、可执行的处置闭环。</p>
-        <div class="pitch-cta">
-          <a href="/?tab=2" class="btn btn-lg">进入处置工作台 →</a>
-          <span class="pitch-meta">限流 · 空检索 · 超预算 · 三类典型场景</span>
-        </div>
+    <section class="pitch-hero pal-hero" aria-label="CoAgent 平台概览">
+      <div class="pal-hero-media" aria-hidden="true"></div>
+      <div class="pal-hero-scrim" aria-hidden="true"></div>
+      <div class="pal-hero-content">
+        <p class="pal-hero-eyebrow">Agent Ops Copilot</p>
+        <h1 class="pal-hero-title">AI 驱动的 Agent 运维<br><span>让每一个处置决策可验证</span></h1>
+        <a href="/?tab=2" class="pal-hero-cta">进入处置工作台</a>
       </div>
-      <div class="pitch-metrics">
-        <div class="pitch-metric"><span class="pitch-metric-val">90s</span><span class="pitch-metric-label">平均研判时延</span></div>
-        <div class="pitch-metric"><span class="pitch-metric-val">3</span><span class="pitch-metric-label">场景类型</span></div>
-        <div class="pitch-metric"><span class="pitch-metric-val">🟢🟡🔴</span><span class="pitch-metric-label">三级处置边界</span></div>
-      </div>
+      <a href="#overview-content" class="pal-hero-scroll" aria-label="向下滚动">
+        <span aria-hidden="true">↓</span>
+      </a>
+    </section>
+
+    <div id="overview-content" class="overview-content">
+    <section class="pitch-stats-bar" aria-label="平台指标">
+      <div class="pitch-stat"><strong>90s</strong><span>平均研判时延</span></div>
+      <div class="pitch-stat"><strong>3</strong><span>典型场景类型</span></div>
+      <div class="pitch-stat"><strong>🟢🟡🔴</strong><span>三级处置边界</span></div>
     </section>
 
     <div id="trace-banner" class="trace-banner" style="display:none">
@@ -147,6 +155,7 @@
             在处置工作台触发事件或注入演练场景后，完整流水线将在此实时展示
           </div>
         </div>
+      </div>
       </div>
     </div>
 
