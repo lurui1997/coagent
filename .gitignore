@@ -18,3 +18,8 @@ demo.log
 data/agent_state/*.json
 !data/agent_state/.gitkeep
 docs/demos/.playwright-videos/
+/.agents/
+/.claude/
+/.codex/
+/.gstack/
+/artifacts/
