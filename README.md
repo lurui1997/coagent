@@ -17,6 +17,19 @@ MOCK_LLM=true DEMO_MODE=true uvicorn app.main:app --reload --port 8000
 
 打开 http://localhost:8000/ → Tab2 触发 S1/S2/S3 Demo。
 
+## 官网
+
+静态营销站点位于 `website/`，与管理台分离部署：
+
+```bash
+# 本地预览（任选其一）
+python3 -m http.server 3000 --directory website
+# 或
+npx serve website
+```
+
+浏览器打开 http://localhost:3000/
+
 ```bash
 bash scripts/run_tests.sh -q
 # 或: .venv/bin/python3 -m pytest tests/ -m "not live_llm" -q

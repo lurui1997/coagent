@@ -697,9 +697,9 @@
   <div class="wrap">
     <header>
       <div>
-        <div class="badge"><span class="badge-dot"></span> Agent Ops Copilot</div>
+        <div class="badge"><span class="badge-dot"></span> Agent 运行态运维</div>
         <h1>CoAgent <em>Architecture</em></h1>
-        <p class="subtitle">FastAPI · Python 3.11 · async Pipeline · 配置驱动 Playbook · 把握度评分可验证推理</p>
+        <p class="subtitle">面向企业的 Agent 运维助手 · 可验证处置闭环 · FastAPI · HTMX + SSE · 处置手册 JSON 单一真相源</p>
       </div>
       <div class="view-tabs" role="tablist">
         <button type="button" class="active" data-view="arch" role="tab" aria-selected="true">技术架构</button>
@@ -708,18 +708,18 @@
     </header>
 
     <div class="pipeline-strip" id="pipelineStrip">
-      <span class="pipeline-label">主链路</span>
-      <span class="chip orange" data-link="agent">Webhook</span>
+      <span class="pipeline-label">统一处置流水线</span>
+      <span class="chip orange" data-link="agent">事件接入</span>
       <span class="arrow-sep">→</span>
-      <span class="chip yellow" data-link="router">Router</span>
+      <span class="chip yellow" data-link="router">场景路由</span>
       <span class="arrow-sep">→</span>
-      <span class="chip blue" data-link="playbook">Playbook</span>
+      <span class="chip blue" data-link="playbook">处置手册+工具</span>
       <span class="arrow-sep">→</span>
-      <span class="chip purple" data-link="llm">LLM</span>
+      <span class="chip purple" data-link="llm">大模型根因推理</span>
       <span class="arrow-sep">→</span>
-      <span class="chip green" data-link="scorer">Score</span>
+      <span class="chip green" data-link="scorer">把握度评分</span>
       <span class="arrow-sep">→</span>
-      <span class="chip blue" data-link="admin">Admin / 飞书</span>
+      <span class="chip blue" data-link="admin">分级处置 · 审计留痕</span>
     </div>
 
     <!-- Architecture View -->
@@ -731,66 +731,66 @@
           <div class="panel-title">外部系统</div>
           <div class="ext-node orange" data-node="agent" tabindex="0">
             <h3>Agent 运行时</h3>
-            <p>cs-bot · rag-bot · content-bot</p>
-            <span class="tag">POST /events</span>
+            <p>运行失败 · 质量异常 · 成本异常<br />cs-bot · rag-bot · content-bot</p>
+            <span class="tag">POST /events · run_fail / cost_report</span>
           </div>
           <div class="ext-node purple" data-node="llm-ext" tabindex="0">
-            <h3>LLM API</h3>
-            <p>OpenAI 兼容 · httpx async · 15s 超时</p>
-            <span class="tag">chat completions</span>
+            <h3>大模型 API</h3>
+            <p>OpenAI 兼容 · httpx async · 15s 超时 · 重试 ×1</p>
+            <span class="tag">LLMOutput 结构化输出</span>
           </div>
           <div class="ext-node green" data-node="feishu" tabindex="0">
             <h3>飞书 IM</h3>
-            <p>S1 卡片 + Retry · L2 降级兜底</p>
-            <span class="tag">S1 only</span>
+            <p>S1 🟢 卡片 + 一键 Retry · L2 通道降级</p>
+            <span class="tag">S1 only · S2/S3 Pro</span>
           </div>
         </aside>
 
         <div class="panel core" id="corePanel">
 
           <div class="layer">
-            <div class="layer-label">接入 & 表现</div>
+            <div class="layer-label">表现层</div>
             <div class="layer-row">
               <div class="node blue" data-node="admin" tabindex="0">
-                <div class="node-name">Admin HTMX</div>
-                <div class="node-desc">4 Tabs · EventSource SSE</div>
+                <div class="node-name">管理台 HTMX</div>
+                <div class="node-desc">总览 · 场景 · 把握度评分 · 飞轮 · SSE 时间线</div>
               </div>
               <div class="node blue" data-node="api" tabindex="0">
-                <div class="node-name">API Layer</div>
-                <div class="node-desc">events · admin · demo · replay</div>
+                <div class="node-name">API 层</div>
+                <div class="node-desc">/events · /admin/* · /demo/retry · 回放只读</div>
               </div>
             </div>
           </div>
 
           <div class="layer">
-            <div class="layer-label">编排</div>
+            <div class="layer-label">领域层 · 编排</div>
             <div class="layer-row">
               <div class="node hero orange" data-node="orch" tabindex="0">
-                <div class="node-name">Orchestrator</div>
-                <div class="node-desc">幂等 10min · 超时 30s · timeline 持久化 · L0–L3 降级</div>
+                <div class="node-name">编排器 Orchestrator</div>
+                <div class="node-desc">幂等 10min · 链超时 30s · 全链路审计 · L0–L3 分层降级</div>
               </div>
             </div>
           </div>
 
           <div class="layer">
-            <div class="layer-label">领域层 Pipeline</div>
+            <div class="layer-label">领域层 · 处置流水线</div>
             <div class="pipeline-track">
             <div class="pipeline-row">
               <div class="node yellow" data-node="router" tabindex="0">
-                <div class="node-name">Scenario Router</div>
-                <div class="node-desc">(type,symptom) → playbook_id</div>
+                <div class="node-name">场景路由</div>
+                <div class="node-desc">(type, symptom) → 处置手册 ID</div>
               </div>
               <div class="node blue" data-node="playbook" tabindex="0">
-                <div class="node-name">PlaybookEngine</div>
-                <div class="node-desc">ops_playbooks.json · mock tools ×3</div>
+                <div class="node-name">处置手册引擎</div>
+                <div class="node-desc">ops_playbooks.json · 模拟工具 ×3 · 3s 超时</div>
               </div>
               <div class="node purple" data-node="llm" tabindex="0">
-                <div class="node-name">LLM Client</div>
-                <div class="node-desc">LLMOutput · Pydantic · retry ×1</div>
+                <div class="node-name">大模型客户端</div>
+                <div class="node-desc">根因推理 · LLMOutput · 禁止静态冒充</div>
               </div>
               <div class="node green" data-node="scorer" tabindex="0">
                 <div class="node-name">把握度评分器</div>
-                <div class="node-desc">数据·手册·推理 · 🟢🟡🔴 分级</div>
+                <div class="node-desc">数据·手册·推理 · ≥80🟢 · 60–79🟡 · &lt;60🔴</div>
               </div>
             </div>
             </div>
@@ -800,16 +800,16 @@
             <div class="layer-label">基础设施</div>
             <div class="infra-row">
               <div class="node blue" data-node="sse" tabindex="0">
-                <div class="node-name">SSE Manager</div>
-                <div class="node-desc">pub/sub · replay</div>
+                <div class="node-name">实时推送审计流</div>
+                <div class="node-desc">SSE pub/sub · 时间线回放</div>
               </div>
               <div class="node blue" data-node="db" tabindex="0">
                 <div class="node-name">SQLite</div>
-                <div class="node-desc">coagent.db</div>
+                <div class="node-desc">incidents · feedback · agent_daily_stats</div>
               </div>
               <div class="node blue" data-node="config" tabindex="0">
-                <div class="node-name">Settings</div>
-                <div class="node-desc">.env · DEMO_MODE</div>
+                <div class="node-name">配置与超时</div>
+                <div class="node-desc">.env · DEMO_MODE · Tool 3s / LLM 15s / 链 30s</div>
               </div>
             </div>
           </div>
@@ -823,29 +823,30 @@
         <aside class="panel">
           <div class="panel-title">接口 & 协议</div>
           <div class="code-block">
-            <span class="cmt">// POST /events</span><br />
+            <span class="cmt">// POST /events — S1 限流</span><br />
             {<br />
             &nbsp;&nbsp;<span class="key">"type"</span>: <span class="str">"run_fail"</span>,<br />
             &nbsp;&nbsp;<span class="key">"symptom"</span>: <span class="str">"rate_limit"</span>,<br />
             &nbsp;&nbsp;<span class="key">"agent_id"</span>: <span class="str">"cs-bot"</span>,<br />
             &nbsp;&nbsp;<span class="key">"event_id"</span>: <span class="str">"evt-s1-demo"</span><br />
-            }
+            }<br />
+            <span class="cmt">// S3: type=cost_report · symptom=over_budget</span>
           </div>
           <div class="code-block">
-            <span class="cmt">// SSE incident 事件序</span>
+            <span class="cmt">// SSE 审计时间线（~8–15s）</span>
             <ul class="sse-list" id="sseList">
-              <li data-sse="0"><span class="sse-dot"></span>incident_started</li>
-              <li data-sse="1"><span class="sse-dot"></span>tool_called ×3</li>
-              <li data-sse="2"><span class="sse-dot"></span>llm_reasoning</li>
-              <li data-sse="3"><span class="sse-dot"></span>llm_result</li>
-              <li data-sse="4"><span class="sse-dot"></span>score_computed</li>
-              <li data-sse="5"><span class="sse-dot"></span>channel_sync</li>
-              <li data-sse="6"><span class="sse-dot"></span>incident_completed</li>
+              <li data-sse="0"><span class="sse-dot"></span>事件接入 incident_started</li>
+              <li data-sse="1"><span class="sse-dot"></span>工具查询 tool_called ×3</li>
+              <li data-sse="2"><span class="sse-dot"></span>大模型推理 llm_reasoning</li>
+              <li data-sse="3"><span class="sse-dot"></span>推理结果 llm_result</li>
+              <li data-sse="4"><span class="sse-dot"></span>把握度评分 score_computed</li>
+              <li data-sse="5"><span class="sse-dot"></span>通道同步 channel_sync (S1)</li>
+              <li data-sse="6"><span class="sse-dot"></span>处置完成 incident_completed</li>
             </ul>
           </div>
         </aside>
       </div>
-      <p class="arch-hint">默认仅显示主链路 · 悬停节点可查看依赖连线</p>
+      <p class="arch-hint">默认仅显示主链路 · 悬停节点查看 SSE / DB / 数据层依赖 · 三场景共用同一流水线</p>
       </div>
     </section>
 
@@ -853,71 +854,77 @@
     <section class="canvas" id="view-flow" aria-label="业务流程">
       <div class="panel flow-canvas">
         <div class="metrics-float">
-          <div><strong>S1</strong> 87 · executable</div>
-          <div><strong>S2</strong> 72 · needs_confirmation</div>
-          <div><strong>S3</strong> 58 · escalate</div>
-          <div style="margin-top:0.5rem;font-size:0.68rem">耗时 ~8–15s</div>
+          <div><strong>S1</strong> 限流 429 · <strong>87</strong> 🟢 可执行</div>
+          <div><strong>S2</strong> 空检索 · <strong>72</strong> 🟡 需确认</div>
+          <div><strong>S3</strong> 超预算 · <strong>58</strong> 🔴 需升级</div>
+          <div style="margin-top:0.5rem;font-size:0.68rem">三场景共用流水线 · 模拟 ~3ms / 真大模型 ~8–15s</div>
         </div>
 
         <div class="flow-steps">
           <div class="flow-step" style="border-color:rgba(245,158,66,0.35);background:var(--orange-soft)">
-            <h3>运维 / Webhook</h3>
-            <p>POST /events · POST /admin/trigger/s1</p>
+            <h3>事件接入</h3>
+            <p>POST /events 回调 · 管理台触发 S1/S2/S3</p>
           </div>
           <div class="flow-connector"></div>
           <div class="flow-step" style="border-color:rgba(232,197,71,0.35);background:var(--yellow-soft)">
             <h3>幂等检查</h3>
-            <p>event_id 10min → duplicate?</p>
+            <p>event_id 10min 去重 · 重复事件不重复推理</p>
           </div>
           <div class="flow-connector"></div>
           <div class="flow-step" style="border-color:rgba(232,197,71,0.35);background:var(--yellow-soft)">
-            <h3>Scenario Router</h3>
-            <p>rate_limit → cs_rate_limit · empty_retrieval → rag · over_budget → cost</p>
+            <h3>场景路由</h3>
+            <p>rate_limit → S1 · empty_retrieval → S2 · over_budget → S3</p>
           </div>
           <div class="flow-connector"></div>
           <div class="flow-step">
-            <h3>PlaybookEngine</h3>
-            <p>query_agent_metrics · query_agent_config · search_ops_playbook</p>
+            <h3>处置手册 + 工具</h3>
+            <p>metrics · config · ops_playbook · JSON 单一真相源</p>
           </div>
           <div class="flow-connector"></div>
           <div class="flow-step" style="border-color:rgba(155,123,255,0.35);background:var(--purple-soft)">
-            <h3>LLM Client</h3>
-            <p>reasoning_chain ≥3 · steps · retry_recommended</p>
+            <h3>大模型根因推理</h3>
+            <p>影响 · 假设 · reasoning_chain≥3 · 步骤 · retry_recommended</p>
           </div>
           <div class="flow-connector"></div>
           <div class="flow-step" style="border-color:rgba(61,214,140,0.35);background:var(--green-soft)">
             <h3>把握度评分</h3>
-            <p>D×0.35 + P×0.35 + C×0.30 → grade</p>
+            <p>round(100×(0.35×数据+0.35×手册+0.30×推理)) · 非大模型自报</p>
+          </div>
+          <div class="flow-connector"></div>
+          <div class="flow-step" style="border-color:rgba(77,142,247,0.35);background:rgba(77,142,247,0.1)">
+            <h3>分级处置 · 审计留痕</h3>
+            <p>SSE 实时时间线 · SQLite 持久化 · 回放只读（不调大模型）</p>
           </div>
         </div>
 
         <div class="branch-row">
           <div class="branch-card g">
             <div class="score">87</div>
-            <h4>executable</h4>
-            <p>Score ≥80 · 一键 Retry</p>
+            <h4>🟢 可执行</h4>
+            <p>S1 限流 · ≥80 · 敢重试 · 飞书卡片</p>
           </div>
           <div class="branch-card y">
             <div class="score">72</div>
-            <h4>needs_confirmation</h4>
-            <p>60–79 · 禁止 Retry</p>
+            <h4>🟡 需确认</h4>
+            <p>S2 空检索 · 60–79 · 禁止盲重试</p>
           </div>
           <div class="branch-card r">
             <div class="score">58</div>
-            <h4>escalate</h4>
-            <p>&lt;60 · @负责人升级</p>
+            <h4>🔴 需升级</h4>
+            <p>S3 超预算 · &lt;60 · @负责人止血</p>
           </div>
         </div>
 
         <div class="side-card">
-          <h4 style="font-size:0.85rem;margin-bottom:0.35rem">飞书 S1</h4>
-          <p style="font-size:0.72rem;color:var(--muted)">卡片 + Retry · channel_sync · L2 降级</p>
+          <h4 style="font-size:0.85rem;margin-bottom:0.35rem">人工把关 · 飞轮</h4>
+          <p style="font-size:0.72rem;color:var(--muted)">评分驱动动作权限 · S1 飞书 Retry · Tab4 👍/👎 反馈迭代</p>
         </div>
       </div>
     </section>
 
     <footer>
-      CoAgent · 基于 <a href="../intro/coagent-tech-report.md">coagent-tech-report.md</a> · 打开本地文件即可预览交互效果
+      CoAgent Basic · 演进 Pro（运行时纠偏 · 模型切换 · 企业审计）→ Ultra（知识图谱 · 历史推演 · Multi-Agent）<br />
+      基于 <a href="../intro/CoAgent%20%E6%8A%80%E6%9C%AF%E6%B1%87%E6%8A%A5.md">CoAgent 技术汇报</a> · <a href="../superpowers/specs/coagent-design-spec.md">设计规范</a> · 打开本地 HTML 即可预览
     </footer>
   </div>
 
@@ -946,7 +953,7 @@
       { id: "e3", from: "api", to: "orch", fromSide: "bottom", toSide: "top", kind: "primary", color: "#4d8ef7", route: "vertical", always: true },
       { id: "e4", from: "orch", to: "router", fromSide: "bottom", toSide: "top", kind: "primary", color: "#f59e42", route: "vertical", always: true },
       { id: "e8", from: "llm-ext", to: "llm", fromSide: "right", toSide: "left", kind: "external", color: "#9b7bff", label: "async", route: "cross-column", always: true },
-      { id: "e9", from: "scorer", to: "feishu", fromSide: "bottom", toSide: "right", kind: "external", color: "#3dd68c", label: "S1", route: "scorer-feishu", always: true },
+      { id: "e9", from: "scorer", to: "feishu", fromSide: "bottom", toSide: "right", kind: "external", color: "#3dd68c", label: "S1 🟢", route: "scorer-feishu", always: true },
       { id: "e11", from: "sse", to: "admin", fromSide: "top", toSide: "bottom", kind: "feedback", color: "#64748b", label: "SSE", route: "left-rail", always: false },
       { id: "e10", from: "orch", to: "sse", fromSide: "bottom", toSide: "top", kind: "secondary", color: "#64748b", route: "right-rail", always: false },
       { id: "e12", from: "orch", to: "db", fromSide: "bottom", toSide: "top", kind: "secondary", color: "#64748b", route: "right-rail-db", always: false },

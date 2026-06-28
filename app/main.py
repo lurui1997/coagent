@@ -9,7 +9,8 @@ from fastapi.templating import Jinja2Templates
 
 from app.api import admin, demo, events
 from app.config import settings
-from app.db import get_feedback_stats, get_latest_scores, init_db, list_incidents
+from app.db import get_feedback_stats, get_latest_scores, init_db, list_audit_actions, list_incidents
+from app.ultra.api import router as ultra_router
 
 
 @asynccontextmanager
@@ -23,6 +24,7 @@ app = FastAPI(title="CoAgent", description="ToB Agent Ops Copilot", lifespan=lif
 app.include_router(events.router)
 app.include_router(admin.router)
 app.include_router(demo.router)
+app.include_router(ultra_router)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "web" / "templates"))
@@ -40,6 +42,7 @@ async def admin_page(request: Request, tab: int = 1, trace: str | None = None):
     latest_scores = get_latest_scores()
     incidents = list_incidents(20)
     stats = get_feedback_stats()
+    audit_logs = list_audit_actions(limit=50)
     return templates.TemplateResponse(
         request,
         "admin.html",
@@ -49,6 +52,7 @@ async def admin_page(request: Request, tab: int = 1, trace: str | None = None):
             "latest_scores": latest_scores,
             "incidents": incidents,
             "stats": stats,
+            "audit_logs": audit_logs,
             "demo_mode": settings.demo_mode,
             "escalate_user": settings.feishu_escalate_user_id or "@oncall",
             "active_trace": trace,

@@ -23,6 +23,7 @@ from app.playbooks.engine import PlaybookEngine
 from app.router import route_scenario
 from app.scoring.scorer import compute_score
 from app.sse import sse_manager
+from app.ultra.team_orchestrator import build_team_plan, select_orchestration_mode
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,12 @@ class Orchestrator:
     ) -> dict[str, Any]:
         existing = find_duplicate_event(event.event_id)
         if existing:
+            insert_audit_action(
+                existing,
+                "duplicate_event",
+                operator,
+                {"event_id": event.event_id, "message": "10min 幂等命中，未新建故障"},
+            )
             return {"status": "duplicate", "trace_id": existing}
 
         playbook_id = route_scenario(event.type, event.symptom)
@@ -76,6 +83,7 @@ class Orchestrator:
             duration_ms = int((time.time() - start_ms) * 1000)
             update_incident(trace_id, status="completed", timeline_json=timeline, duration_ms=duration_ms)
             upsert_agent_stats(event.agent_id, event.type, event.cost_yuan_today)
+            insert_audit_action(trace_id, "incident_completed", operator, {"duration_ms": duration_ms})
             return {"status": "ok", "trace_id": trace_id, "incident_id": incident_id}
         except Exception as e:
             logger.exception("Pipeline failed for %s", trace_id)
@@ -136,6 +144,12 @@ class Orchestrator:
         score = compute_score(event, llm_output, playbook, tool_results)
         await record("score_computed", score)
         update_incident(trace_id, score_json=score)
+
+        mode = select_orchestration_mode(event, playbook_id, score.get("total"))
+        team_plan = build_team_plan(mode, event, playbook_id)
+        for task in team_plan["tasks"]:
+            task["status"] = "completed"
+        await record("team_orchestration", team_plan)
 
         if playbook_id == "cs_rate_limit":
             try:

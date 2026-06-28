@@ -16,6 +16,7 @@ from app.db import (
     get_incident,
     insert_audit_action,
     insert_feedback,
+    list_audit_actions,
     list_incidents,
 )
 from app.orchestrator import orchestrator
@@ -36,8 +37,13 @@ async def trigger_scenario(scenario_id: str, x_operator: str | None = Header(Non
     event = orchestrator.load_scenario(scenario_id)
     operator = _operator(x_operator)
     result = await orchestrator.process_event(event, scenario_id=scenario_id, operator=operator)
-    if result.get("trace_id") and result.get("status") == "ok":
-        insert_audit_action(result["trace_id"], "scenario_trigger", operator, {"scenario_id": scenario_id})
+    if result.get("trace_id"):
+        insert_audit_action(
+            result["trace_id"],
+            "scenario_trigger",
+            operator,
+            {"scenario_id": scenario_id, "pipeline_status": result.get("status")},
+        )
     return result
 
 
@@ -119,6 +125,12 @@ async def replay_incident(trace_id: str, x_operator: str | None = Header(None, a
         return await orchestrator.replay(trace_id)
     except ValueError as e:
         raise HTTPException(404, str(e)) from e
+
+
+@router.get("/audit/log")
+async def get_audit_log(limit: int = 50):
+    actions = list_audit_actions(limit=limit)
+    return {"actions": actions, "count": len(actions)}
 
 
 @router.get("/audit/export")

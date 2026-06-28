@@ -29,6 +29,8 @@
     <a href="/?tab=2" class="{% if tab == 2 %}active{% endif %}">场景</a>
     <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">把握度评分</a>
     <a href="/?tab=4" class="{% if tab == 4 %}active{% endif %}">飞轮</a>
+    <a href="/?tab=5" class="{% if tab == 5 %}active{% endif %}">企业审计</a>
+    <a href="/?tab=6" class="{% if tab == 6 %}active{% endif %}">Ultra</a>
   </nav>
 
   <div class="page {% if tab == 1 %}tab-overview{% endif %}">
@@ -73,13 +75,13 @@
       </div>
       <div class="card">
         <div class="card-header">
-          <h3>审计时间线</h3>
+          <h3>流水线时间线</h3>
           <span class="card-count" id="timeline-count">—</span>
         </div>
         <div id="timeline" class="timeline">
           <div class="empty">
             <div class="empty-icon">◎</div>
-            在场景页触发 S1/S2/S3，事件将在此实时滚动
+            在场景页触发 S1/S2/S3，处置链路将在此实时滚动
           </div>
         </div>
       </div>
@@ -209,6 +211,74 @@
         <button class="btn btn-outline" type="button" onclick="submitFeedback('down')">👎 无用</button>
       </div>
     </div>
+    {% elif tab == 5 %}
+    <section class="page-hero">
+      <h2>企业<em>审计</em></h2>
+      <p>操作人、审批动作、纠偏与反馈的全链路留痕 — 支持 JSON/CSV 导出。</p>
+    </section>
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-header">
+        <h3>导出</h3>
+      </div>
+      <div class="action-row" style="padding:0 1rem 1rem;">
+        <a class="btn btn-secondary" href="/admin/audit/export" target="_blank">JSON 导出</a>
+        <a class="btn btn-outline" href="/admin/audit/export?format=csv" target="_blank">CSV 导出</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h3>审计动作日志</h3>
+        <span class="card-count" id="audit-log-count">—</span>
+        <button class="btn btn-outline" type="button" style="margin-left:auto;font-size:0.75rem;padding:0.25rem 0.75rem;" onclick="loadAuditLog()">刷新</button>
+      </div>
+      <div id="audit-log-list">
+        <div class="empty" style="padding:2rem;">
+          <div class="empty-icon">◎</div>
+          加载中…
+        </div>
+      </div>
+      <p style="padding:0 1rem 1rem;font-size:0.75rem;color:var(--text-muted);margin:0;">
+        提示：10 分钟内重复触发同场景会幂等命中（<code>duplicate_event</code>），不会新建故障但仍会写入审计。
+      </p>
+    </div>
+
+    {% elif tab == 6 %}
+    <section class="page-hero">
+      <h2>Ultra · <em>智能编排</em></h2>
+      <p>知识图谱 · 相似事故 · What-if 推演 · Agent-Team 编排。请先在「场景」页触发 S1/S2/S3，再回到此页查看。</p>
+    </section>
+    <div id="ultra-api-hint" class="alert alert-warning" style="display:none;margin-bottom:1rem;"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><h3>知识图谱</h3></div>
+        <div id="kg-stats" class="empty" style="padding:1rem;">加载中…</div>
+        <pre id="kg-preview" style="max-height:240px;overflow:auto;font-size:0.75rem;padding:0 1rem 1rem;"></pre>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Agent-Team 编排</h3></div>
+        <select id="ultra-trace" class="select-field" style="margin:0 1rem 1rem;">
+          {% for inc in incidents[:10] %}
+          <option value="{{ inc.trace_id }}">{{ inc.agent_id }} · {{ inc.scenario_id }} · {{ inc.trace_id }}</option>
+          {% endfor %}
+        </select>
+        <div id="team-plan" style="padding:0 1rem 1rem;font-size:0.875rem;color:var(--text-secondary)">选择故障查看编排计划</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-header"><h3>What-if 推演</h3></div>
+      <div style="padding:0 1rem 1rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+        <select id="whatif-scenario" class="select-field" style="width:auto;">
+          <option value="concurrent:5">S1 · concurrent → 5</option>
+          <option value="budget_yuan_daily:30">S3 · 预算 → ¥30</option>
+        </select>
+        <button class="btn" type="button" onclick="runWhatIf()">运行推演</button>
+      </div>
+      <div id="whatif-result" style="padding:0 1rem 1rem;font-size:0.875rem;"></div>
+    </div>
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-header"><h3>相似历史事故</h3></div>
+      <div id="similar-incidents" style="padding:0 1rem 1rem;font-size:0.875rem;color:var(--text-secondary)">选择故障后自动加载</div>
+    </div>
     {% endif %}
   </div>
 
@@ -223,6 +293,7 @@
       llm_result: '大模型输出',
       score_computed: '把握度评分',
       channel_sync: '通道同步',
+      team_orchestration: 'Agent-Team 编排',
       incident_completed: '已完成',
       incident_failed: '已失败',
       replay_started: '回放开始',
@@ -256,6 +327,7 @@
       let summary = '';
       if (event.type === 'tool_called') summary = payload.tool || '';
       else if (event.type === 'score_computed') summary = `总分=${payload.total} ${payload.grade || ''}`;
+      else if (event.type === 'team_orchestration') summary = payload.mode_label || payload.mode || '';
       else if (event.type === 'llm_reasoning') summary = (payload.reasoning_chain || []).length + ' 步';
       else if (event.type === 'incident_started') summary = payload.agent_id || '';
 
@@ -494,10 +566,134 @@
       document.getElementById('stat-total').textContent = stats.total;
     }
 
+    const AUDIT_ACTION_LABELS = {
+      incident_created: '故障创建',
+      incident_completed: '流水线完成',
+      scenario_trigger: '场景触发',
+      duplicate_event: '幂等命中',
+      feedback: '飞轮反馈',
+      replay: '审计回放',
+      correction_applied: '纠偏应用',
+      demo_retry: '演示重试',
+    };
+
+    async function loadAuditLog() {
+      const listEl = document.getElementById('audit-log-list');
+      const countEl = document.getElementById('audit-log-count');
+      if (!listEl) return;
+      const res = await fetch('/admin/audit/log?limit=50');
+      if (!res.ok) {
+        listEl.innerHTML = '<div class="empty" style="padding:2rem;"><div class="empty-icon">!</div>无法加载审计日志，请确认服务已重启且包含最新代码。</div>';
+        return;
+      }
+      const data = await res.json();
+      if (countEl) countEl.textContent = String(data.count);
+      if (!data.actions?.length) {
+        listEl.innerHTML = '<div class="empty" style="padding:2rem;"><div class="empty-icon">◎</div>暂无审计记录。请先到「场景」页触发 S1/S2/S3。</div>';
+        return;
+      }
+      listEl.innerHTML = data.actions.map(log => {
+        const label = AUDIT_ACTION_LABELS[log.action_type] || log.action_type;
+        const ts = log.created_at ? String(log.created_at).slice(0, 19).replace('T', ' ') : '';
+        return `<div class="incident-row"><span><code>${log.trace_id}</code> · <strong>${label}</strong> · ${log.operator}</span><span class="ts" style="font-size:0.75rem;color:var(--text-muted)">${ts}</span></div>`;
+      }).join('');
+    }
+
+    async function loadLatestTimeline() {
+      const res = await fetch('/admin/incidents');
+      if (!res.ok) return;
+      const items = await res.json();
+      const latest = items.find(i => i.status === 'completed') || items[0];
+      if (latest) await hydrateIncident(latest.trace_id);
+    }
+
+    async function loadUltraPanel() {
+      const hint = document.getElementById('ultra-api-hint');
+      const graphRes = await fetch('/admin/ultra/graph');
+      if (graphRes.status === 404 && hint) {
+        hint.style.display = 'block';
+        hint.textContent = 'Ultra API 不可用：请重启 uvicorn 以加载 app/ultra 模块（当前代码未生效）。';
+        return;
+      }
+      if (graphRes.ok) {
+        const g = await graphRes.json();
+        const statsEl = document.getElementById('kg-stats');
+        if (statsEl) {
+          statsEl.className = '';
+          statsEl.innerHTML = `节点 ${g.stats.node_count} · 边 ${g.stats.edge_count} · Agent ${g.stats.agents} · 故障 ${g.stats.incidents}`;
+        }
+        const preview = document.getElementById('kg-preview');
+        if (preview) preview.textContent = JSON.stringify(g.edges.slice(0, 12), null, 2);
+      }
+      const traceSel = document.getElementById('ultra-trace');
+      if (traceSel?.value) {
+        await loadTeamPlan(traceSel.value);
+        await loadSimilar(traceSel.value);
+      }
+    }
+
+    async function loadTeamPlan(traceId) {
+      const res = await fetch(`/admin/ultra/incidents/${traceId}/team-plan`);
+      const el = document.getElementById('team-plan');
+      if (!el || !res.ok) return;
+      const plan = await res.json();
+      el.innerHTML = `<strong>${plan.mode_label}</strong><ul style="margin:0.5rem 0;padding-left:1.2rem;">${
+        plan.team_agents.map(a => `<li>${a.role}: ${a.focus}</li>`).join('')
+      }</ul>`;
+    }
+
+    async function loadSimilar(traceId) {
+      const res = await fetch(`/admin/ultra/incidents/${traceId}/similar`);
+      const el = document.getElementById('similar-incidents');
+      if (!el || !res.ok) return;
+      const data = await res.json();
+      if (!data.similar.length) {
+        el.textContent = '暂无相似历史事故（多触发几次场景后可见）';
+        return;
+      }
+      el.innerHTML = data.similar.map(s =>
+        `<div class="incident-row"><span>${s.agent_id} · ${s.scenario_id} · 相似度 ${s.similarity}</span><code>${s.trace_id}</code></div>`
+      ).join('');
+    }
+
+    async function runWhatIf() {
+      const traceId = document.getElementById('ultra-trace')?.value;
+      const spec = document.getElementById('whatif-scenario')?.value || 'concurrent:5';
+      const [key, val] = spec.split(':');
+      const changes = { [key]: isNaN(Number(val)) ? val : Number(val) };
+      const res = await fetch(`/admin/ultra/incidents/${traceId}/what-if`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ changes }),
+      });
+      const el = document.getElementById('whatif-result');
+      if (!el) return;
+      const data = await res.json();
+      if (!res.ok) { el.textContent = data.detail || '推演失败'; return; }
+      el.innerHTML = `<div class="alert alert-${data.grade_changed ? 'warning' : 'success'}" style="margin:0">${
+        data.narrative
+      }</div><div style="margin-top:0.5rem">原始 ${data.original_score} → 反事实 ${data.counterfactual_score} (Δ ${data.delta})</div>`;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(location.search);
+      const tab = parseInt(params.get('tab') || '1', 10);
       const trace = params.get('trace') || {% if active_trace %}'{{ active_trace }}'{% else %}null{% endif %};
-      if (trace) hydrateIncident(trace);
+      if (trace) {
+        hydrateIncident(trace);
+      } else if (tab === 1 && document.getElementById('timeline')) {
+        loadLatestTimeline();
+      }
+      if (tab === 5) {
+        loadAuditLog();
+      }
+      if (tab === 6) {
+        loadUltraPanel();
+        document.getElementById('ultra-trace')?.addEventListener('change', (e) => {
+          loadTeamPlan(e.target.value);
+          loadSimilar(e.target.value);
+        });
+      }
     });
   </script>
 </body>
