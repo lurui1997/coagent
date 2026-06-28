@@ -38,7 +38,8 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 async def admin_page(request: Request, tab: int = 1, trace: str | None = None):
-    legacy_tab_map = {3: 2, 4: 3, 5: 3, 6: 2}
+    # 旧版 Tab 4/5/6 兼容；Tab 3 现为「审计复盘」，不可再映射到工作台
+    legacy_tab_map = {4: 3, 5: 3, 6: 2}
     tab = legacy_tab_map.get(tab, tab)
     if tab not in (1, 2, 3):
         tab = 1

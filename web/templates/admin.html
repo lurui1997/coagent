@@ -1134,7 +1134,7 @@
       const params = new URLSearchParams(location.search);
       const tab = parseInt(params.get('tab') || '1', 10);
       const trace = params.get('trace') || {% if active_trace %}'{{ active_trace }}'{% else %}null{% endif %};
-      if (trace) {
+      if (trace && tab === 2) {
         hydrateIncident(trace);
       } else if (tab === 1 && document.getElementById('timeline')) {
         loadLatestTimeline();
