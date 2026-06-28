@@ -1703,8 +1703,15 @@ body.page-app .timeline-entry pre {
 .audit-detail-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.625rem;
   margin-bottom: 1.25rem;
+}
+
+.audit-feedback-row .audit-feedback-hint {
+  flex: 1;
+  min-width: 10rem;
+  margin: 0;
 }
 
 .audit-detail-timeline h4 {
@@ -1930,6 +1937,31 @@ body.page-app .timeline-entry pre {
   margin-bottom: 1.25rem;
   border-color: var(--accent-border, var(--brand-ring));
   background: linear-gradient(135deg, var(--accent-soft, var(--brand-glow)) 0%, var(--surface) 55%);
+}
+
+.flywheel-card-header {
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.flywheel-card-note {
+  flex: 1;
+  max-width: 28rem;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+@media (max-width: 720px) {
+  .flywheel-card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .flywheel-card-note {
+    max-width: none;
+    text-align: left;
+  }
 }
 
 .flywheel-track {

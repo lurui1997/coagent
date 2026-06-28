@@ -285,9 +285,9 @@
     <div class="page-content">
 
     <section class="flywheel-loop-card card" aria-label="反馈迭代飞轮">
-      <div class="card-header">
+      <div class="card-header flywheel-card-header">
         <h3>反馈迭代飞轮</h3>
-        <span class="card-count">闭环驱动手册持续优化</span>
+        <span class="flywheel-card-note">每次反馈都会沉淀为审计动作，推动下一轮处置更准、更快。</span>
       </div>
       <div class="flywheel-track" id="flywheel-track">
         <div class="flywheel-node" data-step="1"><span class="flywheel-num">1</span><strong>处置决策</strong><small>把握度分级 · 执行/确认/升级</small></div>
@@ -299,7 +299,6 @@
         <div class="flywheel-node" data-step="4"><span class="flywheel-num">4</span><strong>手册迭代</strong><small>纠偏建议 · Playbook 更新</small></div>
         <div class="flywheel-arrow flywheel-arrow-return" aria-hidden="true">↻</div>
       </div>
-      <p class="flywheel-loop-foot">每次反馈都会沉淀为审计动作，推动下一轮处置更准、更快。</p>
     </section>
 
     <div class="flywheel-stats-row">
@@ -308,11 +307,11 @@
         <div class="viz-donut-row flywheel-donut-inner">
           <div class="viz-donut" style="--pct-up: {{ (stats.thumbs_up / stats.total * 100) if stats.total else 50 }}; --pct-down: {{ (stats.thumbs_down / stats.total * 100) if stats.total else 50 }};">
             <div class="viz-donut-ring"></div>
-            <div class="viz-donut-center">{{ stats.total }}</div>
+            <div class="viz-donut-center" id="stat-donut-total">{{ stats.total }}</div>
           </div>
           <div class="viz-donut-legend">
-            <div><span class="viz-dot green"></span>有用 {{ stats.thumbs_up }}</div>
-            <div><span class="viz-dot red"></span>无用 {{ stats.thumbs_down }}</div>
+            <div><span class="viz-dot green"></span>有用 <span id="donut-count-up">{{ stats.thumbs_up }}</span></div>
+            <div><span class="viz-dot red"></span>无用 <span id="donut-count-down">{{ stats.thumbs_down }}</span></div>
           </div>
         </div>
       </div>
@@ -350,15 +349,29 @@
         <div class="viz-stack-row"><span>apply_correction</span><div class="viz-bar-track"><div class="viz-bar-fill brand" style="width:15%"></div></div></div>
       </div>
     </div>
-    <div class="card" style="margin-bottom:1rem;">
-      <div class="card-header">
-        <h3>导出</h3>
+    <details class="card collapsible-card audit-log-collapsible" id="audit-log-section" open>
+      <summary class="card-header collapsible-summary audit-log-header">
+        <span class="collapse-chevron" aria-hidden="true"></span>
+        <h3>审计动作日志</h3>
+        <span class="card-count" id="audit-log-count">—</span>
+      </summary>
+      <div class="collapsible-body">
+        <div class="audit-log-toolbar">
+          <a class="btn btn-secondary btn-sm" href="/admin/audit/export" target="_blank">JSON 导出</a>
+          <a class="btn btn-outline btn-sm" href="/admin/audit/export?format=csv" target="_blank">CSV 导出</a>
+          <button class="btn btn-outline btn-sm" type="button" onclick="loadAuditLog()">刷新</button>
+        </div>
+      <div id="audit-log-list">
+        <div class="empty" style="padding:2rem;">
+          <div class="empty-icon">◎</div>
+          加载中…
+        </div>
       </div>
-      <div class="action-row" style="padding:0 1rem 1rem;">
-        <a class="btn btn-secondary" href="/admin/audit/export" target="_blank">JSON 导出</a>
-        <a class="btn btn-outline" href="/admin/audit/export?format=csv" target="_blank">CSV 导出</a>
+      <p class="audit-log-footnote">
+        说明：10 分钟内重复触发同一演练场景将幂等命中（<code>duplicate_event</code>），不新建故障记录，审计日志仍完整保留。
+      </p>
       </div>
-    </div>
+    </details>
     {% if audit_detail %}
     <details class="card collapsible-card audit-detail-panel" id="audit-detail-panel" open>
       <summary class="card-header collapsible-summary">
@@ -376,9 +389,11 @@
         <div><span class="audit-detail-label">把握度</span><strong>{{ sc.total or '—' }} {{ sc.grade or '' }}</strong></div>
         <div><span class="audit-detail-label">耗时</span><strong>{{ audit_detail.duration_ms or '—' }} ms</strong></div>
       </div>
-      <div class="audit-detail-actions">
+      <div class="audit-detail-actions audit-feedback-row">
         <a class="btn btn-secondary" href="/?tab=2&amp;trace={{ audit_detail.trace_id }}">查看决策链路</a>
-        <a class="btn btn-outline" href="/admin/audit/export" target="_blank">导出 JSON</a>
+        <span id="audit-feedback-hint" class="audit-feedback-hint">在此提交处置反馈</span>
+        <button class="btn btn-success btn-sm" type="button" id="btn-feedback-up" onclick="submitAuditFeedback('up')">👍 有用</button>
+        <button class="btn btn-outline btn-sm" type="button" id="btn-feedback-down" onclick="submitAuditFeedback('down')">👎 无用</button>
       </div>
       <div class="audit-detail-timeline">
         <h4>审计动作链</h4>
@@ -398,30 +413,6 @@
       </div>
     </details>
     {% endif %}
-    <details class="card collapsible-card audit-log-collapsible" id="audit-log-section" open>
-      <summary class="card-header collapsible-summary audit-log-header">
-        <span class="collapse-chevron" aria-hidden="true"></span>
-        <h3>审计动作日志</h3>
-        <span class="card-count" id="audit-log-count">—</span>
-      </summary>
-      <div class="collapsible-body">
-        <div class="audit-log-toolbar">
-          <span id="audit-feedback-hint" class="audit-feedback-hint">选择日志条目查看详情后可提交反馈</span>
-          <button class="btn btn-success btn-sm" type="button" id="btn-feedback-up" disabled onclick="submitAuditFeedback('up')">👍 有用</button>
-          <button class="btn btn-outline btn-sm" type="button" id="btn-feedback-down" disabled onclick="submitAuditFeedback('down')">👎 无用</button>
-          <button class="btn btn-outline btn-sm" type="button" onclick="loadAuditLog()">刷新</button>
-        </div>
-      <div id="audit-log-list">
-        <div class="empty" style="padding:2rem;">
-          <div class="empty-icon">◎</div>
-          加载中…
-        </div>
-      </div>
-      <p class="audit-log-footnote">
-        说明：10 分钟内重复触发同一演练场景将幂等命中（<code>duplicate_event</code>），不新建故障记录，审计日志仍完整保留。
-      </p>
-      </div>
-    </details>
     </div>
 
     {% endif %}
@@ -940,13 +931,24 @@
       const upEl = document.getElementById('stat-up');
       const downEl = document.getElementById('stat-down');
       const totalEl = document.getElementById('stat-total');
+      const donutTotalEl = document.getElementById('stat-donut-total');
+      const donutUpEl = document.getElementById('donut-count-up');
+      const donutDownEl = document.getElementById('donut-count-down');
       if (upEl) upEl.textContent = stats.thumbs_up;
       if (downEl) downEl.textContent = stats.thumbs_down;
       if (totalEl) totalEl.textContent = stats.total;
+      if (donutTotalEl) donutTotalEl.textContent = stats.total;
+      if (donutUpEl) donutUpEl.textContent = stats.thumbs_up;
+      if (donutDownEl) donutDownEl.textContent = stats.thumbs_down;
       const donut = document.querySelector('.flywheel-donut-card .viz-donut');
-      if (donut && stats.total) {
-        donut.style.setProperty('--pct-up', String(stats.thumbs_up / stats.total * 100));
-        donut.style.setProperty('--pct-down', String(stats.thumbs_down / stats.total * 100));
+      if (donut) {
+        if (stats.total) {
+          donut.style.setProperty('--pct-up', String(stats.thumbs_up / stats.total * 100));
+          donut.style.setProperty('--pct-down', String(stats.thumbs_down / stats.total * 100));
+        } else {
+          donut.style.setProperty('--pct-up', '50');
+          donut.style.setProperty('--pct-down', '50');
+        }
       }
     }
 
@@ -981,6 +983,32 @@
       }
       if (up) up.disabled = false;
       if (down) down.disabled = false;
+      await refreshAuditDetailTimeline(traceId);
+    }
+
+    async function refreshAuditDetailTimeline(traceId) {
+      const container = document.querySelector('.audit-detail-timeline');
+      if (!container || !traceId) return;
+      const res = await fetch('/admin/audit/log?limit=200');
+      if (!res.ok) return;
+      const data = await res.json();
+      const actions = (data.actions || []).filter(a => a.trace_id === traceId);
+      const stepsHtml = actions.length
+        ? actions.map(act => {
+            const label = AUDIT_ACTION_LABELS[act.action_type] || act.action_type;
+            const ts = formatCnTime(act.created_at);
+            const payload = act.payload_json && Object.keys(act.payload_json).length
+              ? `<pre class="audit-step-payload">${JSON.stringify(act.payload_json, null, 2)}</pre>`
+              : '';
+            return `<div class="audit-detail-step">
+              <span class="audit-step-time">${ts}</span>
+              <span class="audit-step-type">${label}</span>
+              <span class="audit-step-op">${act.operator || ''}</span>
+              ${payload}
+            </div>`;
+          }).join('')
+        : '<p class="empty" style="padding:1rem;">暂无审计动作</p>';
+      container.innerHTML = `<h4>审计动作链</h4>${stepsHtml}`;
     }
 
     const AUDIT_ACTION_LABELS = {
