@@ -15,13 +15,60 @@ const BASE = process.env.BASE_URL || 'http://localhost:8000';
 const OUT_DIR = join(ROOT, 'docs', 'demos');
 const TS = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 const SLOW = Number(process.env.DEMO_SLOW_MS || 800);
-const SCENARIO_TIMEOUT = Number(process.env.DEMO_SCENARIO_TIMEOUT_MS || 180000);
+const SCENARIO_TIMEOUT = Number(process.env.DEMO_SCENARIO_TIMEOUT_MS || 300000);
+const VIEWPORT = { width: 1920, height: 1080 };
 
 mkdirSync(OUT_DIR, { recursive: true });
 mkdirSync(join(OUT_DIR, '.playwright-videos'), { recursive: true });
 
 async function pause(page, ms = SLOW) {
   await page.waitForTimeout(ms);
+}
+
+async function waitForCompletedIncident(traceId) {
+  const deadline = Date.now() + SCENARIO_TIMEOUT;
+  while (Date.now() < deadline) {
+    const res = await fetch(`${BASE}/admin/incidents/${traceId}`);
+    if (res.ok) {
+      const inc = await res.json();
+      if (inc.status === 'completed' && inc.score_json?.total != null) return inc;
+      if (inc.status === 'failed') {
+        throw new Error(`场景 ${traceId} 流水线失败，请使用 MOCK_LLM=true 录制`);
+      }
+    }
+    await new Promise((r) => setTimeout(r, 400));
+  }
+  throw new Error(`等待决策结果超时: ${traceId}`);
+}
+
+async function runDemoScenario(page, scenarioId) {
+  const beforeRes = await fetch(`${BASE}/admin/incidents`);
+  const beforeIds = beforeRes.ok
+    ? new Set((await beforeRes.json()).map((i) => i.trace_id))
+    : new Set();
+
+  await page.locator(`[data-demo-scenario="${scenarioId}"]`).click();
+
+  let traceId = null;
+  const deadline = Date.now() + SCENARIO_TIMEOUT;
+  while (Date.now() < deadline) {
+    const res = await fetch(`${BASE}/admin/incidents`);
+    if (res.ok) {
+      const items = await res.json();
+      const fresh = items.filter((i) => i.scenario_id === scenarioId && !beforeIds.has(i.trace_id));
+      if (fresh.length) {
+        traceId = fresh[0].trace_id;
+        break;
+      }
+    }
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  if (!traceId) throw new Error(`未获取 trace_id: ${scenarioId}`);
+
+  await waitForCompletedIncident(traceId);
+  await page.goto(`${BASE}/?tab=2&trace=${encodeURIComponent(traceId)}`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('.decision-score-header', { timeout: 30000 });
+  return traceId;
 }
 
 async function scrollTo(page, selector) {
@@ -44,8 +91,8 @@ try {
 
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({
-  viewport: { width: 1440, height: 900 },
-  recordVideo: { dir: join(OUT_DIR, '.playwright-videos'), size: { width: 1440, height: 900 } },
+  viewport: VIEWPORT,
+  recordVideo: { dir: join(OUT_DIR, '.playwright-videos'), size: VIEWPORT },
   locale: 'zh-CN',
 });
 const page = await context.newPage();
@@ -64,9 +111,7 @@ try {
   console.log('→ 处置工作台 · S1');
   await page.goto(`${BASE}/?tab=2`, { waitUntil: 'networkidle' });
   await pause(page, 1500);
-  await page.locator('[data-demo-scenario="s1"]').click();
-  await page.waitForURL(/trace=/, { timeout: SCENARIO_TIMEOUT });
-  await page.waitForSelector('.decision-score-header', { timeout: SCENARIO_TIMEOUT });
+  await runDemoScenario(page, 's1');
   await pause(page, 2000);
   await scrollTo(page, '#execution-chain');
   await pause(page, 2500);
@@ -82,18 +127,14 @@ try {
 
   // ── 3. S2 空检索 · 🟡 ──
   console.log('→ S2 空检索');
-  await page.locator('[data-demo-scenario="s2"]').click();
-  await page.waitForURL(/trace=/, { timeout: SCENARIO_TIMEOUT });
-  await page.waitForSelector('.decision-score-header', { timeout: SCENARIO_TIMEOUT });
+  await runDemoScenario(page, 's2');
   await pause(page, 2000);
   await scrollTo(page, '#decision-panel');
   await pause(page, 2500);
 
   // ── 4. S3 超预算 · 🔴 ──
   console.log('→ S3 超预算');
-  await page.locator('[data-demo-scenario="s3"]').click();
-  await page.waitForURL(/trace=/, { timeout: SCENARIO_TIMEOUT });
-  await page.waitForSelector('.decision-score-header', { timeout: SCENARIO_TIMEOUT });
+  await runDemoScenario(page, 's3');
   await pause(page, 2000);
   await scrollTo(page, '#execution-chain');
   await pause(page, 2000);
@@ -105,17 +146,19 @@ try {
   await page.goto(`${BASE}/?tab=3`, { waitUntil: 'networkidle' });
   await pause(page, 1500);
   await scrollTo(page, '.flywheel-loop-card');
-  await pause(page, 2000);
+  await pause(page, 1500);
 
   const auditRow = page.locator('.audit-row-link').first();
   if (await auditRow.count()) {
     await auditRow.click();
     await page.waitForURL(/trace=/, { timeout: 15000 });
+    await page.waitForSelector('#audit-detail-panel', { timeout: 15000 });
+    await scrollTo(page, '#audit-detail-panel');
     await pause(page, 1000);
     const feedbackUp = page.locator('#btn-feedback-up');
     if (await feedbackUp.count() && !(await feedbackUp.isDisabled())) {
       await feedbackUp.click();
-      await pause(page, 1500);
+      await pause(page, 2000);
     }
   }
 
@@ -124,8 +167,8 @@ try {
 
   // 回到总览收尾
   await page.goto(`${BASE}/?tab=1`, { waitUntil: 'networkidle' });
-  await scrollTo(page, '.pitch-hero');
-  await pause(page, 2500);
+  await scrollTo(page, '.pal-hero-title');
+  await pause(page, 3000);
 
   console.log('✓ 录制流程完成');
 } catch (err) {

@@ -696,6 +696,151 @@
     }
 
     footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── Tech stack & principles ── */
+    .tech-stack-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 1rem;
+      padding: 0.85rem 1rem;
+      background: rgba(77, 142, 247, 0.06);
+      border: 1px solid rgba(77, 142, 247, 0.2);
+      border-radius: var(--radius);
+    }
+
+    .tech-stack-bar .stack-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-right: 0.5rem;
+      align-self: center;
+    }
+
+    .tech-pill {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+      background: var(--surface-solid);
+      border: 1px solid var(--border);
+      color: #93c5fd;
+    }
+
+    .principles-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.65rem;
+      margin-bottom: 1.25rem;
+    }
+
+    @media (max-width: 900px) {
+      .principles-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .principle-card {
+      padding: 0.75rem 0.9rem;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--surface-solid);
+    }
+
+    .principle-card strong {
+      display: block;
+      font-size: 0.78rem;
+      margin-bottom: 0.25rem;
+      color: var(--text);
+    }
+
+    .principle-card span {
+      font-size: 0.68rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      margin-top: 0.45rem;
+    }
+
+    .tech-tags span {
+      font-size: 0.58rem;
+      font-weight: 600;
+      padding: 0.12rem 0.38rem;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.35);
+      color: #94a3b8;
+      font-family: ui-monospace, monospace;
+    }
+
+    .arch-grid {
+      grid-template-columns: 200px 1fr 300px;
+    }
+
+    .core { min-height: 820px; }
+
+    .pipeline-row {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    @media (max-width: 900px) {
+      .pipeline-row { grid-template-columns: 1fr 1fr; }
+    }
+
+    .layer-ultra .layer-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65rem;
+    }
+
+    .node.compact { min-width: 0; max-width: none; }
+
+    .rationale-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.68rem;
+    }
+
+    .rationale-table th,
+    .rationale-table td {
+      text-align: left;
+      padding: 0.4rem 0.35rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      vertical-align: top;
+    }
+
+    .rationale-table th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .rationale-table td:first-child {
+      color: #93c5fd;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .rationale-table tr:last-child td { border-bottom: none; }
+
+    .degrade-bar {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      background: rgba(245, 158, 66, 0.08);
+      border: 1px dashed rgba(245, 158, 66, 0.35);
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .degrade-bar strong { color: #fbbf72; }
   </style>
 </head>
 <body>
@@ -704,7 +849,7 @@
       <div>
         <div class="badge"><span class="badge-dot"></span> Agent 运行态运维</div>
         <h1>CoAgent <em>Architecture</em></h1>
-        <p class="subtitle">面向企业的 Agent 运维助手 · 可验证处置闭环 · FastAPI · HTMX + SSE · 处置手册 JSON 单一真相源</p>
+        <p class="subtitle">分层架构 · 技术选型可解释 · 异步可验证处置闭环 · Basic → Ultra 演进</p>
       </div>
       <div class="view-tabs" role="tablist">
         <button type="button" class="active" data-view="arch" role="tab" aria-selected="true">技术架构</button>
@@ -729,50 +874,84 @@
 
     <!-- Architecture View -->
     <section class="canvas active" id="view-arch" aria-label="技术架构">
+      <div class="tech-stack-bar">
+        <span class="stack-label">技术栈</span>
+        <span class="tech-pill">Python 3.11+</span>
+        <span class="tech-pill">FastAPI · Uvicorn</span>
+        <span class="tech-pill">Pydantic v2</span>
+        <span class="tech-pill">httpx async</span>
+        <span class="tech-pill">Jinja2 · HTMX</span>
+        <span class="tech-pill">SSE</span>
+        <span class="tech-pill">SQLite</span>
+        <span class="tech-pill">OpenAI-compat LLM</span>
+      </div>
+
+      <div class="principles-grid">
+        <div class="principle-card">
+          <strong>Async-first</strong>
+          <span>LLM / 外部 I/O 走 asyncio，SSE 时间线不断流</span>
+        </div>
+        <div class="principle-card">
+          <strong>Config-driven</strong>
+          <span>处置手册 JSON 单一真相源，改场景无需改代码</span>
+        </div>
+        <div class="principle-card">
+          <strong>Verifiable</strong>
+          <span>把握度评分独立于 LLM 自报，公式可追问可审计</span>
+        </div>
+        <div class="principle-card">
+          <strong>Graceful degrade</strong>
+          <span>L0–L3 分层降级：工具 → LLM → 通道 → 整链超时兜底</span>
+        </div>
+      </div>
+
       <div class="arch-canvas" id="archCanvas">
       <svg class="svg-layer" id="archSvg" aria-hidden="true"></svg>
       <div class="arch-grid">
         <aside class="panel">
-          <div class="panel-title">外部系统</div>
+          <div class="panel-title">接入 & 外部依赖</div>
           <div class="ext-node orange" data-node="agent" tabindex="0">
             <h3>Agent 运行时</h3>
-            <p>运行失败 · 质量异常 · 成本异常<br />cs-bot · rag-bot · content-bot</p>
-            <span class="tag">POST /events · run_fail / cost_report</span>
+            <p>Webhook 上报 · agents/ CLI<br />cs-bot · rag-bot · content-bot</p>
+            <div class="tech-tags"><span>HTTP</span><span>CLI</span></div>
           </div>
           <div class="ext-node purple" data-node="llm-ext" tabindex="0">
             <h3>大模型 API</h3>
-            <p>OpenAI 兼容 · httpx async · 15s 超时 · 重试 ×1</p>
-            <span class="tag">LLMOutput 结构化输出</span>
+            <p>OpenAI 兼容 · 结构化 LLMOutput<br />ModelRouter · mock 降级</p>
+            <div class="tech-tags"><span>httpx</span><span>Pydantic</span></div>
           </div>
           <div class="ext-node green" data-node="feishu" tabindex="0">
-            <h3>飞书 IM</h3>
-            <p>规划中 · S1 卡片 + 一键 Retry</p>
-            <span class="tag">P1 · 骨架 feishu_im.py</span>
+            <h3>IM 协同</h3>
+            <p>飞书卡片 · 一键确认/重试<br />骨架已预留，尚未对接</p>
+            <div class="tech-tags"><span>P1</span><span>channels/</span></div>
           </div>
         </aside>
 
         <div class="panel core" id="corePanel">
 
           <div class="layer">
-            <div class="layer-label">表现层</div>
+            <div class="layer-label">表现层 · Presentation</div>
             <div class="layer-row">
               <div class="node blue" data-node="admin" tabindex="0">
-                <div class="node-name">管理台 HTMX</div>
-                <div class="node-desc">总览 · 场景 · 把握度评分 · 飞轮 · SSE 时间线</div>
+                <div class="node-name">管理台</div>
+                <div class="node-desc">三 Tab · SSE 时间线 · Ultra 面板 · 版本化静态资源</div>
+                <div class="tech-tags"><span>Jinja2</span><span>HTMX</span><span>SSE client</span></div>
               </div>
               <div class="node blue" data-node="api" tabindex="0">
-                <div class="node-name">API 层</div>
-                <div class="node-desc">/events · /admin/* · /demo/retry · 回放只读</div>
+                <div class="node-name">API Gateway</div>
+                <div class="node-desc">/events · /admin/* · /agents/* · /demo · /ultra</div>
+                <div class="tech-tags"><span>FastAPI</span><span>Pydantic</span><span>multipart</span></div>
               </div>
             </div>
           </div>
 
           <div class="layer">
-            <div class="layer-label">领域层 · 编排</div>
+            <div class="layer-label">编排层 · Orchestration</div>
             <div class="layer-row">
               <div class="node hero orange" data-node="orch" tabindex="0">
-                <div class="node-name">编排器 Orchestrator</div>
-                <div class="node-desc">幂等 10min · 链超时 30s · 全链路审计 · L0–L3 分层降级</div>
+                <div class="node-name">Orchestrator</div>
+                <div class="node-desc">10min 幂等 · 链超时 30s · 全链路 audit · L0–L3 降级</div>
+                <div class="tech-tags"><span>asyncio.wait_for</span><span>sse_manager</span></div>
               </div>
             </div>
           </div>
@@ -783,75 +962,101 @@
             <div class="pipeline-row">
               <div class="node yellow" data-node="router" tabindex="0">
                 <div class="node-name">场景路由</div>
-                <div class="node-desc">(type, symptom) → 处置手册 ID</div>
+                <div class="node-desc">(type, symptom) → playbook</div>
+                <div class="tech-tags"><span>router.py</span></div>
               </div>
               <div class="node blue" data-node="playbook" tabindex="0">
-                <div class="node-name">处置手册引擎</div>
-                <div class="node-desc">ops_playbooks.json · 模拟工具 ×3 · 3s 超时</div>
+                <div class="node-name">Playbook 引擎</div>
+                <div class="node-desc">JSON SSoT · mock 工具 ×3 · 3s 超时</div>
+                <div class="tech-tags"><span>engine.py</span></div>
+              </div>
+              <div class="node purple" data-node="diag" tabindex="0">
+                <div class="node-name">ReAct 诊断</div>
+                <div class="node-desc">按需调工具 · max 8 步 · 失败回退 legacy</div>
+                <div class="tech-tags"><span>DiagnosticAgent</span></div>
               </div>
               <div class="node purple" data-node="llm" tabindex="0">
-                <div class="node-name">大模型客户端</div>
-                <div class="node-desc">根因推理 · LLMOutput · 禁止静态冒充</div>
+                <div class="node-name">LLM Client</div>
+                <div class="node-desc">根因推理 · LLMOutput 契约 · 重试 ×1</div>
+                <div class="tech-tags"><span>httpx</span><span>ModelRouter</span></div>
               </div>
               <div class="node green" data-node="scorer" tabindex="0">
-                <div class="node-name">把握度评分器</div>
-                <div class="node-desc">数据·手册·推理 · ≥80🟢 · 60–79🟡 · &lt;60🔴</div>
+                <div class="node-name">把握度评分</div>
+                <div class="node-desc">D/P/C 三因子 · ≥80🟢 · 60–79🟡 · &lt;60🔴</div>
+                <div class="tech-tags"><span>scorer.py</span><span>DEMO clamp</span></div>
               </div>
             </div>
             </div>
           </div>
 
+          <div class="layer layer-ultra">
+            <div class="layer-label">领域层 · 增强 & 通道</div>
+            <div class="layer-row">
+              <div class="node blue compact" data-node="ultra" tabindex="0">
+                <div class="node-name">Ultra 能力</div>
+                <div class="node-desc">知识图谱 · 相似事故 · What-if · Team-plan</div>
+                <div class="tech-tags"><span>ultra/</span></div>
+              </div>
+              <div class="node green compact" data-node="channel" tabindex="0">
+                <div class="node-name">协同通道</div>
+                <div class="node-desc">IM 卡片（P1）· channel_sync 占位</div>
+                <div class="tech-tags"><span>feishu_im.py</span></div>
+              </div>
+            </div>
+          </div>
+
           <div class="layer">
-            <div class="layer-label">基础设施</div>
+            <div class="layer-label">基础设施 · Infrastructure</div>
             <div class="infra-row">
               <div class="node blue" data-node="sse" tabindex="0">
-                <div class="node-name">实时推送审计流</div>
-                <div class="node-desc">SSE pub/sub · 时间线回放</div>
+                <div class="node-name">SSE 审计流</div>
+                <div class="node-desc">pub/sub · 实时推送 · 只读 replay</div>
+                <div class="tech-tags"><span>sse.py</span></div>
               </div>
               <div class="node blue" data-node="db" tabindex="0">
                 <div class="node-name">SQLite</div>
-                <div class="node-desc">incidents · feedback · agent_daily_stats</div>
+                <div class="node-desc">incidents · feedback · agent_stats</div>
+                <div class="tech-tags"><span>db.py</span></div>
               </div>
               <div class="node blue" data-node="config" tabindex="0">
-                <div class="node-name">配置与超时</div>
-                <div class="node-desc">.env · DEMO_MODE · Tool 3s / LLM 15s / 链 30s</div>
+                <div class="node-name">配置中心</div>
+                <div class="node-desc">.env · pydantic-settings · 超时预算</div>
+                <div class="tech-tags"><span>config.py</span></div>
               </div>
             </div>
           </div>
 
           <div class="layer">
-            <div class="layer-label">数据层</div>
-            <div class="data-bar" data-node="data">ops_playbooks.json · scenarios/s1|s2|s3.json · agents.json · calibration/</div>
+            <div class="layer-label">数据层 · Data (JSON SSoT)</div>
+            <div class="data-bar" data-node="data">ops_playbooks.json · scenarios/s1|s2|s3 · agents.json · calibration/</div>
+          </div>
+
+          <div class="degrade-bar">
+            <strong>超时预算：</strong>Tool 3s · LLM 15s · 链 30s · 飞书 5s &nbsp;|&nbsp;
+            <strong>降级：</strong>L0 禁止静态冒充 · L1 工具降级 mock · L2 通道跳过 · L3 整链 timeout 留痕
           </div>
         </div>
 
         <aside class="panel">
-          <div class="panel-title">接口 & 协议</div>
-          <div class="code-block">
-            <span class="cmt">// POST /events — S1 限流</span><br />
-            {<br />
-            &nbsp;&nbsp;<span class="key">"type"</span>: <span class="str">"run_fail"</span>,<br />
-            &nbsp;&nbsp;<span class="key">"symptom"</span>: <span class="str">"rate_limit"</span>,<br />
-            &nbsp;&nbsp;<span class="key">"agent_id"</span>: <span class="str">"cs-bot"</span>,<br />
-            &nbsp;&nbsp;<span class="key">"event_id"</span>: <span class="str">"evt-s1-demo"</span><br />
-            }<br />
-            <span class="cmt">// S3: type=cost_report · symptom=over_budget</span>
-          </div>
-          <div class="code-block">
-            <span class="cmt">// SSE 审计时间线（~8–15s）</span>
-            <ul class="sse-list" id="sseList">
-              <li data-sse="0"><span class="sse-dot"></span>事件接入 incident_started</li>
-              <li data-sse="1"><span class="sse-dot"></span>工具查询 tool_called ×3</li>
-              <li data-sse="2"><span class="sse-dot"></span>大模型推理 llm_reasoning</li>
-              <li data-sse="3"><span class="sse-dot"></span>推理结果 llm_result</li>
-              <li data-sse="4"><span class="sse-dot"></span>把握度评分 score_computed</li>
-              <li data-sse="5"><span class="sse-dot"></span>通道同步 channel_sync (S1)</li>
-              <li data-sse="6"><span class="sse-dot"></span>处置完成 incident_completed</li>
-            </ul>
-          </div>
+          <div class="panel-title">技术选型 · 理由</div>
+          <table class="rationale-table">
+            <thead>
+              <tr><th>维度</th><th>选型</th><th>理由</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Web 框架</td><td>FastAPI</td><td>原生 async、OpenAPI 自文档、类型约束与 Pydantic 一体</td></tr>
+              <tr><td>契约校验</td><td>Pydantic v2</td><td>AgentEvent / LLMOutput 强类型，零幻觉容忍</td></tr>
+              <tr><td>LLM 调用</td><td>httpx async</td><td>不阻塞事件循环；OpenAI 兼容可换模型</td></tr>
+              <tr><td>诊断模式</td><td>ReAct Agent</td><td>按需调工具，比 batch 更贴近真实运维排查</td></tr>
+              <tr><td>实时 UI</td><td>SSE + HTMX</td><td>单向审计流足够；免 SPA 构建链，运维台快速迭代</td></tr>
+              <tr><td>持久化</td><td>SQLite</td><td>单机零运维、审计留痕、黑客松/私有化友好</td></tr>
+              <tr><td>场景配置</td><td>JSON SSoT</td><td>Playbook / 场景 / 评分规则同源，改配置即改行为</td></tr>
+              <tr><td>评分引擎</td><td>确定性公式</td><td>独立于 LLM 自报置信度，评委与客户可追问</td></tr>
+            </tbody>
+          </table>
         </aside>
       </div>
-      <p class="arch-hint">默认仅显示主链路 · 悬停节点查看 SSE / DB / 数据层依赖 · 三场景共用同一流水线</p>
+      <p class="arch-hint">悬停节点高亮关联链路 · 默认显示主路径 · Basic 已实现 · Ultra 增量演进 · IM 通道 P1</p>
       </div>
     </section>
 
@@ -868,37 +1073,37 @@
         <div class="flow-steps">
           <div class="flow-step" style="border-color:rgba(245,158,66,0.35);background:var(--orange-soft)">
             <h3>事件接入</h3>
-            <p>POST /events 回调 · 管理台触发 S1/S2/S3</p>
+            <p>Agent 运行事件上报 · 或管理台触发 S1/S2/S3 演示</p>
           </div>
           <div class="flow-connector"></div>
           <div class="flow-step" style="border-color:rgba(232,197,71,0.35);background:var(--yellow-soft)">
             <h3>幂等检查</h3>
-            <p>event_id 10min 去重 · 重复事件不重复推理</p>
+            <p>10 分钟内重复事件不重复推理 · 避免重复处置</p>
           </div>
           <div class="flow-connector"></div>
           <div class="flow-step" style="border-color:rgba(232,197,71,0.35);background:var(--yellow-soft)">
             <h3>场景路由</h3>
-            <p>rate_limit → S1 · empty_retrieval → S2 · over_budget → S3</p>
+            <p>运行失败 → S1 · 质量异常 → S2 · 成本失控 → S3</p>
           </div>
           <div class="flow-connector"></div>
           <div class="flow-step">
             <h3>处置手册 + 工具</h3>
-            <p>metrics · config · ops_playbook · JSON 单一真相源</p>
+            <p>拉取指标、配置与手册规则 · 形成诊断上下文</p>
           </div>
           <div class="flow-connector"></div>
           <div class="flow-step" style="border-color:rgba(155,123,255,0.35);background:var(--purple-soft)">
-            <h3>大模型根因推理</h3>
-            <p>影响 · 假设 · reasoning_chain≥3 · 步骤 · retry_recommended</p>
+            <h3>根因推理</h3>
+            <p>影响判断 · 根因假设 · 处置步骤 · 可验证证据链</p>
           </div>
           <div class="flow-connector"></div>
           <div class="flow-step" style="border-color:rgba(61,214,140,0.35);background:var(--green-soft)">
             <h3>把握度评分</h3>
-            <p>round(100×(0.35×数据+0.35×手册+0.30×推理)) · 非大模型自报</p>
+            <p>数据 · 手册 · 推理三因子 · 非大模型自报置信度</p>
           </div>
           <div class="flow-connector"></div>
           <div class="flow-step" style="border-color:rgba(77,142,247,0.35);background:rgba(77,142,247,0.1)">
             <h3>分级处置 · 审计留痕</h3>
-            <p>SSE 实时时间线 · SQLite 持久化 · 回放只读（不调大模型）</p>
+            <p>管理台决策 · 实时时间线 · 回放复盘 · 反馈飞轮</p>
           </div>
         </div>
 
@@ -922,7 +1127,7 @@
 
         <div class="side-card">
           <h4 style="font-size:0.85rem;margin-bottom:0.35rem">人工把关 · 飞轮</h4>
-          <p style="font-size:0.72rem;color:var(--muted)">评分驱动动作权限 · Tab2 模拟 Retry · Tab3 👍/👎 反馈迭代</p>
+          <p style="font-size:0.72rem;color:var(--muted)">评分驱动处置权限 · 工作台模拟重试 · 审计 Tab 反馈迭代</p>
         </div>
       </div>
     </section>
@@ -936,17 +1141,20 @@
   <script>
     const LINKS = {
       agent: ["agent", "api", "orch"],
-      admin: ["admin", "api", "sse"],
+      admin: ["admin", "api", "sse", "ultra"],
       api: ["api", "orch", "agent"],
-      orch: ["orch", "router", "sse", "db", "api"],
+      orch: ["orch", "router", "sse", "db", "api", "diag"],
       router: ["router", "playbook", "orch"],
-      playbook: ["playbook", "llm", "data", "router"],
-      llm: ["llm", "llm-ext", "scorer", "playbook"],
-      scorer: ["scorer", "db", "feishu", "llm", "admin"],
+      playbook: ["playbook", "diag", "data", "router"],
+      diag: ["diag", "playbook", "llm", "llm-ext", "orch"],
+      llm: ["llm", "llm-ext", "scorer", "diag", "playbook"],
+      scorer: ["scorer", "db", "ultra", "channel", "feishu", "llm", "admin"],
+      ultra: ["ultra", "scorer", "db", "admin"],
+      channel: ["channel", "feishu", "scorer"],
       sse: ["sse", "admin", "orch"],
-      db: ["db", "orch", "scorer"],
+      db: ["db", "orch", "scorer", "ultra"],
       "llm-ext": ["llm", "llm-ext"],
-      feishu: ["scorer", "feishu"],
+      feishu: ["feishu", "channel"],
       data: ["playbook", "data"],
       config: ["config", "playbook"],
     };
@@ -954,11 +1162,17 @@
     /** always=true 默认显示；false 仅悬停相关节点时显示 */
     const EDGES = [
       { id: "e1", from: "agent", to: "api", fromSide: "right", toSide: "left", kind: "external", color: "#f59e42", label: "POST /events", route: "cross-column", always: true },
-      { id: "e2", from: "admin", to: "api", fromSide: "right", toSide: "left", kind: "primary", color: "#4d8ef7", label: "trigger", route: "horizontal", always: true },
+      { id: "e2", from: "admin", to: "api", fromSide: "right", toSide: "left", kind: "primary", color: "#4d8ef7", label: "HTMX", route: "horizontal", always: true },
       { id: "e3", from: "api", to: "orch", fromSide: "bottom", toSide: "top", kind: "primary", color: "#4d8ef7", route: "vertical", always: true },
       { id: "e4", from: "orch", to: "router", fromSide: "bottom", toSide: "top", kind: "primary", color: "#f59e42", route: "vertical", always: true },
-      { id: "e8", from: "llm-ext", to: "llm", fromSide: "right", toSide: "left", kind: "external", color: "#9b7bff", label: "async", route: "cross-column", always: true },
-      { id: "e9", from: "scorer", to: "feishu", fromSide: "bottom", toSide: "right", kind: "external", color: "#3dd68c", label: "S1 🟢", route: "scorer-feishu", always: true },
+      { id: "e4b", from: "router", to: "playbook", fromSide: "right", toSide: "left", kind: "primary", color: "#f59e42", route: "horizontal", always: true },
+      { id: "e5", from: "playbook", to: "diag", fromSide: "right", toSide: "left", kind: "primary", color: "#9b7bff", route: "horizontal", always: true },
+      { id: "e6", from: "diag", to: "llm", fromSide: "right", toSide: "left", kind: "primary", color: "#9b7bff", route: "horizontal", always: true },
+      { id: "e7", from: "llm", to: "scorer", fromSide: "right", toSide: "left", kind: "primary", color: "#3dd68c", route: "horizontal", always: true },
+      { id: "e8", from: "llm-ext", to: "llm", fromSide: "right", toSide: "left", kind: "external", color: "#9b7bff", label: "httpx", route: "cross-column", always: true },
+      { id: "e9", from: "scorer", to: "channel", fromSide: "bottom", toSide: "top", kind: "feedback", color: "#64748b", label: "P1", route: "vertical", always: false },
+      { id: "e14", from: "channel", to: "feishu", fromSide: "left", toSide: "right", kind: "external", color: "#64748b", route: "cross-column", always: false },
+      { id: "e15", from: "scorer", to: "ultra", fromSide: "bottom", toSide: "top", kind: "secondary", color: "#64748b", route: "vertical", always: false },
       { id: "e11", from: "sse", to: "admin", fromSide: "top", toSide: "bottom", kind: "feedback", color: "#64748b", label: "SSE", route: "left-rail", always: false },
       { id: "e10", from: "orch", to: "sse", fromSide: "bottom", toSide: "top", kind: "secondary", color: "#64748b", route: "right-rail", always: false },
       { id: "e12", from: "orch", to: "db", fromSide: "bottom", toSide: "top", kind: "secondary", color: "#64748b", route: "right-rail-db", always: false },
@@ -1122,8 +1336,9 @@
 
     function highlight(nodeId) {
       activeNode = nodeId;
+      const linkId = nodeId === "llm" ? "llm" : nodeId;
       document.querySelectorAll("[data-node]").forEach(el => {
-        el.classList.toggle("highlight", el.dataset.node === nodeId || (LINKS[nodeId] || []).includes(el.dataset.node));
+        el.classList.toggle("highlight", el.dataset.node === nodeId || (LINKS[linkId] || LINKS[nodeId] || []).includes(el.dataset.node));
       });
       document.querySelectorAll(".chip[data-link]").forEach(el => {
         el.style.boxShadow = el.dataset.link === nodeId ? "0 0 16px var(--accent-glow)" : "";
@@ -1203,11 +1418,13 @@
     });
 
     const sseItems = document.querySelectorAll("#sseList li");
-    let sseIdx = 0;
-    setInterval(() => {
-      sseItems.forEach((li, i) => li.classList.toggle("active", i === sseIdx));
-      sseIdx = (sseIdx + 1) % sseItems.length;
-    }, 900);
+    if (sseItems.length) {
+      let sseIdx = 0;
+      setInterval(() => {
+        sseItems.forEach((li, i) => li.classList.toggle("active", i === sseIdx));
+        sseIdx = (sseIdx + 1) % sseItems.length;
+      }, 900);
+    }
 
     setInterval(tickPipelineAutoPlay, 1200);
     tickPipelineAutoPlay();
