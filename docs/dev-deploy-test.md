@@ -282,6 +282,9 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        # 禁止 nginx 缓存 HTML（静态资源由 uvicorn 带 ?v= 长期缓存）
+        proxy_no_cache 1;
+        proxy_cache_bypass 1;
     }
 }
 ```
@@ -291,15 +294,16 @@ server {
 **部署更新步骤：**
 
 ```bash
+# 方式一：一键脚本（在服务器项目目录执行）
+bash scripts/deploy_server.sh
+
+# 方式二：手动
 cd /path/to/coagent
 git pull origin main
 source .venv/bin/activate
 pip install -r requirements.txt -q
-# 重启服务（systemd / supervisor / 手动）
 pkill -f 'uvicorn app.main:app' || true
 nohup uvicorn app.main:app --host 127.0.0.1 --port 8000 >> coagent.log 2>&1 &
-# 可选：重载 nginx
-sudo nginx -s reload
 ```
 
 **部署后验证：**

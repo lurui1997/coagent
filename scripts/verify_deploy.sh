@@ -22,6 +22,10 @@ if [ -z "$css_path" ]; then
   exit 1
 fi
 
+if ! echo "$css_path" | grep -q '?v='; then
+  echo "⚠ HTML 中 style.css 未带 ?v= 版本号，浏览器可能命中旧 CSS 缓存"
+fi
+
 if [[ "$css_path" != /* ]]; then
   css_url="$css_path"
 else
@@ -31,6 +35,13 @@ fi
 echo "→ CSS: $css_url"
 code=$(curl -sf -o /tmp/coagent-check.css -w '%{http_code}' --max-time 20 "$css_url")
 [ "$code" = "200" ] || { echo "✗ CSS HTTP $code"; exit 1; }
+
+bare_code=$(curl -sf -o /dev/null -w '%{http_code}|%{redirect_url}' --max-time 10 "${BASE%/}/static/style.css" 2>/dev/null || echo "000|")
+if echo "$bare_code" | grep -q '^302|.*style\.css?v='; then
+  echo "✓ 无版本号 /static/style.css 会 302 到带 ?v= 的 URL"
+elif echo "$bare_code" | grep -q '^200|'; then
+  echo "⚠ /static/style.css 无版本号仍返回 200，请确认已部署最新 main.py"
+fi
 
 if grep -q '\.pitch-hero' /tmp/coagent-check.css && grep -q '\.pitch-narrative' /tmp/coagent-check.css; then
   echo "✓ CSS 含 pitch 布局规则 ($(wc -c </tmp/coagent-check.css) bytes)"
