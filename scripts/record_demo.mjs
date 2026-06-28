@@ -15,6 +15,7 @@ const BASE = process.env.BASE_URL || 'http://localhost:8000';
 const OUT_DIR = join(ROOT, 'docs', 'demos');
 const TS = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 const SLOW = Number(process.env.DEMO_SLOW_MS || 800);
+const SCENARIO_TIMEOUT = Number(process.env.DEMO_SCENARIO_TIMEOUT_MS || 180000);
 
 mkdirSync(OUT_DIR, { recursive: true });
 mkdirSync(join(OUT_DIR, '.playwright-videos'), { recursive: true });
@@ -64,8 +65,8 @@ try {
   await page.goto(`${BASE}/?tab=2`, { waitUntil: 'networkidle' });
   await pause(page, 1500);
   await page.locator('[data-demo-scenario="s1"]').click();
-  await page.waitForURL(/trace=/, { timeout: 30000 });
-  await page.waitForSelector('.decision-score-header', { timeout: 30000 });
+  await page.waitForURL(/trace=/, { timeout: SCENARIO_TIMEOUT });
+  await page.waitForSelector('.decision-score-header', { timeout: SCENARIO_TIMEOUT });
   await pause(page, 2000);
   await scrollTo(page, '#execution-chain');
   await pause(page, 2500);
@@ -82,8 +83,8 @@ try {
   // ── 3. S2 空检索 · 🟡 ──
   console.log('→ S2 空检索');
   await page.locator('[data-demo-scenario="s2"]').click();
-  await page.waitForURL(/trace=/, { timeout: 30000 });
-  await page.waitForSelector('.decision-score-header', { timeout: 30000 });
+  await page.waitForURL(/trace=/, { timeout: SCENARIO_TIMEOUT });
+  await page.waitForSelector('.decision-score-header', { timeout: SCENARIO_TIMEOUT });
   await pause(page, 2000);
   await scrollTo(page, '#decision-panel');
   await pause(page, 2500);
@@ -91,8 +92,8 @@ try {
   // ── 4. S3 超预算 · 🔴 ──
   console.log('→ S3 超预算');
   await page.locator('[data-demo-scenario="s3"]').click();
-  await page.waitForURL(/trace=/, { timeout: 30000 });
-  await page.waitForSelector('.decision-score-header', { timeout: 30000 });
+  await page.waitForURL(/trace=/, { timeout: SCENARIO_TIMEOUT });
+  await page.waitForSelector('.decision-score-header', { timeout: SCENARIO_TIMEOUT });
   await pause(page, 2000);
   await scrollTo(page, '#execution-chain');
   await pause(page, 2000);
