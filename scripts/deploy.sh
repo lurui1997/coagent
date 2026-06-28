@@ -57,7 +57,10 @@ else
     STASHED=1
   fi
 
-  git fetch origin "$BRANCH"
+  # 注意：老版本 git(1.8.x) 下 `git fetch origin <branch>` 只更新 FETCH_HEAD，
+  # 不更新 origin/<branch> 跟踪引用，会导致后续 ff 判定基于陈旧引用。
+  # 显式把远程分支抓到本地跟踪引用，保证 origin/<branch> 是最新的。
+  git fetch origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
   if git merge-base --is-ancestor HEAD "origin/$BRANCH"; then
     git merge --ff-only "origin/$BRANCH"
   else
