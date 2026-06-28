@@ -41,8 +41,7 @@
 - [快速开始](#快速开始)
 - [本地 Claude Agent(真实接入)](#本地-claude-agent真实接入)
 - [进阶能力](#进阶能力)
-- [官网](#官网) · [测试](#测试)
-- [文档](#文档) · [License](#license)
+- [官网](#官网) · [测试](#测试) · [License](#license)
 
 </details>
 
@@ -205,13 +204,6 @@ bash scripts/run_tests.sh -q
 # 或: .venv/bin/python3 -m pytest tests/ -m "not live_llm" -q
 bash scripts/demo.sh
 ```
-
-## 文档
-
-- **设计规格(唯一实施基线):** [docs/superpowers/specs/coagent-design-spec.md](docs/superpowers/specs/coagent-design-spec.md)
-- **产品选题与市场分析:** [docs/intro/CoAgent 选题文档.md](docs/intro/CoAgent%20选题文档.md)
-- **开发 / 部署 / 测试:** [docs/dev-deploy-test.md](docs/dev-deploy-test.md)
-- **任务追踪:** [TODOS.md](TODOS.md)
 
 ## License
 
