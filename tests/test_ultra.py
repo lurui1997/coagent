@@ -108,6 +108,9 @@ async def test_ultra_what_if(client):
     data = resp.json()
     assert "counterfactual_score" in data
     assert data["narrative"]
+    assert len(data["logic_chain"]) == 4
+    assert data["logic_chain"][0]["key"] == "baseline"
+    assert data["logic_chain"][-1]["key"] == "conclusion"
 
 
 @pytest.mark.asyncio

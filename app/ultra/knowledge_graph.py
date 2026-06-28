@@ -4,6 +4,23 @@ from __future__ import annotations
 
 from typing import Any
 
+REL_LABELS = {
+    "triggered": "触发",
+    "routed_to": "路由",
+    "hypothesized": "根因",
+    "recommended": "处置",
+    "scored": "评分",
+}
+
+NODE_COLORS = {
+    "agent": "#6d28d9",
+    "incident": "#2563eb",
+    "playbook": "#d97706",
+    "root_cause": "#dc2626",
+    "action": "#059669",
+    "score": "#5c5470",
+}
+
 
 def build_knowledge_graph(incidents: list[dict], playbooks: dict[str, dict] | None = None) -> dict[str, Any]:
     """构建 Agent / 事件 / 根因 / 处置 关联图。"""
@@ -55,6 +72,8 @@ def build_knowledge_graph(incidents: list[dict], playbooks: dict[str, dict] | No
             "agents": len([n for n in nodes.values() if n["type"] == "agent"]),
             "incidents": len([n for n in nodes.values() if n["type"] == "incident"]),
         },
+        "rel_labels": REL_LABELS,
+        "node_colors": NODE_COLORS,
     }
 
 

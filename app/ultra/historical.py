@@ -7,7 +7,7 @@ from typing import Any
 
 from app.models.event import AgentEvent
 from app.models.llm_output import LLMOutput, Step
-from app.scoring.scorer import compute_score, grade_from_total
+from app.scoring.scorer import compute_score
 
 
 def find_similar_incidents(target: dict, candidates: list[dict], limit: int = 5) -> list[dict]:
@@ -57,8 +57,21 @@ def simulate_what_if(
     tool_results = _mock_tools_from_playbook(playbook, changes)
     counterfactual = compute_score(event, llm, playbook, tool_results)
 
+    # 原始因子（复算以便与反事实对比）
+    orig_event = AgentEvent.model_validate(incident.get("event_json") or {})
+    orig_tools = _mock_tools_from_playbook(playbook, {})
+    original_recomputed = compute_score(orig_event, llm, playbook, orig_tools)
+
     delta = counterfactual["total"] - original_score.get("total", counterfactual["total"])
     narrative = _what_if_narrative(incident.get("scenario_id", ""), changes, delta, counterfactual)
+    logic_chain = _build_logic_chain(
+        incident,
+        changes,
+        original_score,
+        original_recomputed,
+        counterfactual,
+        narrative,
+    )
 
     return {
         "trace_id": incident["trace_id"],
@@ -70,7 +83,9 @@ def simulate_what_if(
         "counterfactual_grade": counterfactual["grade"],
         "grade_changed": original_score.get("grade") != counterfactual["grade"],
         "factors": counterfactual["factors"],
+        "original_factors": original_recomputed["factors"],
         "narrative": narrative,
+        "logic_chain": logic_chain,
     }
 
 
@@ -106,12 +121,119 @@ def _mock_tools_from_playbook(playbook: dict, changes: dict[str, Any]) -> list[d
     return results
 
 
+def _fmt_factor(factors: dict, key: str) -> str:
+    val = factors.get(key)
+    return f"{float(val) * 100:.0f}%" if val is not None else "—"
+
+
+def _change_description(key: str, val: Any, event: dict) -> str:
+    before = event.get(key, "—")
+    labels = {
+        "concurrent": "并发",
+        "budget_yuan_daily": "日预算",
+        "log_snippet": "运行日志",
+        "cost_yuan_today": "日成本",
+    }
+    label = labels.get(key, key)
+    return f"{label}: {before} → {val}"
+
+
+def _build_logic_chain(
+    incident: dict,
+    changes: dict[str, Any],
+    original_score: dict,
+    original_recomputed: dict,
+    counterfactual: dict,
+    narrative: str,
+) -> list[dict[str, Any]]:
+    """构建 What-if 推演逻辑链（供前端可视化）。"""
+    event = incident.get("event_json") or {}
+    orig_f = original_recomputed.get("factors") or original_score.get("factors") or {}
+    new_f = counterfactual.get("factors") or {}
+    llm = incident.get("llm_json") or {}
+
+    grade_labels = {
+        "executable": "🟢 可执行",
+        "needs_confirmation": "🟡 需确认",
+        "escalate": "🔴 升级",
+    }
+
+    return [
+        {
+            "step": 1,
+            "key": "baseline",
+            "title": "基准状态",
+            "summary": f"{incident.get('agent_id')} · {incident.get('scenario_id')} · 评分 {original_score.get('total', '—')}",
+            "links": [
+                {"rel": "Agent", "to": incident.get("agent_id", "")},
+                {"rel": "场景", "to": incident.get("scenario_id", "")},
+                {"rel": "分级", "to": grade_labels.get(original_score.get("grade", ""), "")},
+            ],
+            "reasoning_chain": llm.get("reasoning_chain") or [],
+        },
+        {
+            "step": 2,
+            "key": "intervention",
+            "title": "假设干预",
+            "summary": "对事件参数施加反事实变更（不调大模型）",
+            "links": [
+                {"rel": _change_description(k, v, event), "to": "变更"}
+                for k, v in changes.items()
+            ],
+        },
+        {
+            "step": 3,
+            "key": "propagation",
+            "title": "因子传导",
+            "summary": "数据·手册·推理 三因子重算",
+            "links": [
+                {
+                    "rel": "数据完备",
+                    "from": _fmt_factor(orig_f, "data_completeness"),
+                    "to": _fmt_factor(new_f, "data_completeness"),
+                },
+                {
+                    "rel": "手册匹配",
+                    "from": _fmt_factor(orig_f, "playbook_match"),
+                    "to": _fmt_factor(new_f, "playbook_match"),
+                },
+                {
+                    "rel": "推理一致",
+                    "from": _fmt_factor(orig_f, "reasoning_consistency"),
+                    "to": _fmt_factor(new_f, "reasoning_consistency"),
+                },
+            ],
+        },
+        {
+            "step": 4,
+            "key": "conclusion",
+            "title": "推演结论",
+            "summary": narrative,
+            "links": [
+                {
+                    "rel": "评分",
+                    "from": str(original_score.get("total", "—")),
+                    "to": str(counterfactual.get("total", "—")),
+                },
+                {
+                    "rel": "分级",
+                    "from": grade_labels.get(original_score.get("grade", ""), "—"),
+                    "to": grade_labels.get(counterfactual.get("grade", ""), "—"),
+                },
+                {"rel": "Δ", "to": f"{counterfactual.get('total', 0) - original_score.get('total', 0):+d}"},
+            ],
+        },
+    ]
+
+
 def _what_if_narrative(scenario_id: str, changes: dict, delta: int, score: dict) -> str:
     parts = []
     if "concurrent" in changes:
         parts.append(f"若 concurrent 调整为 {changes['concurrent']}")
     if "budget_yuan_daily" in changes:
         parts.append(f"若日预算调整为 ¥{changes['budget_yuan_daily']}")
+    if "log_snippet" in changes:
+        parts.append("若运行日志/指标恢复稳定")
     if not parts:
         parts.append("若应用假设变更")
     direction = "上升" if delta > 0 else ("下降" if delta < 0 else "不变")

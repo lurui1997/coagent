@@ -18,9 +18,6 @@
     </a>
     <div class="header-meta">
       <span class="badge-live" id="header-status">流水线就绪</span>
-      {% if demo_mode %}
-      <span class="badge">演示模式</span>
-      {% endif %}
     </div>
   </header>
 
@@ -248,32 +245,48 @@
       <p>知识图谱 · 相似事故 · What-if 推演 · Agent-Team 编排。请先在「场景」页触发 S1/S2/S3，再回到此页查看。</p>
     </section>
     <div id="ultra-api-hint" class="alert alert-warning" style="display:none;margin-bottom:1rem;"></div>
+    <div class="card kg-card" style="margin-bottom:1rem;">
+      <div class="card-header">
+        <h3>知识图谱 · 拓扑</h3>
+        <span class="card-count" id="kg-stats">—</span>
+      </div>
+      <div class="kg-legend">
+        <span><i class="kg-dot agent"></i>Agent</span>
+        <span><i class="kg-dot incident"></i>故障</span>
+        <span><i class="kg-dot playbook"></i>手册</span>
+        <span><i class="kg-dot root_cause"></i>根因</span>
+        <span><i class="kg-dot action"></i>处置</span>
+        <span><i class="kg-dot score"></i>评分</span>
+      </div>
+      <div id="kg-topology-wrap" class="kg-topology-wrap">
+        <div id="kg-topology" class="kg-readable-graph" aria-label="知识图谱拓扑"></div>
+      </div>
+    </div>
     <div class="grid-2">
       <div class="card">
-        <div class="card-header"><h3>知识图谱</h3></div>
-        <div id="kg-stats" class="empty" style="padding:1rem;">加载中…</div>
-        <pre id="kg-preview" style="max-height:240px;overflow:auto;font-size:0.75rem;padding:0 1rem 1rem;"></pre>
-      </div>
-      <div class="card">
-        <div class="card-header"><h3>Agent-Team 编排</h3></div>
+        <div class="card-header"><h3>故障选择</h3></div>
         <select id="ultra-trace" class="select-field" style="margin:0 1rem 1rem;">
           {% for inc in incidents[:10] %}
           <option value="{{ inc.trace_id }}">{{ inc.agent_id }} · {{ inc.scenario_id }} · {{ inc.trace_id }}</option>
           {% endfor %}
         </select>
+        <p style="padding:0 1rem 1rem;font-size:0.75rem;color:var(--text-muted);margin:0;">切换故障可查看该事件的因果链与处置步骤</p>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Agent-Team 编排</h3></div>
         <div id="team-plan" style="padding:0 1rem 1rem;font-size:0.875rem;color:var(--text-secondary)">选择故障查看编排计划</div>
       </div>
     </div>
     <div class="card" style="margin-top:1rem;">
-      <div class="card-header"><h3>What-if 推演</h3></div>
+      <div class="card-header"><h3>What-if 推演 · 逻辑链</h3></div>
       <div style="padding:0 1rem 1rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
         <select id="whatif-scenario" class="select-field" style="width:auto;">
-          <option value="concurrent:5">S1 · concurrent → 5</option>
-          <option value="budget_yuan_daily:30">S3 · 预算 → ¥30</option>
+          <option value="log_snippet:concurrent=5 rate_limit recovered stable">S1 · 降并发后日志恢复</option>
+          <option value="budget_yuan_daily:30">S3 · 日预算 → ¥30</option>
         </select>
         <button class="btn" type="button" onclick="runWhatIf()">运行推演</button>
       </div>
-      <div id="whatif-result" style="padding:0 1rem 1rem;font-size:0.875rem;"></div>
+      <div id="whatif-result" class="whatif-panel"></div>
     </div>
     <div class="card" style="margin-top:1rem;">
       <div class="card-header"><h3>相似历史事故</h3></div>
@@ -285,6 +298,16 @@
   <script>
     let currentTraceId = null;
     let eventSource = null;
+    let kgGraphData = null;
+
+    const KG_TYPE_LABEL = {
+      agent: 'Agent', incident: '故障', playbook: '手册',
+      root_cause: '根因', action: '处置', score: '评分',
+    };
+    const KG_REL_LABEL = {
+      triggered: '触发', routed_to: '路由', hypothesized: '根因',
+      recommended: '处置', scored: '评分',
+    };
 
     const EVENT_LABELS = {
       incident_started: '事件接入',
@@ -607,6 +630,150 @@
       if (latest) await hydrateIncident(latest.trace_id);
     }
 
+    function escapeHtml(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    /** 仅保留与当前故障直接相连的节点（不沿 Agent 扩散到其他故障） */
+    function filterGraphForTrace(graph, traceId) {
+      if (!traceId || !graph) return { nodes: [], edges: [] };
+      const focus = `incident:${traceId}`;
+      const ids = new Set([focus]);
+      graph.edges.forEach(e => {
+        if (e.from === focus || e.to === focus) {
+          ids.add(e.from);
+          ids.add(e.to);
+        }
+      });
+      return {
+        ...graph,
+        nodes: graph.nodes.filter(n => ids.has(n.id)),
+        edges: graph.edges.filter(e => ids.has(e.from) && ids.has(e.to)),
+      };
+    }
+
+    function renderKnowledgeGraphTopology(graph, focusTraceId) {
+      const container = document.getElementById('kg-topology');
+      const wrap = document.getElementById('kg-topology-wrap');
+      if (!container || !graph?.nodes?.length) {
+        if (container) container.innerHTML = '';
+        if (wrap) wrap.dataset.empty = '1';
+        return;
+      }
+
+      const traceId = focusTraceId || graph.nodes.find(n => n.type === 'incident')?.id?.replace('incident:', '');
+      const view = traceId ? filterGraphForTrace(graph, traceId) : { nodes: [], edges: [] };
+
+      if (!view.nodes.length) {
+        container.innerHTML = '';
+        if (wrap) wrap.dataset.empty = '1';
+        return;
+      }
+      if (wrap) wrap.dataset.empty = '0';
+
+      const byType = (t) => view.nodes.filter(n => n.type === t);
+      const agent = byType('agent')[0];
+      const incident = byType('incident')[0];
+      const playbook = byType('playbook')[0];
+      const roots = byType('root_cause');
+      const actions = byType('action');
+      const score = byType('score')[0];
+      const relMap = graph.rel_labels || KG_REL_LABEL;
+
+      const card = (n, extra) => {
+        if (!n) return '';
+        return `<div class="kg-card-node kg-${n.type}${extra || ''}">
+          <span class="kg-card-type">${KG_TYPE_LABEL[n.type]}</span>
+          <span class="kg-card-label">${escapeHtml(n.label)}</span>
+        </div>`;
+      };
+
+      let html = '<div class="kg-readable-inner">';
+
+      html += '<div class="kg-tier-label">① 接入 · 路由</div>';
+      html += '<div class="kg-flow-row main">';
+      html += card(agent);
+      html += `<span class="kg-flow-link"><span class="kg-flow-arrow">→</span>${relMap.triggered || '触发'}</span>`;
+      html += card(incident, ' kg-hub');
+      html += `<span class="kg-flow-link"><span class="kg-flow-arrow">→</span>${relMap.routed_to || '路由'}</span>`;
+      html += card(playbook);
+      html += '</div>';
+
+      if (roots.length) {
+        html += `<div class="kg-tier-label">② ${relMap.hypothesized || '根因'} · 假设链</div>`;
+        html += '<div class="kg-causal-list">';
+        roots.forEach((r, i) => {
+          if (i > 0) html += '<div class="kg-causal-connector">↓ 因果推导</div>';
+          html += `<div class="kg-causal-item">${escapeHtml(r.label)}</div>`;
+        });
+        html += '</div>';
+      }
+
+      if (actions.length) {
+        html += `<div class="kg-tier-label">③ ${relMap.recommended || '处置'} · 建议步骤</div>`;
+        html += '<div class="kg-action-flow">';
+        actions.forEach((a, i) => {
+          if (i > 0) html += '<span class="pipeline-arrow">→</span>';
+          const risk = a.risk ? `<em class="risk-tag risk-${a.risk}">${a.risk}</em>` : '';
+          html += `<div class="kg-action-chip">${risk}<span>${escapeHtml(a.label)}</span></div>`;
+        });
+        html += '</div>';
+      }
+
+      if (score) {
+        html += `<div class="kg-tier-label">④ ${relMap.scored || '评分'} · 把握度</div>`;
+        html += '<div class="kg-flow-row">' + card(score, ' kg-score-final') + '</div>';
+      }
+
+      html += '</div>';
+      container.innerHTML = html;
+
+      const statsEl = document.getElementById('kg-stats');
+      if (statsEl && traceId) {
+        statsEl.textContent = `本故障 ${view.nodes.length} 实体 · ${view.edges.length} 关系 · ${traceId}`;
+      }
+    }
+
+    function renderWhatIfLogicChain(data) {
+      const el = document.getElementById('whatif-result');
+      if (!el || !data.logic_chain) return;
+
+      let html = '<div class="logic-ontology-rail">';
+      data.logic_chain.forEach((step, i) => {
+        const isLast = i === data.logic_chain.length - 1;
+        html += `<div class="logic-rail-step">
+          <div class="logic-rail-marker"><span>${step.step}</span></div>
+          <div class="logic-rail-body">
+            <div class="logic-rail-head"><strong>${step.title}</strong><span>${step.summary}</span></div>`;
+        if (step.reasoning_chain?.length) {
+          html += '<div class="logic-rail-chain">';
+          step.reasoning_chain.forEach((t, j) => {
+            html += `<div class="logic-rail-node root">${j + 1}. ${t}</div>`;
+            if (j < step.reasoning_chain.length - 1) html += '<div class="logic-rail-link">↓ 因果传导</div>';
+          });
+          html += '</div>';
+        }
+        if (step.links?.length) {
+          html += '<div class="logic-rail-links">';
+          step.links.forEach(link => {
+            if (link.from !== undefined && link.to !== undefined) {
+              html += `<div class="logic-rail-flow"><span class="logic-link-rel">${link.rel}</span><span class="logic-rail-pill">${link.from}</span><span class="pipeline-arrow">→</span><span class="logic-rail-pill accent">${link.to}</span></div>`;
+            } else {
+              html += `<div class="logic-rail-flow"><span class="logic-link-rel">${link.rel}</span><span class="logic-rail-pill">${link.to || ''}</span></div>`;
+            }
+          });
+          html += '</div>';
+        }
+        html += '</div></div>';
+        if (!isLast) html += '<div class="logic-rail-connector"><span>↓</span></div>';
+      });
+      html += '</div>';
+
+      const gradeChanged = data.grade_changed;
+      html += `<div class="alert alert-${gradeChanged ? 'warning' : 'success'}" style="margin-top:1rem">${data.narrative}</div>`;
+      el.innerHTML = html;
+    }
+
     async function loadUltraPanel() {
       const hint = document.getElementById('ultra-api-hint');
       const graphRes = await fetch('/admin/ultra/graph');
@@ -616,14 +783,9 @@
         return;
       }
       if (graphRes.ok) {
-        const g = await graphRes.json();
-        const statsEl = document.getElementById('kg-stats');
-        if (statsEl) {
-          statsEl.className = '';
-          statsEl.innerHTML = `节点 ${g.stats.node_count} · 边 ${g.stats.edge_count} · Agent ${g.stats.agents} · 故障 ${g.stats.incidents}`;
-        }
-        const preview = document.getElementById('kg-preview');
-        if (preview) preview.textContent = JSON.stringify(g.edges.slice(0, 12), null, 2);
+        kgGraphData = await graphRes.json();
+        const traceSel = document.getElementById('ultra-trace');
+        renderKnowledgeGraphTopology(kgGraphData, traceSel?.value || null);
       }
       const traceSel = document.getElementById('ultra-trace');
       if (traceSel?.value) {
@@ -658,8 +820,10 @@
 
     async function runWhatIf() {
       const traceId = document.getElementById('ultra-trace')?.value;
-      const spec = document.getElementById('whatif-scenario')?.value || 'concurrent:5';
-      const [key, val] = spec.split(':');
+      const spec = document.getElementById('whatif-scenario')?.value || 'log_snippet:concurrent=5 rate_limit recovered';
+      const colon = spec.indexOf(':');
+      const key = spec.slice(0, colon);
+      const val = spec.slice(colon + 1);
       const changes = { [key]: isNaN(Number(val)) ? val : Number(val) };
       const res = await fetch(`/admin/ultra/incidents/${traceId}/what-if`, {
         method: 'POST',
@@ -670,9 +834,7 @@
       if (!el) return;
       const data = await res.json();
       if (!res.ok) { el.textContent = data.detail || '推演失败'; return; }
-      el.innerHTML = `<div class="alert alert-${data.grade_changed ? 'warning' : 'success'}" style="margin:0">${
-        data.narrative
-      }</div><div style="margin-top:0.5rem">原始 ${data.original_score} → 反事实 ${data.counterfactual_score} (Δ ${data.delta})</div>`;
+      renderWhatIfLogicChain(data);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -690,6 +852,7 @@
       if (tab === 6) {
         loadUltraPanel();
         document.getElementById('ultra-trace')?.addEventListener('change', (e) => {
+          renderKnowledgeGraphTopology(kgGraphData, e.target.value);
           loadTeamPlan(e.target.value);
           loadSimilar(e.target.value);
         });
