@@ -1,0 +1,3 @@
+[build]
+  command = "cp 'docs/intro/CoAgent-路演PPT.html' docs/index.html"
+  publish = "docs"

@@ -94,6 +94,18 @@
   .demo-shot{height:300px;border:1.5px dashed #2c61a8;border-radius:12px;display:flex;flex-direction:column;
     align-items:center;justify-content:center;color:var(--muted);background:rgba(13,30,66,.5);gap:8px}
   .demo-shot .big{font-size:15px;letter-spacing:.1em;color:var(--blue-l)}
+  .demo-layout{display:grid;grid-template-columns:658px 1fr;gap:18px;height:370px}
+  .demo-video-frame{position:relative;height:370px;overflow:hidden;border:1px solid #2c61a8;border-radius:12px;
+    background:#01040d;box-shadow:0 18px 42px rgba(0,0,0,.34)}
+  .demo-video{display:block;width:100%;height:100%;object-fit:contain;background:#01040d}
+  .demo-video-badge{position:absolute;left:14px;top:14px;z-index:2;padding:5px 10px;border:1px solid rgba(0,224,255,.45);
+    border-radius:999px;background:rgba(4,9,31,.82);color:var(--cyan);font-size:10px;font-weight:700;letter-spacing:.16em;
+    pointer-events:none;backdrop-filter:blur(6px)}
+  .demo-journey{display:grid;grid-template-columns:1fr;gap:8px;height:370px}
+  .demo-journey .step{padding:10px 13px;min-height:0}
+  .demo-journey .step .s{font-size:11px}
+  .demo-journey .step h4{font-size:14px;margin:3px 0 2px}
+  .demo-journey .step p{font-size:11.5px;line-height:1.35}
   .journey{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
   .step{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 14px}
   .step .s{color:var(--cyan);font-weight:700;font-size:13px;letter-spacing:.1em}
@@ -117,6 +129,9 @@
   .hl-card .k{font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
   .hl-card h4{font-size:16px;margin:5px 0 5px;color:var(--cyan)}
   .hl-card p{font-size:12.5px;color:var(--dim);line-height:1.45}
+  .architecture-embed{height:500px;margin-top:12px;overflow:hidden;border:1px solid #263b72;border-radius:12px;
+    background:#070b12;box-shadow:0 16px 42px rgba(0,0,0,.28)}
+  .architecture-embed iframe{display:block;width:100%;height:100%;border:0;background:#070b12}
   /* business */
   .biz{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px}
   .biz .blk{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
@@ -145,6 +160,37 @@
   .qa-note{margin-top:30px;font-size:13px;color:var(--muted);max-width:760px;line-height:1.7;border-top:1px solid var(--line);padding-top:14px}
   .qa-note b{color:var(--dim)}
   .note{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.5}
+  /* P2：市场数据主视觉 */
+  .problem-lead{font-size:16px;color:var(--dim);margin-top:4px;line-height:1.45}
+  .market-stats{display:grid;grid-template-columns:1fr 28px 1fr 28px 1fr;gap:8px;margin-top:14px;align-items:stretch}
+  .market-stat{height:160px;padding:13px 16px 12px;position:relative;overflow:hidden;
+    background:linear-gradient(165deg,rgba(17,30,69,.94),rgba(7,15,42,.96));
+    border:1px solid #263b72;border-radius:13px}
+  .market-stat::after{content:"";position:absolute;right:-45px;bottom:-85px;width:170px;height:170px;
+    border:1px solid rgba(110,197,255,.14);border-radius:50%;box-shadow:0 0 60px rgba(0,224,255,.08)}
+  .market-stat.risk{border-color:#5a4413;background:linear-gradient(165deg,rgba(42,29,7,.96),rgba(20,14,8,.96))}
+  .market-stat .eyebrow{font-size:9.5px;letter-spacing:.16em;color:var(--muted);font-weight:700}
+  .market-stat .big-num{font-size:52px;font-weight:800;line-height:1;margin:7px 0 4px;letter-spacing:-.04em;
+    background:linear-gradient(180deg,#fff 10%,var(--cyan) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .market-stat.risk .big-num{background:linear-gradient(180deg,#fff 10%,var(--gold) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .market-stat h3{font-size:16px;line-height:1.25;color:#fff;font-weight:700;position:relative;z-index:1}
+  .market-stat p{font-size:11px;color:var(--muted);line-height:1.35;margin-top:4px;position:relative;z-index:1}
+  .market-stat .source{position:absolute;left:16px;bottom:8px;font-size:9px;letter-spacing:.06em;color:#465982}
+  .flow-arrow{display:flex;align-items:center;justify-content:center;color:var(--cyan);font-size:22px;font-weight:700}
+  .pain-chain{display:grid;grid-template-columns:repeat(4,1fr);margin-top:10px;border:1px solid var(--line);
+    border-radius:10px;overflow:hidden;background:rgba(9,20,49,.78)}
+  .pain-chain span{padding:8px 8px;text-align:center;font-size:13px;color:var(--dim);border-right:1px solid var(--line)}
+  .pain-chain span:last-child{border-right:0}
+  .pain-chain b{color:#fff;font-weight:700}
+  .tool-head{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:10.5px;letter-spacing:.12em;color:var(--cyan);font-weight:700}
+  .tool-head span:last-child{color:var(--muted);font-weight:400;letter-spacing:.04em}
+  .tool-landscape{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+  .tool-cap{height:78px;padding:9px 11px;background:linear-gradient(180deg,rgba(13,28,65,.9),rgba(8,18,45,.92));border:1px solid var(--line);border-radius:9px}
+  .tool-cap h4{font-size:12.5px;color:#fff;margin-bottom:3px}
+  .tool-cap p{font-size:10.5px;line-height:1.3;color:var(--dim)}
+  .tool-cap .products{margin-top:4px;font-size:9.5px;color:var(--muted);letter-spacing:.03em}
+  .problem-gap{margin-top:9px;padding:9px 14px;border-left:3px solid var(--cyan);
+    background:linear-gradient(90deg,rgba(0,224,255,.11),rgba(0,224,255,.02));font-size:13px;line-height:1.4;color:var(--dim)}
   /* 打印 / 导出 PDF：还原为 8 页平铺 */
   @media print{
     body{overflow:visible;background:#fff}
@@ -204,44 +250,54 @@
 <!-- ============ P2 问题 ============ -->
 <section class="slide">
   <div class="seclabel">THE PROBLEM <span class="cn">· 痛点与机会</span></div>
-  <h1 class="title">我们要解决的真问题</h1>
-  <div class="oneliner">Agent 一上生产，<span class="hlg">真正的麻烦才开始</span>：出事时，最该处置的人<span class="hl">往往不是原作者</span> —— 看不懂、不敢动、错过止损窗口。</div>
+  <h1 class="title">Agent 加速进入企业，治理断层正在放大</h1>
+  <div class="problem-lead">采用率快速上升，但治理能力没有同步建立，最终把生产问题推向项目失败。</div>
 
-  <!-- 英雄位：能力层成熟度梯度（供应侧）—— 市场从左往右成熟，却在「处理」这层崩塌 -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:4px">
-    <div style="background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-top:3px solid #00E0FF;border-radius:10px;padding:14px 15px">
-      <div style="font-size:11.5px;letter-spacing:.14em;color:#00E0FF;text-transform:uppercase">① 感知 / 评测</div>
-      <div style="font-size:19px;font-weight:700;color:#fff;margin:7px 0 5px">成熟 ✓</div>
-      <p style="font-size:12px;color:var(--dim);line-height:1.45;margin:0">Trace · 指标 · 在线评测 · 告警<br><span style="color:var(--muted)">LangSmith · Datadog</span></p>
+  <!-- 英雄位：采用率 → 治理缺口 → 取消风险 -->
+  <div class="market-stats">
+    <div class="market-stat">
+      <div class="eyebrow">ADOPTION · AGENT 采用率</div>
+      <div class="big-num">62%</div>
+      <h3>企业已试验 Agent</h3>
+      <p>但近 2/3 尚未进入规模化部署。</p>
+      <div class="source">McKinsey · 2025</div>
     </div>
-    <div style="background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-top:3px solid #4D8DFF;border-radius:10px;padding:14px 15px">
-      <div style="font-size:11.5px;letter-spacing:.14em;color:#6EC5FF;text-transform:uppercase">② 诊断 / 决策</div>
-      <div style="font-size:19px;font-weight:700;color:#fff;margin:7px 0 5px">成长期</div>
-      <p style="font-size:12px;color:var(--dim);line-height:1.45;margin:0">根因调查 · 关联证据 · 修复建议<br><span style="color:var(--muted)">Galileo · Rootly</span></p>
+    <div class="flow-arrow">→</div>
+    <div class="market-stat">
+      <div class="eyebrow">GOVERNANCE GAP · 治理缺口</div>
+      <div class="big-num">仅 21%</div>
+      <h3>具备成熟治理能力</h3>
+      <p>大量 Agent 已上线，却缺少生产治理体系。</p>
+      <div class="source">Deloitte · 2026</div>
     </div>
-    <div style="background:linear-gradient(180deg,#1a1206,#241a0a);border:1px solid #5a4413;border-top:3px solid var(--warn);border-radius:10px;padding:14px 15px;position:relative">
-      <div style="position:absolute;top:-11px;right:10px;font-size:10.5px;letter-spacing:.08em;color:#04091F;background:var(--warn);border-radius:10px;padding:1px 8px;font-weight:700">缺口</div>
-      <div style="font-size:11.5px;letter-spacing:.14em;color:var(--warn);text-transform:uppercase">③ 控制 / 执行</div>
-      <div style="font-size:19px;font-weight:700;color:#fff;margin:7px 0 5px">早期</div>
-      <p style="font-size:12px;color:var(--dim);line-height:1.45;margin:0">Guardrail · 策略阻断 · Runbook<br><span style="color:var(--muted)">Cisco · Snyk · Rootly</span></p>
-    </div>
-    <div style="background:linear-gradient(180deg,#1a1206,#241a0a);border:1px solid #5a4413;border-top:3px solid var(--warn);border-radius:10px;padding:14px 15px;position:relative">
-      <div style="position:absolute;top:-11px;right:10px;font-size:10.5px;letter-spacing:.08em;color:#04091F;background:var(--warn);border-radius:10px;padding:1px 8px;font-weight:700">缺口</div>
-      <div style="font-size:11.5px;letter-spacing:.14em;color:var(--warn);text-transform:uppercase">④ 协同 / 治理</div>
-      <div style="font-size:19px;font-weight:700;color:#fff;margin:7px 0 5px">分化</div>
-      <p style="font-size:12px;color:var(--dim);line-height:1.45;margin:0">On-call · 人工审批 · 留痕<br><span style="color:var(--muted)">PagerDuty · 飞书+人工</span></p>
+    <div class="flow-arrow">→</div>
+    <div class="market-stat risk">
+      <div class="eyebrow">FAILURE RISK · 失败风险</div>
+      <div class="big-num">40%+</div>
+      <h3>Agent 项目可能被取消</h3>
+      <p>到 2027 年底，成本、价值与风险失控将成为主因。</p>
+      <div class="source">Gartner · 2027</div>
     </div>
   </div>
-  <div style="font-size:15px;color:var(--dim);margin-top:13px">市场在<span class="hl">「看见」「诊断」</span>上已成熟，却在<span class="hlg">「处理」这一层集体缺位</span> —— 而这正是事故责任人站的位置。</div>
 
-  <div style="display:flex;gap:22px;margin-top:11px;font-size:13px;color:var(--muted);align-items:center;flex-wrap:wrap">
-    <span><b style="color:var(--text)">62%</b> 已试验 Agent</span>
-    <span><b style="color:var(--text)">仅 21%</b> 有成熟治理</span>
-    <span><b style="color:var(--gold)">40%+</b> 项目将被取消（成本 / 风险失控）</span>
-    <span style="color:#3f4d70;font-size:11.5px">McKinsey 2025 · Deloitte 2026 · Gartner 2027</span>
+  <!-- 治理断层带来的四类生产问题 -->
+  <div class="pain-chain">
+    <span>质量问题<b>看不见</b></span>
+    <span>运行异常<b>找不到</b></span>
+    <span>成本失控<b>止不住</b></span>
+    <span>处置风险<b>不敢动</b></span>
   </div>
 
-  <div class="note">▸ 缺的不是能力，是把<span class="hl">看见 → 诊断 → 处理</span>连成闭环、让<span class="hl">非原作者也能安全处置</span> —— 这正是 CoAgent。</div>
+  <!-- 当前市场提供的单点能力与代表产品 -->
+  <div class="tool-head"><span>MARKET CAPABILITIES · 当前市场已有能力</span><span>能力存在，但分散在不同工具和工作流中</span></div>
+  <div class="tool-landscape">
+    <div class="tool-cap"><h4>① 看见</h4><p>Trace · 指标 · Eval · 告警</p><div class="products">LangSmith · Datadog</div></div>
+    <div class="tool-cap"><h4>② 诊断</h4><p>根因调查 · 关联证据 · 修复建议</p><div class="products">Galileo · Rootly</div></div>
+    <div class="tool-cap"><h4>③ 控制</h4><p>Guardrail · 策略阻断 · Runbook</p><div class="products">Cisco · Snyk</div></div>
+    <div class="tool-cap"><h4>④ 协同</h4><p>On-call · 人工审批 · 审计留痕</p><div class="products">PagerDuty · 飞书</div></div>
+  </div>
+
+  <div class="problem-gap">缺的不是单点工具，而是一个<span class="hl">低集成成本、Agent 原生、面向事故责任人的一体化处置闭环</span>。</div>
   <div class="footer"><span>小宿科技环球黑客松 · 北京站</span><span class="pageno">02 / 08</span></div>
 </section>
 
@@ -264,7 +320,7 @@
     <div class="card">
       <span class="tag">03 CAPABILITY</span>
       <h3>🛠 处理问题</h3>
-      <p>处置合同（🟢可执行 / 🟡需确认 / 🔴必须升级）+ 飞书协同 + 受控动作，帮你安全动手。</p>
+      <p>处置合同（🟢&nbsp;可执行 / 🟡&nbsp;需确认 / 🔴&nbsp;必须升级）+ 飞书协同 + 受控动作，帮你安全动手。</p>
     </div>
   </div>
   <div class="note">▸ 差异：别人把「看见、诊断、处理」拆在不同工具、还停在屏幕上；CoAgent 收进<span class="hl">一个闭环</span>，帮你动手。</div>
@@ -275,15 +331,21 @@
 <section class="slide">
   <div class="seclabel">PRODUCT DEMO <span class="cn">· 看它怎么干活</span></div>
   <h1 class="title" style="margin-bottom:14px">Demo · 看它怎么干活</h1>
-  <div class="demo-shot">
-    <div class="big">[ DEMO SCREENSHOT / VIDEO · 720 × 350 ]</div>
-    <div style="font-size:13px">放管理台实跑 S1 画面：时间线滚动 + 评分分解 + 飞书卡片 <span class="chip-warn">从答辩录屏抽帧 ⚠️</span></div>
-  </div>
-  <div class="journey">
-    <div class="step"><div class="s">01 →</div><h4>触发事件</h4><p>Demo 控制条点 S1/S2/S3，或真实 Agent 回调 <code>POST /events</code>。</p></div>
-    <div class="step"><div class="s">02 →</div><h4>看见 + 诊断</h4><p>时间线实时滚动：工具调用 → 大模型推理 → 把握度评分。</p></div>
-    <div class="step"><div class="s">03 →</div><h4>帮你处理</h4><p>出处置合同 + 差异化动作（重试/禁试/升级）+ 飞书一键。</p></div>
-    <div class="step"><div class="s">04 →</div><h4>复盘沉淀</h4><p>👍/👎 反馈飞轮 + 审计只读回放，越用越准。</p></div>
+  <div class="demo-layout">
+    <div class="demo-video-frame">
+      <video class="demo-video" data-demo-video muted loop playsinline controls preload="metadata"
+        aria-label="CoAgent 15 秒产品演示">
+        <source src="../demos/coagent-demo-15s-2026-06-28T04-35-20.mp4" type="video/mp4">
+        当前浏览器无法播放视频。<a href="../demos/coagent-demo-15s-2026-06-28T04-35-20.mp4">打开演示视频</a>
+      </video>
+      <div class="demo-video-badge">15 SEC · LIVE PRODUCT</div>
+    </div>
+    <div class="demo-journey">
+      <div class="step"><div class="s">01 →</div><h4>触发事件</h4><p>控制条选择场景，或由真实 Agent 回调 <code>POST /events</code>。</p></div>
+      <div class="step"><div class="s">02 →</div><h4>看见 + 诊断</h4><p>汇总运行信号，生成根因、证据链与把握度评分。</p></div>
+      <div class="step"><div class="s">03 →</div><h4>帮你处理</h4><p>输出风险分级处置合同，并通过飞书协同确认。</p></div>
+      <div class="step"><div class="s">04 →</div><h4>复盘沉淀</h4><p>验证处置结果，沉淀审计记录与反馈飞轮。</p></div>
+    </div>
   </div>
   <div class="scoreline">同一套引擎，三种事故三种处理：
     <span class="pill g">S1 87 🟢 重试</span>
@@ -296,24 +358,9 @@
 <!-- ============ P5 架构 ============ -->
 <section class="slide">
   <div class="seclabel">ARCHITECTURE <span class="cn">· 技术实现</span></div>
-  <h1 class="title" style="margin-bottom:12px">技术实现 · 怎么搭起来的</h1>
-  <div class="arch">
-    <div class="layer"><div class="lk">Interaction</div><div class="boxes">
-      <div class="box"><b>管理台</b> Web</div><div class="box"><b>/events</b> API · Webhook</div><div class="box"><b>飞书</b> IM</div></div></div>
-    <div class="layer"><div class="lk">Agent Core</div><div class="boxes">
-      <div class="box">Planner · <b>Orchestrator</b></div>
-      <div class="box">Tool Router · <b>PlaybookEngine</b></div>
-      <div class="box">Memory · <b>SQLite 全链路</b></div>
-      <div class="box">Evaluator · <b>把握度 Scorer</b></div></div></div>
-    <div class="layer"><div class="lk">Foundation</div><div class="boxes">
-      <div class="box"><b>OpenAI 兼容 LLM</b>（gpt-4o-mini / Claude / 多模型路由）</div>
-      <div class="box" style="border-style:dashed;border-color:var(--warn);color:var(--warn)">指向小宿 API ⚠️</div>
-      <div class="box">业务工具 / MCP（按需）</div></div></div>
-  </div>
-  <div class="hls">
-    <div class="hl-card"><div class="k">Highlight 01</div><h4>把握度评分</h4><p>数据·手册·推理三因子，把「有多大把握」量化成 🟢🟡🔴。</p></div>
-    <div class="hl-card"><div class="k">Highlight 02</div><h4>风险分级处置合同</h4><p>风险判断直接约束动作权限与审批边界，不只是给建议。</p></div>
-    <div class="hl-card"><div class="k">Highlight 03</div><h4>结果验证飞轮</h4><p>事故前后对比反哺手册/规则，越用越准。</p></div>
+  <h1 class="title" style="margin-bottom:0">技术实现 · 异步可验证的处置闭环</h1>
+  <div class="architecture-embed">
+    <iframe src="../diagrams/coagent-architecture.html?embed=slide" title="CoAgent 技术架构图" loading="eager"></iframe>
   </div>
   <div class="footer"><span>小宿科技环球黑客松 · 北京站</span><span class="pageno">05 / 08</span></div>
 </section>
@@ -383,7 +430,7 @@
     <div class="qa-note">
       <b>QA 防翻车预案：</b><br>
       · 「能自动修复吗？」→ <b>帮你处理 ≠ 替你处理</b>：建议 + 人工审批 + 模拟执行，守住安全边界。<br>
-      · 「用了主办方 API 吗？」→ OpenAI 兼容架构，<code>LLM_BASE_URL</code> 可指向小宿 API。<br>
+      · 「怎么接入现有 Agent？」→ 通过标准事件入口接入运行信号，按需适配业务工具 / MCP。<br>
       · 「和 LangSmith / Datadog 区别？」→ 他们停在看见/诊断，我们做到<b>一体化处置闭环</b>。
     </div>
   </div>
@@ -404,6 +451,7 @@
 <script>
   (function(){
     var slides=[].slice.call(document.querySelectorAll('.slide'));
+    var videos=[].slice.call(document.querySelectorAll('[data-demo-video]'));
     var n=slides.length, i=0, ind=document.getElementById('pageind');
     function pad(x){return (x<10?'0':'')+x;}
     // 整页等比缩放以铺满视口（保持 16:9，不重排内容）
@@ -414,6 +462,15 @@
     function show(k){
       i=Math.max(0, Math.min(n-1, k));
       slides.forEach(function(s,idx){ s.classList.toggle('active', idx===i); });
+      videos.forEach(function(video){
+        if(slides[i].contains(video)){
+          try{ video.currentTime=0; }catch(e){}
+          var playPromise=video.play();
+          if(playPromise&&playPromise.catch){ playPromise.catch(function(){}); }
+        }else{
+          video.pause();
+        }
+      });
       if(ind) ind.textContent=pad(i+1)+' / '+pad(n);
       try{ history.replaceState(null,'','#'+(i+1)); }catch(e){}
     }
