@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CoAgent — Agent 出错或烧钱时，90 秒内拿到该信什么、该做什么、有多把握。面向企业的 Agent Ops Copilot。">
-  <title>CoAgent — Agent Ops Copilot</title>
+  <meta name="description" content="CoAgent — 企业级 Agent Ops Copilot。Agent 异常或成本超支时，90 秒内完成根因研判、把握度评估与分级处置，全链路可审计。">
+  <title>CoAgent — 企业级 Agent Ops Copilot</title>
   <script>(function(){try{var t=localStorage.getItem('coagent-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,7 +35,7 @@
           <span class="theme-toggle-label">夜间</span>
         </button>
         <a href="https://github.com/lurui1997/coagent" class="btn btn-ghost" target="_blank" rel="noopener">GitHub</a>
-        <a href="http://localhost:8000/" class="btn btn-primary">打开控制台</a>
+        <a href="http://localhost:8000/" class="btn btn-primary">进入控制台</a>
         <button class="nav-toggle" aria-label="打开菜单" aria-expanded="false" aria-controls="mobile-nav">
           <span></span><span></span>
         </button>
@@ -48,7 +48,7 @@
       <a href="#confidence">把握度评分</a>
       <a href="#innovation">创新</a>
       <a href="#roadmap">路线图</a>
-      <a href="http://localhost:8000/" class="btn btn-primary">打开控制台</a>
+      <a href="http://localhost:8000/" class="btn btn-primary">进入控制台</a>
     </nav>
   </header>
 
@@ -57,27 +57,27 @@
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-grid">
         <div class="hero-copy reveal">
-          <p class="eyebrow">Agent Ops Copilot · 企业级</p>
-          <h1 id="hero-title">让团队敢运维<br><span class="hero-accent">AI Agent</span></h1>
+          <p class="eyebrow">Enterprise Agent Ops Platform</p>
+          <h1 id="hero-title">让企业放心<br><span class="hero-accent">运维 AI Agent</span></h1>
           <p class="hero-lead">
-            Agent 出错或烧钱时，90 秒内拿到「该信什么、该做什么、有多把握」——
-            带可验证把握度评分的 Agent 运维助手。
+            Agent 异常或成本超支时，90 秒内完成根因研判、把握度评估与分级处置决策——
+            可验证、可审计、可闭环的企业级 Agent 运维平台。
           </p>
           <div class="hero-cta">
-            <a href="http://localhost:8000/" class="btn btn-primary btn-lg">体验 Demo</a>
-            <a href="#platform" class="btn btn-outline btn-lg">了解平台</a>
+            <a href="http://localhost:8000/" class="btn btn-primary btn-lg">进入运维控制台</a>
+            <a href="#platform" class="btn btn-outline btn-lg">了解平台架构</a>
           </div>
           <dl class="hero-stats">
             <div>
-              <dt>响应时间</dt>
+              <dt>研判时延</dt>
               <dd><span class="stat-num" data-target="90">0</span><span class="stat-unit">秒</span></dd>
             </div>
             <div>
-              <dt>演示场景</dt>
-              <dd><span class="stat-num" data-target="3">0</span><span class="stat-unit">种</span></dd>
+              <dt>场景覆盖</dt>
+              <dd><span class="stat-num" data-target="3">0</span><span class="stat-unit">类</span></dd>
             </div>
             <div>
-              <dt>评分因子</dt>
+              <dt>评分维度</dt>
               <dd><span class="stat-num" data-target="3">0</span><span class="stat-unit">维</span></dd>
             </div>
           </dl>
@@ -136,15 +136,15 @@
     </section>
 
     <!-- Trust strip -->
-    <section class="trust-strip" aria-label="集成生态">
-      <p class="trust-label">接入你的 Agent 运行栈</p>
+    <section class="trust-strip" aria-label="技术栈与集成">
+      <p class="trust-label">与企业现有 Agent 运行栈无缝集成</p>
       <ul class="trust-logos">
         <li>FastAPI</li>
-        <li>OpenAI</li>
+        <li>OpenAI / Azure</li>
         <li>飞书 IM</li>
-        <li>SQLite</li>
-        <li>HTMX</li>
         <li>Webhook</li>
+        <li>SSE 实时流</li>
+        <li>私有化部署</li>
       </ul>
     </section>
 
@@ -154,8 +154,8 @@
         <p class="eyebrow">CoAgent Operations Platform</p>
         <h2 id="platform-title">面向 Agent 运行态的<br>可验证处置平台</h2>
         <p class="section-lead">
-          PagerDuty 管基础设施，通用 Chatbot 管问答——CoAgent 填补中间真空：
-          运维 AI Agent 本身，从零幻觉可解释处置闭环出发。
+          基础设施监控管服务器，通用 Copilot 管问答——CoAgent 专注 Agent 运行态层：
+          从零幻觉、可解释、可审计的处置闭环出发，填补企业 Agent 运维空白。
         </p>
       </div>
 
@@ -163,27 +163,27 @@
         <article class="platform-card reveal">
           <span class="card-num">01</span>
           <h3>感知层</h3>
-          <p>Webhook 事件接入 + 管理台面板，Agent 失败第一时间「听见」，不靠客户反馈才发现。</p>
+          <p>Webhook 统一事件接入与控制台实时面板，Agent 异常第一时间感知，降低静默失败风险。</p>
           <ul>
-            <li>POST /events 统一接入</li>
-            <li>SSE 实时时间线</li>
-            <li>飞书 IM 同步告警</li>
+            <li>POST /events 标准接入</li>
+            <li>SSE 实时处置时间线</li>
+            <li>飞书 IM 告警同步</li>
           </ul>
         </article>
         <article class="platform-card reveal" style="--delay: 80ms">
           <span class="card-num">02</span>
           <h3>推理层</h3>
-          <p>处置手册约束下的根因推理——不是日志关联，是 Agent 运行态根因链。</p>
+          <p>运维手册约束下的结构化根因推理——聚焦 Agent 运行态因果链，而非通用日志关联。</p>
           <ul>
-            <li>429 → 不可用</li>
-            <li>空检索 → 幻觉答复</li>
-            <li>Token 飙升 → 超预算</li>
+            <li>API 限流 → 服务不可用</li>
+            <li>空检索 → 幻觉级联</li>
+            <li>Token 异常 → 成本超支</li>
           </ul>
         </article>
         <article class="platform-card reveal" style="--delay: 160ms">
           <span class="card-num">03</span>
           <h3>决策层</h3>
-          <p>把握度评分三因子可验证，非 LLM 自报置信度。🟢 敢动 · 🟡 确认 · 🔴 升级。</p>
+          <p>把握度评分三因子可验证、可审计，非 LLM 自报置信度。🟢 可执行 · 🟡 需确认 · 🔴 须升级。</p>
           <ul>
             <li>数据完备度 35%</li>
             <li>手册匹配度 35%</li>
@@ -193,11 +193,11 @@
         <article class="platform-card reveal" style="--delay: 240ms">
           <span class="card-num">04</span>
           <h3>闭环层</h3>
-          <p>人工把关 + 全链路审计 + 👍👎 飞轮，让团队越用越准、查得着、控得住。</p>
+          <p>人工分级把关 + 全链路审计 + 运营反馈飞轮，确保团队越用越准、查得着、控得住。</p>
           <ul>
-            <li>SQLite 故障记录</li>
-            <li>回放只读重放</li>
-            <li>手册迭代统计</li>
+            <li>故障记录持久化</li>
+            <li>只读回放审计</li>
+            <li>手册持续迭代</li>
           </ul>
         </article>
       </div>
@@ -232,9 +232,9 @@
     <!-- Scenarios -->
     <section class="section scenarios" id="scenarios" aria-labelledby="scenarios-title">
       <div class="section-intro reveal">
-        <p class="eyebrow">三场景演示</p>
-        <h2 id="scenarios-title">同一内核，三种处置边界</h2>
-        <p class="section-lead">敢动手 → 不敢盲动 → 必须升级。评分定义「敢不敢动」的边界。</p>
+        <p class="eyebrow">典型运维场景</p>
+        <h2 id="scenarios-title">统一评分引擎，差异化处置策略</h2>
+        <p class="section-lead">把握度评分定义动作权限边界——可执行、需确认、须升级，同一平台覆盖三类核心 Agent 运维场景。</p>
       </div>
 
       <div class="scenario-list">
@@ -318,7 +318,7 @@
         <div class="confidence-copy reveal">
           <p class="eyebrow">把握度评分</p>
           <h2 id="confidence-title">可验证推理，<br>非 LLM 自报置信度</h2>
-          <p>三因子公式透明可追问，评委与客户都能验证「为什么敢动 / 为什么不敢动」。</p>
+          <p>三因子公式透明可审计，运维团队与合规部门均可验证「为何可执行 / 为何须升级」。</p>
           <div class="formula-block">
             <code>总分 = round(100 × (0.35×数据 + 0.35×手册 + 0.30×推理))</code>
           </div>
@@ -363,8 +363,8 @@
     <!-- Innovation -->
     <section class="section innovation" id="innovation" aria-labelledby="innovation-title">
       <div class="section-intro reveal">
-        <p class="eyebrow">核心创新</p>
-        <h2 id="innovation-title">答辩必讲三件套</h2>
+        <p class="eyebrow">平台差异化</p>
+        <h2 id="innovation-title">三大核心能力</h2>
       </div>
 
       <div class="innovation-grid">
@@ -373,21 +373,21 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
           </div>
           <h3>跨信号 Agent 运维推理</h3>
-          <p>处置手册约束下的根因链，不是基础设施变更关联。聚焦 Agent 运行态层。</p>
+          <p>运维手册约束下的结构化根因链，聚焦 Agent 运行态层，非基础设施变更关联。</p>
         </article>
         <article class="innovation-card reveal" style="--delay: 80ms">
           <div class="innovation-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
           </div>
           <h3>每步可验证</h3>
-          <p>把握度评分三因子分解，数据·手册·推理均可追问公式，零幻觉容忍。</p>
+          <p>把握度评分三因子分解，数据 · 手册 · 推理均可追溯公式，满足零幻觉运维要求。</p>
         </article>
         <article class="innovation-card reveal" style="--delay: 160ms">
           <div class="innovation-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           </div>
           <h3>处置可闭环</h3>
-          <p>建议 + 把握度 + 重试/升级，全程留痕。👍👎 飞轮驱动手册越用越准。</p>
+          <p>分级建议 + 把握度评估 + 重试/升级动作，全程留痕。运营反馈驱动手册持续优化。</p>
         </article>
       </div>
 
@@ -403,18 +403,23 @@
           <tbody>
             <tr>
               <td>监控范围</td>
-              <td>服务器 / 5xx</td>
-              <td><strong>Agent 失败、质量、成本</strong></td>
+              <td>服务器 / HTTP 5xx</td>
+              <td><strong>Agent 失败、质量退化、成本异常</strong></td>
             </tr>
             <tr>
               <td>告警方式</td>
-              <td>告警 + 建议</td>
-              <td><strong>评分可验证 + 审计闭环</strong></td>
+              <td>告警通知 + 通用建议</td>
+              <td><strong>把握度评分 + 分级处置 + 审计闭环</strong></td>
             </tr>
             <tr>
               <td>部署模式</td>
-              <td>云服务吃数据</td>
-              <td><strong>本地部署，日志不出域</strong></td>
+              <td>公有云 SaaS</td>
+              <td><strong>私有化部署，核心数据不出域</strong></td>
+            </tr>
+            <tr>
+              <td>合规能力</td>
+              <td>基础日志</td>
+              <td><strong>全链路审计 · JSON/CSV 导出 · 回放追溯</strong></td>
             </tr>
           </tbody>
         </table>
@@ -426,39 +431,39 @@
       <div class="section-intro reveal">
         <p class="eyebrow">产品路线图</p>
         <h2 id="roadmap-title">价值递进</h2>
-        <p class="section-lead">从「要不要动」到「能不能自动修正」再到「复杂场景编排」。</p>
+        <p class="section-lead">从事件感知到自动纠偏，能力分层递进，匹配企业不同成熟度需求。</p>
       </div>
 
       <div class="roadmap-grid">
         <article class="roadmap-card active reveal">
-          <span class="tier-badge">Basic · 已实现</span>
-          <h3>听见 · 推理 · 评分 · 复盘</h3>
-          <p>事件 → 处置手册 → LLM 推理 → 把握度评分 → 管理台 / 飞书 → 人工反馈飞轮</p>
+          <span class="tier-badge">Standard · 已交付</span>
+          <h3>感知 · 推理 · 评分 · 复盘</h3>
+          <p>事件接入 → 运维手册路由 → LLM 根因推理 → 把握度评分 → 控制台 / IM → 运营反馈飞轮</p>
           <ul>
-            <li>POST /events 事件接入</li>
-            <li>S1/S2/S3 三场景演示</li>
-            <li>SSE 实时时间线 + SQLite 审计</li>
-            <li>👍/👎 飞轮统计</li>
+            <li>POST /events Webhook 接入</li>
+            <li>限流 / 空检索 / 超预算 三类场景</li>
+            <li>SSE 实时时间线 + 审计持久化</li>
+            <li>运营反馈统计与导出</li>
           </ul>
         </article>
         <article class="roadmap-card reveal" style="--delay: 80ms">
-          <span class="tier-badge muted">Pro · 规划中</span>
+          <span class="tier-badge muted">Professional · 规划中</span>
           <h3>运行时纠偏 · 模型切换</h3>
-          <p>能不能自动/半自动修正？谁批准的？</p>
+          <p>半自动参数修正与模型热切换，每一次变更均可追溯审批人。</p>
           <ul>
             <li>运行时参数纠偏</li>
-            <li>模型热切换</li>
-            <li>企业级审计导出</li>
+            <li>模型路由热切换</li>
+            <li>企业级 RBAC 与 SSO</li>
           </ul>
         </article>
         <article class="roadmap-card reveal" style="--delay: 160ms">
-          <span class="tier-badge muted">Ultra · 后期</span>
+          <span class="tier-badge muted">Enterprise · 规划中</span>
           <h3>知识图谱 · 多 Agent 编排</h3>
-          <p>历史上类似事故怎么处理？复杂场景谁来做？</p>
+          <p>历史事故关联推演与复杂场景下的多 Agent 协同编排。</p>
           <ul>
-            <li>知识图谱关联</li>
-            <li>历史推演 What-if</li>
-            <li>多 Agent 编排</li>
+            <li>知识图谱因果拓扑</li>
+            <li>What-if 参数推演</li>
+            <li>Agent-Team 协同编排</li>
           </ul>
         </article>
       </div>
@@ -467,11 +472,11 @@
     <!-- CTA -->
     <section class="cta-section" aria-labelledby="cta-title">
       <div class="cta-inner reveal">
-        <h2 id="cta-title">准备好运维你的 AI Agent 了吗？</h2>
-        <p>几分钟内知道要不要动、怎么动、有多大把握。本地部署，日志不出域。</p>
+        <h2 id="cta-title">准备好运维您的 AI Agent 了吗？</h2>
+        <p>90 秒内完成根因研判与分级处置决策。支持私有化部署，核心数据不出域。</p>
         <div class="cta-actions">
-          <a href="http://localhost:8000/" class="btn btn-primary btn-lg">启动 Demo 控制台</a>
-          <a href="https://github.com/lurui1997/coagent" class="btn btn-outline btn-lg" target="_blank" rel="noopener">查看源码</a>
+          <a href="http://localhost:8000/" class="btn btn-primary btn-lg">进入运维控制台</a>
+          <a href="https://github.com/lurui1997/coagent" class="btn btn-outline btn-lg" target="_blank" rel="noopener">查看技术文档</a>
         </div>
       </div>
     </section>
@@ -484,13 +489,13 @@
           <span class="brand-mark" aria-hidden="true">C</span>
           <span class="brand-name">CoAgent</span>
         </a>
-        <p class="footer-tagline">让团队敢运维 AI Agent — 几分钟内知道要不要动、怎么动、有多大把握。</p>
+        <p class="footer-tagline">企业级 Agent Ops Copilot — 可验证推理、分级处置、全链路审计。</p>
       </div>
       <nav class="footer-nav" aria-label="页脚导航">
         <div>
           <h4>产品</h4>
           <a href="#platform">平台能力</a>
-          <a href="#scenarios">演示场景</a>
+          <a href="#scenarios">运维场景</a>
           <a href="#confidence">把握度评分</a>
         </div>
         <div>
@@ -501,13 +506,14 @@
         </div>
         <div>
           <h4>控制台</h4>
-          <a href="http://localhost:8000/">管理台</a>
+          <a href="http://localhost:8000/">运维控制台</a>
           <a href="http://localhost:8000/docs">API 文档</a>
+          <a href="http://localhost:8000/health">健康检查</a>
         </div>
       </nav>
     </div>
     <div class="footer-bottom">
-      <p>© 2026 CoAgent. Hackathon Project.</p>
+      <p>© 2026 CoAgent. 保留所有权利 · 支持私有化部署</p>
     </div>
   </footer>
 

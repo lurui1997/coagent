@@ -2,16 +2,16 @@
   {
     "agent_id": "cs-bot",
     "agent_name": "客服 Agent",
-    "description": "电商 OPC 客服 Agent，接 OpenAI API"
+    "description": "Claude 驱动的电商客服；限流时上报 CoAgent（run_fail/rate_limit）"
   },
   {
     "agent_id": "rag-bot",
     "agent_name": "RAG 客服 Agent",
-    "description": "企业知识库问答 Agent"
+    "description": "Claude + 本地 FAQ 知识库；空检索时上报 CoAgent（run_fail/empty_retrieval）"
   },
   {
     "agent_id": "content-bot",
     "agent_name": "内容生成 Agent",
-    "description": "营销内容批量生成 Agent"
+    "description": "Claude 营销文案生成；日成本超预算时上报 CoAgent（cost_report/over_budget）"
   }
 ]

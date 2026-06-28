@@ -8,6 +8,6 @@
   "log_snippet": "[14:02:11] retry=3/3 failed; model=gpt-4o-mini; concurrent=10",
   "cost_yuan_today": 8.5,
   "budget_yuan_daily": 20,
-  "retry_webhook": "http://localhost:8000/demo/retry/cs-bot",
+  "retry_webhook": "http://localhost:8000/agents/retry/cs-bot",
   "ts": "2026-06-27T14:02:00+08:00"
 }

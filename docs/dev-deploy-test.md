@@ -260,6 +260,56 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 - 配置数据：`data/ops_playbooks.json`（改场景无需改 Python）
 - 校准产出：`data/calibration/`
 
+### 7.4 Nginx 反向代理（生产必看）
+
+**常见展示异常原因：**
+
+1. **HTML 未更新** — 服务器仍是旧 `admin.html`（页面出现「Hackathon Demo」文案）
+2. **CSS 被缓存** — 浏览器/nginx 缓存了旧版 `/static/style.css`（有 HTML 无卡片样式）
+3. **`/static` 未转发** — nginx 把 `/static` 指到空目录，返回 404 或非 CSS 内容
+
+**推荐配置**（全部转发给 uvicorn，由 FastAPI 提供静态文件）：
+
+```nginx
+server {
+    listen 80;
+    server_name www.aikipedia.cn aikipedia.cn;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+**不要**单独 `alias /static` 到旧目录，除非你能保证与代码同步更新。
+
+**部署更新步骤：**
+
+```bash
+cd /path/to/coagent
+git pull origin main
+source .venv/bin/activate
+pip install -r requirements.txt -q
+# 重启服务（systemd / supervisor / 手动）
+pkill -f 'uvicorn app.main:app' || true
+nohup uvicorn app.main:app --host 127.0.0.1 --port 8000 >> coagent.log 2>&1 &
+# 可选：重载 nginx
+sudo nginx -s reload
+```
+
+**部署后验证：**
+
+```bash
+bash scripts/verify_deploy.sh http://www.aikipedia.cn
+```
+
+模板已对 `style.css` / `theme.js` / `htmx` 附加 `?v=mtime` 版本号；htmx 已内置到 `web/static/vendor/`，不依赖 unpkg CDN。
+
 ---
 
 ## 8. 验收清单（对照 Spec §15）

@@ -7,9 +7,10 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app.api import admin, demo, events
+from app.api import admin, agents, demo, events
 from app.config import settings
 from app.db import get_feedback_stats, get_incident, get_latest_scores, init_db, list_audit_actions, list_feedback_history, list_incidents
+from app.static_assets import static_asset_url, static_dir_version
 from app.timeutil import format_display
 from app.ultra.api import router as ultra_router
 
@@ -23,16 +24,20 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="CoAgent", description="ToB Agent Ops Copilot", lifespan=lifespan)
 
 app.include_router(events.router)
+app.include_router(agents.router)
 app.include_router(admin.router)
 app.include_router(demo.router)
 app.include_router(ultra_router)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-templates = Jinja2Templates(directory=str(BASE_DIR / "web" / "templates"))
-templates.env.filters["format_cn_time"] = format_display
-
 static_dir = BASE_DIR / "web" / "static"
 static_dir.mkdir(parents=True, exist_ok=True)
+
+templates = Jinja2Templates(directory=str(BASE_DIR / "web" / "templates"))
+templates.env.filters["format_cn_time"] = format_display
+templates.env.globals["static_asset"] = lambda name: static_asset_url(static_dir, name)
+templates.env.globals["static_v"] = static_dir_version(static_dir, "style.css", "theme.js")
+
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 

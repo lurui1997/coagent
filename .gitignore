@@ -15,3 +15,6 @@ data/calibration/*.json
 .worktrees/
 demo.log
 .DS_Store
+data/agent_state/*.json
+!data/agent_state/.gitkeep
+docs/demos/.playwright-videos/

@@ -3,13 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CoAgent — Agent 运维助手</title>
+  <meta name="coagent-static-v" content="{{ static_v }}">
+  <title>CoAgent — Agent 运维控制台</title>
   <script>(function(){try{var t=localStorage.getItem('coagent-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
-  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <link rel="stylesheet" href="{{ static_asset('style.css') }}">
+  <script src="{{ static_asset('vendor/htmx.min.js') }}" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -33,18 +31,18 @@
     {% if tab == 1 %}
     <section class="pitch-hero">
       <div class="pitch-hero-copy">
-        <span class="pitch-badge">Hackathon Demo · Agent Ops Copilot</span>
-        <h2>Agent 出错时，<em>90 秒内</em>知道要不要动、怎么动、有多大把握</h2>
-        <p class="pitch-lead">PagerDuty 管基础设施，Chatbot 管问答——中间缺一层「Agent 运行态运维」。CoAgent 用可验证把握度评分，把告警变成敢执行的处置决策。</p>
+        <span class="pitch-badge">Agent Ops Copilot · 企业运维平台</span>
+        <h2>Agent 异常时，<em>90 秒内</em>完成根因研判、把握度评估与处置决策</h2>
+        <p class="pitch-lead">面向生产环境的 Agent 运行态运维平台：从事件接入、手册约束推理到可验证把握度评分，将告警转化为可审计、可执行的处置闭环。</p>
         <div class="pitch-cta">
           <a href="/?tab=2" class="btn btn-lg">进入处置工作台 →</a>
-          <span class="pitch-meta">S1 限流 · S2 空检索 · S3 超预算</span>
+          <span class="pitch-meta">限流 · 空检索 · 超预算 · 三类典型场景</span>
         </div>
       </div>
       <div class="pitch-metrics">
-        <div class="pitch-metric"><span class="pitch-metric-val">90s</span><span class="pitch-metric-label">拿到结论</span></div>
-        <div class="pitch-metric"><span class="pitch-metric-val">3</span><span class="pitch-metric-label">演示场景</span></div>
-        <div class="pitch-metric"><span class="pitch-metric-val">🟢🟡🔴</span><span class="pitch-metric-label">处置边界</span></div>
+        <div class="pitch-metric"><span class="pitch-metric-val">90s</span><span class="pitch-metric-label">平均研判时延</span></div>
+        <div class="pitch-metric"><span class="pitch-metric-val">3</span><span class="pitch-metric-label">场景类型</span></div>
+        <div class="pitch-metric"><span class="pitch-metric-val">🟢🟡🔴</span><span class="pitch-metric-label">三级处置边界</span></div>
       </div>
     </section>
 
@@ -53,69 +51,69 @@
       <a id="trace-banner-link" href="#">查看完整决策链路 →</a>
     </div>
 
-    <section class="pitch-narrative" aria-label="问题、方案与效果">
+    <section class="pitch-narrative" aria-label="业务挑战、平台能力与运行成效">
       <article class="pitch-pillar pitch-problem">
-        <span class="pitch-pillar-tag">01 · 要解决的问题</span>
-        <h3>Agent 进了业务，运维还没跟上</h3>
+        <span class="pitch-pillar-tag">01 · 业务挑战</span>
+        <h3>Agent 规模化上线，运行态运维缺位</h3>
         <ul class="pain-list">
-          <li><strong>静默失败</strong><span>429 / 空检索挂了，客户先发现</span></li>
-          <li><strong>不会处置</strong><span>不知先重试、改 prompt 还是换模型</span></li>
-          <li><strong>成本失控</strong><span>Token 单日超预算无分级响应</span></li>
-          <li><strong>不敢执行</strong><span>不知道 AI 建议靠不靠谱</span></li>
-          <li><strong>无法复盘</strong><span>说不清当时建议了什么、谁批准的</span></li>
+          <li><strong>静默失败</strong><span>限流、空检索等异常往往由业务方先感知</span></li>
+          <li><strong>处置路径不清</strong><span>重试、改 Prompt、换模型缺乏统一决策依据</span></li>
+          <li><strong>成本不可控</strong><span>Token 消耗超预算缺少分级响应机制</span></li>
+          <li><strong>执行风险高</strong><span>AI 建议缺乏可验证的置信度评估</span></li>
+          <li><strong>审计不完整</strong><span>处置过程、审批人与决策依据难以追溯</span></li>
         </ul>
       </article>
       <article class="pitch-pillar pitch-solution">
-        <span class="pitch-pillar-tag">02 · 我们的方案</span>
+        <span class="pitch-pillar-tag">02 · 平台能力</span>
         <h3>可验证处置闭环</h3>
         <div class="solution-flow">
-          <div class="solution-step"><span class="solution-num">1</span><div><strong>听见异常</strong><span>Webhook + 管理台实时告警</span></div></div>
+          <div class="solution-step"><span class="solution-num">1</span><div><strong>事件感知</strong><span>Webhook 接入 · 控制台实时推送</span></div></div>
           <div class="solution-arrow">→</div>
-          <div class="solution-step"><span class="solution-num">2</span><div><strong>根因推理</strong><span>处置手册约束 · 非日志关联</span></div></div>
+          <div class="solution-step"><span class="solution-num">2</span><div><strong>根因推理</strong><span>运维手册约束 · 结构化因果链</span></div></div>
           <div class="solution-arrow">→</div>
-          <div class="solution-step"><span class="solution-num">3</span><div><strong>把握度评分</strong><span>数据·手册·推理 三因子可追问</span></div></div>
+          <div class="solution-step"><span class="solution-num">3</span><div><strong>把握度评分</strong><span>数据 · 手册 · 推理 三因子可审计</span></div></div>
           <div class="solution-arrow">→</div>
-          <div class="solution-step"><span class="solution-num">4</span><div><strong>人工把关</strong><span>🟢敢动 / 🟡确认 / 🔴升级</span></div></div>
+          <div class="solution-step"><span class="solution-num">4</span><div><strong>分级处置</strong><span>🟢 可执行 / 🟡 需确认 / 🔴 须升级</span></div></div>
         </div>
         <p class="pitch-formula"><code>总分 = round(100 × (0.35×数据 + 0.35×手册 + 0.30×推理))</code></p>
       </article>
       <article class="pitch-pillar pitch-impact">
-        <span class="pitch-pillar-tag">03 · 实现的效果</span>
-        <h3>同一内核，三种处置边界</h3>
+        <span class="pitch-pillar-tag">03 · 运行成效</span>
+        <h3>统一评分引擎，差异化处置策略</h3>
         <div class="impact-grid">
           <div class="impact-item green">
             <span class="impact-score">87</span>
-            <strong>S1 限流</strong>
-            <span>47 次/5min · 失败率 38% → 分钟级发现，敢重试</span>
+            <strong>API 限流</strong>
+            <span>47 次/5min · 失败率 38% · 分钟级发现，建议重试</span>
           </div>
           <div class="impact-item amber">
             <span class="impact-score">72</span>
-            <strong>S2 空检索</strong>
-            <span>空检索 35% → 禁止盲重试，须改知识库</span>
+            <strong>空检索异常</strong>
+            <span>空检索率 35% · 禁止盲重试，须更新知识库</span>
           </div>
           <div class="impact-item red">
             <span class="impact-score">58</span>
-            <strong>S3 超预算</strong>
-            <span>¥28.5 / ¥20 → 强制升级 @负责人</span>
+            <strong>成本超预算</strong>
+            <span>¥28.5 / ¥20 · 强制升级至负责人审批</span>
           </div>
         </div>
-        <p class="impact-footnote">评分定义「敢不敢动」——同样 run_fail，S1 能重试，S2 不能</p>
+        <p class="impact-footnote">把握度评分定义动作权限边界——同类失败事件，处置策略因根因而异</p>
       </article>
     </section>
 
     <section class="demo-script card">
       <div class="card-header">
-        <h3>5 分钟答辩节奏</h3>
+        <h3>标准响应流程</h3>
         <a href="/?tab=2" class="btn btn-secondary" style="font-size:var(--text-xs);padding:0.35rem 0.75rem;">进入处置工作台</a>
       </div>
       <ol class="demo-steps">
-        <li><span class="demo-time">0:00</span><span>痛点 + 一句话价值（本页）</span></li>
-        <li><span class="demo-time">0:30</span><span>工作台 Demo 条 → <strong>S1</strong> → 🟢 可重试</span></li>
-        <li><span class="demo-time">1:40</span><span>工作台 Demo 条 → <strong>S2</strong> → 🟡 无重试</span></li>
-        <li><span class="demo-time">2:05</span><span>工作台 Demo 条 → <strong>S3</strong> → 🔴 升级</span></li>
-        <li><span class="demo-time">2:40</span><span>审计复盘 👎 → 飞轮统计更新</span></li>
-        <li><span class="demo-time">3:10</span><span>飞书 S1 卡片（可选）</span></li>
-        <li><span class="demo-time">4:00</span><span>三件套 + 投资回报 + 「越用越准」</span></li>
+        <li><span class="demo-time">①</span><span>事件接入 — Webhook 上报或控制台演练注入</span></li>
+        <li><span class="demo-time">②</span><span>场景路由 — 按 (type, symptom) 匹配运维手册</span></li>
+        <li><span class="demo-time">③</span><span>工具查询 — 拉取指标、配置与手册条目</span></li>
+        <li><span class="demo-time">④</span><span>根因推理 — LLM 生成因果链与处置步骤</span></li>
+        <li><span class="demo-time">⑤</span><span>把握度评分 — 三因子计算，输出 🟢🟡🔴 分级</span></li>
+        <li><span class="demo-time">⑥</span><span>分级处置 — 执行 / 确认 / 升级，同步 IM 通道</span></li>
+        <li><span class="demo-time">⑦</span><span>审计归档 — 全链路留痕，反馈驱动手册迭代</span></li>
       </ol>
     </section>
 
@@ -123,7 +121,7 @@
       <div class="card">
         <div class="card-header">
           <h3>Agent 把握度 · 实时状态</h3>
-          <span class="card-count">触发场景后更新</span>
+          <span class="card-count">事件触发后更新</span>
         </div>
         <div class="viz-bar-chart">
           {% for agent in agents %}
@@ -140,13 +138,13 @@
       </div>
       <div class="card">
         <div class="card-header">
-          <h3>流水线时间线 · 实时演示</h3>
+          <h3>处置流水线 · 实时时间线</h3>
           <span class="card-count" id="timeline-count">—</span>
         </div>
         <div id="timeline" class="timeline">
           <div class="empty">
             <div class="empty-icon">◎</div>
-            在处置工作台使用 Demo 控制条注入 S1/S2/S3，流水线将在此实时滚动
+            在处置工作台触发事件或注入演练场景后，完整流水线将在此实时展示
           </div>
         </div>
       </div>
@@ -155,13 +153,13 @@
     {% elif tab == 2 %}
     <section class="page-hero">
       <h2>处置<em>工作台</em></h2>
-      <p>把握度评分驱动的 Agent 运维处置 — 推理链、执行决策、What-if 推演与知识图谱。</p>
+      <p>把握度评分驱动的 Agent 运维处置中心 — 根因推理链、分级决策、What-if 推演与知识图谱关联分析。</p>
     </section>
 
-    <div class="demo-control-bar" role="region" aria-label="Demo 控制">
+    <div class="demo-control-bar" role="region" aria-label="场景演练">
       <div class="demo-control-meta">
-        <span class="demo-control-tag">Demo 控制</span>
-        <span class="demo-control-desc">Hackathon 演示事件注入，非生产入口</span>
+        <span class="demo-control-tag">场景演练</span>
+        <span class="demo-control-desc">预置场景用于验证与培训；生产环境请通过 POST /events Webhook 接入</span>
       </div>
       <div class="demo-control-actions">
         <button type="button" class="demo-scenario-btn s1" data-demo-scenario="s1" onclick="triggerScenario('s1')">
@@ -184,7 +182,7 @@
     </div>
 
     <div class="viz-panel card" style="margin-bottom:1.25rem;">
-      <div class="card-header"><h3>三场景评分对比</h3></div>
+      <div class="card-header"><h3>典型场景 · 把握度基准</h3></div>
       <div class="viz-grouped-bars">
         <div class="viz-group"><span class="viz-group-label">S1 限流</span><div class="viz-bar-track"><div class="viz-bar-fill green" style="width:87%"></div></div><span>87</span></div>
         <div class="viz-group"><span class="viz-group-label">S2 空检索</span><div class="viz-bar-track"><div class="viz-bar-fill amber" style="width:72%"></div></div><span>72</span></div>
@@ -218,14 +216,14 @@
         <div id="timeline" class="timeline">
           <div class="empty">
             <div class="empty-icon">◎</div>
-            使用 Demo 控制条注入事件后，完整处置链路将在此展示
+            事件接入后，完整处置链路将在此展示
           </div>
         </div>
       </div>
       <div id="decision-panel" class="card decision-panel">
         <div class="empty">
           <div class="empty-icon">◈</div>
-          使用 Demo 控制条注入事件后，把握度详情将自动展示
+          事件接入后，把握度详情与处置建议将自动展示
         </div>
       </div>
     </div>
@@ -253,11 +251,11 @@
         <div class="advanced-side">
           <div class="card">
             <div class="card-header"><h3>Agent-Team 编排</h3></div>
-            <div id="team-plan" class="advanced-panel-body">触发场景后自动加载编排计划</div>
+            <div id="team-plan" class="advanced-panel-body">事件触发后自动加载编排计划</div>
           </div>
           <div class="card">
             <div class="card-header"><h3>相似历史事故</h3></div>
-            <div id="similar-incidents" class="advanced-panel-body">触发场景后自动检索相似事故</div>
+            <div id="similar-incidents" class="advanced-panel-body">事件触发后自动检索相似历史事故</div>
           </div>
         </div>
       </div>
@@ -277,7 +275,7 @@
     {% elif tab == 3 %}
     <section class="page-hero">
       <h2>审计<em>复盘</em></h2>
-      <p>全链路留痕、反馈飞轮与导出 — 事后追溯处置决策，驱动手册迭代。</p>
+      <p>全链路审计留痕、运营反馈闭环与合规导出 — 追溯每一次处置决策，持续优化运维手册。</p>
     </section>
 
     <div class="flywheel-stats-row">
@@ -310,7 +308,7 @@
     <div class="card" style="margin-top: 1.25rem;">
       <div class="card-header"><h3>提交反馈</h3></div>
       <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
-        选择最近故障提交反馈，驱动运维手册迭代
+        选择故障事件提交运营反馈，数据将写入审计日志并驱动手册迭代
       </p>
       <select id="feedback-trace" class="select-field">
         {% for inc in incidents[:10] %}
@@ -344,7 +342,7 @@
         {% else %}
         <div class="empty" style="padding:2rem;">
           <div class="empty-icon">◎</div>
-          暂无反馈记录，提交 👍/👎 后将在此展示并写入企业审计
+          暂无反馈记录。提交运营反馈后将在此展示，并同步写入审计日志
         </div>
         {% endif %}
       </div>
@@ -428,7 +426,7 @@
         </div>
       </div>
       <p style="padding:0 1rem 1rem;font-size:0.75rem;color:var(--text-muted);margin:0;">
-        提示：10 分钟内重复触发同场景会幂等命中（<code>duplicate_event</code>），不会新建故障但仍会写入审计。
+        说明：10 分钟内重复触发同一演练场景将幂等命中（<code>duplicate_event</code>），不新建故障记录，审计日志仍完整保留。
       </p>
     </div>
 
@@ -733,7 +731,7 @@
 
       {% if demo_mode %}
       if (sc.clamp_applied) {
-        html += `<div class="footnote">演示模式 · 推理因子已校正 (原始 ${sc.factors.reasoning_consistency_raw} → ${sc.factors.reasoning_consistency})</div>`;
+        html += `<div class="footnote">演练环境 · 推理因子已校正 (原始 ${sc.factors.reasoning_consistency_raw} → ${sc.factors.reasoning_consistency})</div>`;
       }
       {% endif %}
 
@@ -881,7 +879,7 @@
       const data = await res.json();
       if (countEl) countEl.textContent = String(data.count);
       if (!data.history?.length) {
-        listEl.innerHTML = '<div class="empty" style="padding:2rem;"><div class="empty-icon">◎</div>暂无反馈记录，提交 👍/👎 后将在此展示并写入企业审计</div>';
+        listEl.innerHTML = '<div class="empty" style="padding:2rem;"><div class="empty-icon">◎</div>暂无反馈记录。提交运营反馈后将在此展示，并同步写入审计日志</div>';
         return;
       }
       listEl.innerHTML = data.history.map(fb => {
@@ -900,7 +898,7 @@
       feedback: '飞轮反馈',
       replay: '审计回放',
       correction_applied: '纠偏应用',
-      demo_retry: '演示重试',
+      demo_retry: '演练重试',
     };
 
     async function loadAuditLog() {
@@ -915,7 +913,7 @@
       const data = await res.json();
       if (countEl) countEl.textContent = String(data.count);
       if (!data.actions?.length) {
-        listEl.innerHTML = '<div class="empty" style="padding:2rem;"><div class="empty-icon">◎</div>暂无审计记录。请先到「场景」页触发 S1/S2/S3。</div>';
+        listEl.innerHTML = '<div class="empty" style="padding:2rem;"><div class="empty-icon">◎</div>暂无审计记录。请先在处置工作台触发事件或接入 Webhook。</div>';
         return;
       }
       listEl.innerHTML = data.actions.map(log => {
@@ -1102,7 +1100,7 @@
       if (!el || !res.ok) return;
       const data = await res.json();
       if (!data.similar.length) {
-        el.textContent = '暂无相似历史事故（多触发几次场景后可见）';
+        el.textContent = '暂无相似历史事故（积累更多事件后可检索）';
         return;
       }
       el.innerHTML = data.similar.map(s =>
@@ -1112,7 +1110,7 @@
 
     async function runWhatIf() {
       const traceId = currentTraceId;
-      if (!traceId) { alert('请先使用 Demo 控制条注入 S1/S2/S3'); return; }
+      if (!traceId) { alert('请先在处置工作台触发事件或选择故障记录'); return; }
       const spec = document.getElementById('whatif-scenario')?.value || 'log_snippet:concurrent=5 rate_limit recovered';
       const colon = spec.indexOf(':');
       const key = spec.slice(0, colon);
@@ -1147,6 +1145,6 @@
       }
     });
   </script>
-  <script src="/static/theme.js"></script>
+  <script src="{{ static_asset('theme.js') }}"></script>
 </body>
 </html>

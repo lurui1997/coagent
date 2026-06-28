@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     feishu_timeout_s: float = 5.0
     pipeline_timeout_s: float = 30.0
     correction_webhook_url: str = ""
+    coagent_public_url: str = "http://localhost:8000"
+    claude_bin: str = ""
+    content_budget_yuan_daily: float = 20.0
+    # 混合 Token 单价（元/1k tokens），对齐 S3：~1.2M tokens → ¥28.5
+    content_cost_per_1k_tokens: float = 0.024
 
     @property
     def use_mock_llm(self) -> bool:
