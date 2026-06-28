@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CoAgent · 技术架构</title>
+  <script>
+    if (new URLSearchParams(window.location.search).get("embed") === "slide") {
+      document.documentElement.classList.add("embed-slide");
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
@@ -837,6 +842,152 @@
     }
 
     .degrade-bar strong { color: #fbbf72; }
+
+    /* 路演嵌入模式：保留同一份架构 DOM 与交互，只压缩为 16:9 页面内的概览。 */
+    html.embed-slide,
+    html.embed-slide body {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .embed-slide .wrap {
+      max-width: none;
+      width: 100%;
+      padding: 0;
+    }
+
+    .embed-slide header,
+    .embed-slide .pipeline-strip,
+    .embed-slide .principles-grid,
+    .embed-slide #view-flow,
+    .embed-slide footer,
+    .embed-slide .arch-hint,
+    .embed-slide .arch-grid > aside:last-child {
+      display: none !important;
+    }
+
+    .embed-slide #view-arch {
+      display: block;
+    }
+
+    .embed-slide .tech-stack-bar {
+      flex-wrap: nowrap;
+      gap: 0.32rem;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem 0.65rem;
+      border-radius: 9px;
+      overflow: hidden;
+    }
+
+    .embed-slide .tech-stack-bar .stack-label {
+      margin-right: 0.2rem;
+    }
+
+    .embed-slide .tech-pill {
+      padding: 0.24rem 0.52rem;
+      font-size: 0.64rem;
+      white-space: nowrap;
+    }
+
+    .embed-slide .arch-grid {
+      grid-template-columns: 178px minmax(0, 1fr);
+      gap: 0.55rem;
+    }
+
+    .embed-slide .panel {
+      padding: 0.65rem;
+      border-radius: 10px;
+    }
+
+    .embed-slide .panel-title {
+      margin-bottom: 0.55rem;
+      padding-bottom: 0.35rem;
+    }
+
+    .embed-slide .ext-node {
+      margin-bottom: 0.45rem;
+      padding: 0.58rem 0.65rem;
+      border-radius: 8px;
+    }
+
+    .embed-slide .ext-node h3 {
+      margin-bottom: 0.18rem;
+      font-size: 0.72rem;
+    }
+
+    .embed-slide .ext-node p {
+      font-size: 0.6rem;
+      line-height: 1.25;
+    }
+
+    .embed-slide .core {
+      min-height: 0;
+      padding: 0.65rem;
+    }
+
+    .embed-slide .layer {
+      margin-bottom: 0.42rem;
+    }
+
+    .embed-slide .layer-label {
+      margin-bottom: 0.24rem;
+      font-size: 0.52rem;
+    }
+
+    .embed-slide .layer-row,
+    .embed-slide .layer-ultra .layer-row {
+      gap: 0.4rem;
+    }
+
+    .embed-slide .pipeline-row,
+    .embed-slide .infra-row {
+      gap: 0.35rem;
+    }
+
+    .embed-slide .node {
+      min-width: 0;
+      padding: 0.48rem 0.58rem;
+      border-radius: 8px;
+    }
+
+    .embed-slide .node.hero {
+      max-width: 360px;
+    }
+
+    .embed-slide .node-name {
+      margin-bottom: 0.12rem;
+      font-size: 0.68rem;
+    }
+
+    .embed-slide .node-desc {
+      font-size: 0.54rem;
+      line-height: 1.22;
+    }
+
+    .embed-slide .tech-tags {
+      gap: 0.16rem;
+      margin-top: 0.22rem;
+    }
+
+    .embed-slide .tech-tags span {
+      padding: 0.08rem 0.26rem;
+      font-size: 0.46rem;
+    }
+
+    .embed-slide .data-bar {
+      margin-top: 0.2rem;
+      padding: 0.38rem 0.55rem;
+      font-size: 0.54rem;
+    }
+
+    .embed-slide .degrade-bar {
+      margin-top: 0.42rem;
+      padding: 0.42rem 0.6rem;
+      font-size: 0.54rem;
+      line-height: 1.3;
+    }
   </style>
 </head>
 <body>

@@ -75,6 +75,35 @@
   .card h3{font-size:21px;margin:8px 0 8px;color:#fff}
   .card p{font-size:14.5px;color:var(--dim);line-height:1.55}
   .tag{display:inline-block;font-size:12px;padding:2px 9px;border-radius:20px;border:1px solid var(--line);color:var(--blue-l);margin-bottom:4px}
+  /* P3 solution: 价值主张 + 三段能力栈 */
+  .solution-intro{font-size:18px;line-height:1.5;color:var(--dim);margin:7px 0 14px;max-width:1080px}
+  .solution-layout{display:grid;grid-template-columns:292px 1fr;gap:18px;height:420px}
+  .solution-promise{display:flex;flex-direction:column;padding:24px 22px;border:1px solid #2a447f;border-radius:13px;
+    background:linear-gradient(160deg,rgba(17,34,76,.98),rgba(5,14,39,.98));position:relative;overflow:hidden}
+  .solution-promise::after{content:"";position:absolute;right:-75px;bottom:-75px;width:210px;height:210px;border-radius:50%;
+    border:1px solid rgba(0,224,255,.15);box-shadow:0 0 70px rgba(0,224,255,.08);pointer-events:none}
+  .promise-kicker{font-size:10px;letter-spacing:.18em;color:var(--cyan);font-weight:700}
+  .solution-promise h2{font-size:30px;line-height:1.16;color:#fff;margin:13px 0 10px;max-width:220px}
+  .solution-promise>p{font-size:13.5px;line-height:1.5;color:var(--dim);position:relative;z-index:1}
+  .promise-users{display:flex;gap:6px;flex-wrap:wrap;margin-top:15px;position:relative;z-index:1}
+  .promise-users span{padding:4px 9px;border:1px solid var(--line);border-radius:999px;font-size:10.5px;color:var(--blue-l);background:rgba(4,9,31,.5)}
+  .promise-flow{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding:12px 10px;border:1px solid var(--line);
+    border-radius:9px;background:rgba(4,9,31,.58);position:relative;z-index:1}
+  .promise-flow span{font-size:11px;font-weight:700;color:#fff}.promise-flow i{font-style:normal;color:var(--cyan);font-size:12px}
+  .promise-rule{margin-top:9px;font-size:11.5px;color:var(--muted);text-align:center;letter-spacing:.04em;position:relative;z-index:1}
+  .promise-rule b{color:var(--gold);font-size:15px;margin:0 4px}
+  .solution-stack{display:grid;grid-template-rows:repeat(3,1fr);gap:10px}
+  .solution-cap{display:grid;grid-template-columns:168px minmax(0,1fr) 132px;gap:18px;align-items:center;padding:14px 16px;
+    border:1px solid var(--line);border-radius:11px;background:linear-gradient(90deg,rgba(12,23,56,.98),rgba(16,31,70,.92))}
+  .solution-cap-head{align-self:stretch;display:flex;flex-direction:column;justify-content:center;border-right:1px solid var(--line);padding-right:14px}
+  .cap-num{font-size:10px;letter-spacing:.16em;color:var(--cyan);font-weight:700;margin-bottom:5px}
+  .solution-cap h3{font-size:19px;color:#fff;white-space:nowrap}
+  .cap-bullets{list-style:none;display:grid;gap:5px}
+  .cap-bullets li{position:relative;padding-left:14px;font-size:12.5px;line-height:1.28;color:var(--dim)}
+  .cap-bullets li::before{content:"•";position:absolute;left:0;top:-1px;color:var(--cyan);font-size:17px;line-height:1}
+  .cap-output{align-self:stretch;display:flex;flex-direction:column;justify-content:center;padding-left:14px;border-left:1px solid var(--line)}
+  .cap-output span{font-size:9px;letter-spacing:.18em;color:var(--muted);font-weight:700;margin-bottom:6px}
+  .cap-output b{font-size:12px;line-height:1.35;color:var(--gold);font-weight:700}
   /* cover */
   .cover-track{font-size:14px;letter-spacing:.26em;color:var(--cyan);text-transform:uppercase}
   .cover-name{font-size:104px;font-weight:800;letter-spacing:.02em;line-height:1;margin:18px 0 14px;
@@ -132,16 +161,36 @@
   .architecture-embed{height:500px;margin-top:12px;overflow:hidden;border:1px solid #263b72;border-radius:12px;
     background:#070b12;box-shadow:0 16px 42px rgba(0,0,0,.28)}
   .architecture-embed iframe{display:block;width:100%;height:100%;border:0;background:#070b12}
-  /* business */
-  .biz{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px}
-  .biz .blk{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
-  .biz .blk .h{font-size:12px;letter-spacing:.18em;color:var(--cyan);text-transform:uppercase;margin-bottom:10px;font-weight:600}
-  .biz ul{list-style:none}
-  .biz li{font-size:14px;color:var(--dim);padding:4px 0;line-height:1.4}
-  .biz li::before{content:"▸ ";color:var(--blue)}
-  .impact{display:flex;gap:28px;margin-top:6px}
-  .impact .i .n{font-size:30px;font-weight:800;color:var(--cyan)}
-  .impact .i .l{font-size:12px;color:var(--muted);letter-spacing:.1em}
+  /* P6 business value: 付费角色 + 商业化路径 */
+  .biz-lead{font-size:17px;line-height:1.5;color:var(--dim);margin:5px 0 15px;max-width:1080px}
+  .business-layout{display:grid;grid-template-columns:1.35fr .9fr;gap:18px;height:354px}
+  .buyer-panel,.commercial-panel{border:1px solid var(--line);border-radius:13px;background:linear-gradient(160deg,rgba(12,23,56,.98),rgba(7,16,43,.98));overflow:hidden}
+  .buyer-panel{padding:19px 20px}
+  .biz-kicker{font-size:10px;letter-spacing:.18em;color:var(--cyan);font-weight:700;margin-bottom:9px}
+  .buyer-list{display:grid;grid-template-rows:repeat(3,1fr);height:286px;border-top:1px solid var(--line)}
+  .buyer-item{display:grid;grid-template-columns:46px 188px 1fr;gap:14px;align-items:center;border-bottom:1px solid var(--line)}
+  .buyer-item:last-child{border-bottom:0}
+  .buyer-index{width:34px;height:34px;border:1px solid #31518f;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    color:var(--cyan);font-size:10px;font-weight:800;letter-spacing:.08em;background:rgba(0,224,255,.05)}
+  .buyer-role h3{font-size:17px;color:#fff;margin-bottom:4px}
+  .buyer-role span{font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+  .buyer-value{font-size:13px;line-height:1.45;color:var(--dim);padding-left:15px;border-left:1px solid var(--line)}
+  .buyer-value b{color:var(--blue-l);font-weight:700}
+  .commercial-panel{padding:20px 20px 18px;position:relative}
+  .commercial-panel::after{content:"";position:absolute;right:-90px;bottom:-100px;width:240px;height:240px;border-radius:50%;
+    border:1px solid rgba(255,209,102,.12);box-shadow:0 0 70px rgba(255,209,102,.06);pointer-events:none}
+  .commercial-panel h2{font-size:23px;color:#fff;margin-bottom:11px}
+  .commercial-steps{border-top:1px solid var(--line);position:relative;z-index:1}
+  .commercial-step{display:grid;grid-template-columns:82px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);align-items:start}
+  .commercial-step:last-child{border-bottom:0}
+  .commercial-step .k{font-size:9px;letter-spacing:.15em;color:var(--cyan);font-weight:700;padding-top:3px}
+  .commercial-step .v{font-size:12.5px;line-height:1.38;color:var(--dim)}
+  .commercial-step .v b{color:#fff;font-weight:700}
+  .biz-value-strip{height:72px;margin-top:14px;padding:13px 18px;display:grid;grid-template-columns:238px 1fr;gap:20px;align-items:center;
+    border:1px solid #34528d;border-left:4px solid var(--gold);border-radius:10px;background:linear-gradient(90deg,rgba(255,209,102,.09),rgba(10,24,57,.75))}
+  .biz-value-strip .k{font-size:10px;letter-spacing:.17em;color:var(--gold);font-weight:700}
+  .biz-value-strip .v{font-size:17px;line-height:1.4;color:#fff}
+  .biz-value-strip .v span{color:var(--blue-l);font-weight:700}
   /* timeline */
   .tl{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}
   .tl .node{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;border-top:3px solid var(--cyan)}
@@ -305,25 +354,34 @@
 <section class="slide">
   <div class="seclabel">THE SOLUTION <span class="cn">· 我们的 Agent</span></div>
   <h1 class="title">我们的解法 · 一个能干活的 Agent</h1>
-  <div class="oneliner">我们做了一个<span class="hl">「Agent 事故指挥官」</span>，让 <span class="hl">FDE / 值班 / 客户 IT</span> 用一张卡片完成<span class="hlg">「从诊断到处置生产事故」</span>。</div>
-  <div class="grid3">
-    <div class="card">
-      <span class="tag">01 CAPABILITY</span>
-      <h3>👁 看见问题</h3>
-      <p>接入运行事件与指标（<code>POST /events</code>）、幂等去重，把运行失败 / 质量异常 / 成本失控识别为「事故」。</p>
-    </div>
-    <div class="card">
-      <span class="tag">02 CAPABILITY</span>
-      <h3>🔍 诊断问题</h3>
-      <p>汇总日志/指标/配置/手册 → 根因假设 + 证据链；把握度评分给出「该信什么、有多大把握」。</p>
-    </div>
-    <div class="card">
-      <span class="tag">03 CAPABILITY</span>
-      <h3>🛠 处理问题</h3>
-      <p>处置合同（🟢&nbsp;可执行 / 🟡&nbsp;需确认 / 🔴&nbsp;必须升级）+ 飞书协同 + 受控动作，帮你安全动手。</p>
+  <div class="solution-intro">把「看见、诊断、处理」收进一个闭环，让 <span class="hl">FDE / 值班 / 客户 IT</span> 用一张卡片处理 Agent 生产事故。</div>
+  <div class="solution-layout">
+    <aside class="solution-promise">
+      <div class="promise-kicker">ONE INCIDENT · ONE LOOP</div>
+      <h2>协同闭环处理</h2>
+      <p>不再在多个工具间搬运信息，事故责任人直接获得证据、判断与下一步。</p>
+      <div class="promise-users"><span>FDE</span><span>值班</span><span>客户 IT</span></div>
+      <div class="promise-flow"><span>看见</span><i>→</i><span>诊断</span><i>→</i><span>处理</span></div>
+      <div class="promise-rule">帮你处理 <b>≠</b> 替你处理</div>
+    </aside>
+    <div class="solution-stack">
+      <article class="solution-cap">
+        <div class="solution-cap-head"><div class="cap-num">01 · OBSERVE</div><h3>👁&nbsp; 看见问题</h3></div>
+        <ul class="cap-bullets"><li>接入运行事件、指标与回调</li><li>幂等去重，聚合运行上下文</li><li>识别失败 / 质量 / 成本类事故</li></ul>
+        <div class="cap-output"><span>OUTPUT</span><b>事故上下文</b></div>
+      </article>
+      <article class="solution-cap">
+        <div class="solution-cap-head"><div class="cap-num">02 · DIAGNOSE</div><h3>🔍&nbsp; 诊断问题</h3></div>
+        <ul class="cap-bullets"><li>汇总日志、指标、配置与手册</li><li>生成根因假设与可追溯证据链</li><li>量化把握度，说明该信什么</li></ul>
+        <div class="cap-output"><span>OUTPUT</span><b>根因 + 证据 + 评分</b></div>
+      </article>
+      <article class="solution-cap">
+        <div class="solution-cap-head"><div class="cap-num">03 · RESOLVE</div><h3>🛠&nbsp; 处理问题</h3></div>
+        <ul class="cap-bullets"><li>输出风险分级处置合同</li><li>🟢&nbsp;可执行 / 🟡&nbsp;需确认 / 🔴&nbsp;必须升级</li><li>人工协同确认，执行受控动作</li></ul>
+        <div class="cap-output"><span>OUTPUT</span><b>权限边界 + 下一步</b></div>
+      </article>
     </div>
   </div>
-  <div class="note">▸ 差异：别人把「看见、诊断、处理」拆在不同工具、还停在屏幕上；CoAgent 收进<span class="hl">一个闭环</span>，帮你动手。</div>
   <div class="footer"><span>小宿科技环球黑客松 · 北京站</span><span class="pageno">03 / 08</span></div>
 </section>
 
@@ -334,16 +392,16 @@
   <div class="demo-layout">
     <div class="demo-video-frame">
       <video class="demo-video" data-demo-video muted loop playsinline controls preload="metadata"
-        aria-label="CoAgent 15 秒产品演示">
-        <source src="../demos/coagent-demo-15s-2026-06-28T04-35-20.mp4" type="video/mp4">
-        当前浏览器无法播放视频。<a href="../demos/coagent-demo-15s-2026-06-28T04-35-20.mp4">打开演示视频</a>
+        aria-label="CoAgent 13 秒产品演示">
+        <source src="../demos/coagent-demo-13s-2026-06-28T04-35-20.mp4" type="video/mp4">
+        当前浏览器无法播放视频。<a href="../demos/coagent-demo-13s-2026-06-28T04-35-20.mp4">打开演示视频</a>
       </video>
-      <div class="demo-video-badge">15 SEC · LIVE PRODUCT</div>
+      <div class="demo-video-badge">13 SEC · LIVE PRODUCT</div>
     </div>
     <div class="demo-journey">
       <div class="step"><div class="s">01 →</div><h4>触发事件</h4><p>控制条选择场景，或由真实 Agent 回调 <code>POST /events</code>。</p></div>
       <div class="step"><div class="s">02 →</div><h4>看见 + 诊断</h4><p>汇总运行信号，生成根因、证据链与把握度评分。</p></div>
-      <div class="step"><div class="s">03 →</div><h4>帮你处理</h4><p>输出风险分级处置合同，并通过飞书协同确认。</p></div>
+      <div class="step"><div class="s">03 →</div><h4>帮你处理</h4><p>输出风险分级处置合同，人工协同确认。</p></div>
       <div class="step"><div class="s">04 →</div><h4>复盘沉淀</h4><p>验证处置结果，沉淀审计记录与反馈飞轮。</p></div>
     </div>
   </div>
@@ -368,40 +426,43 @@
 <!-- ============ P6 商业价值 ============ -->
 <section class="slide">
   <div class="seclabel">BUSINESS VALUE <span class="cn">· 谁会为它买单</span></div>
-  <h1 class="title" style="margin-bottom:12px">商业价值 · 谁会为它买单</h1>
-  <div class="biz">
-    <div class="blk">
-      <div class="h">Target Customers · 客户</div>
-      <ul>
-        <li><b style="color:#fff">Agent 交付团队</b>：FDE / 解决方案商，少人维护多客户</li>
-        <li><b style="color:#fff">企业 AI 平台 / SRE</b>：保线上稳定、控成本</li>
-        <li><b style="color:#fff">客户 IT / 业务负责人</b>：看懂依据、完成审批</li>
-      </ul>
-    </div>
-    <div class="blk">
-      <div class="h">Core Scenarios · 核心场景</div>
-      <ul>
-        <li>S1 限流止损（429 → 一键重试）</li>
-        <li>S2 空检索拦截（禁止无效重试）</li>
-        <li>S3 成本超预算（升级审批）</li>
-      </ul>
-    </div>
-    <div class="blk">
-      <div class="h">Quantified Impact · 量化收益 <span class="chip-warn">数字待估 ⚠️</span></div>
-      <div class="impact">
-        <div class="i"><div class="n">N×</div><div class="l">诊断/MTTR 提效</div></div>
-        <div class="i"><div class="n">-XX%</div><div class="l">止损/超支下降</div></div>
-        <div class="i"><div class="n">¥X</div><div class="l">单客户 ARR</div></div>
+  <h1 class="title" style="margin-bottom:0">商业价值 · 谁付费，为什么买</h1>
+  <div class="biz-lead">先从负责交付与稳定性的人切入：他们为更低的事故处理摩擦、更清晰的责任边界和可审计的处置流程买单。</div>
+  <div class="business-layout">
+    <div class="buyer-panel">
+      <div class="biz-kicker">WHO PAYS · 付费角色</div>
+      <div class="buyer-list">
+        <div class="buyer-item">
+          <div class="buyer-index">01</div>
+          <div class="buyer-role"><h3>Agent 交付团队</h3><span>FDE / 解决方案商</span></div>
+          <div class="buyer-value"><b>少人维护更多客户</b>，跨项目复用处置知识。</div>
+        </div>
+        <div class="buyer-item">
+          <div class="buyer-index">02</div>
+          <div class="buyer-role"><h3>企业 AI 平台 / SRE</h3><span>稳定性与治理负责人</span></div>
+          <div class="buyer-value"><b>统一 Agent 生产治理</b>，降低值守与协同负担。</div>
+        </div>
+        <div class="buyer-item">
+          <div class="buyer-index">03</div>
+          <div class="buyer-role"><h3>客户 IT / 业务负责人</h3><span>事故审批与责任承接者</span></div>
+          <div class="buyer-value"><b>看懂依据与权限边界</b>，处置过程可审计。</div>
+        </div>
       </div>
     </div>
-    <div class="blk">
-      <div class="h">Business Model · 商业模式 <span class="chip-warn">假设待定稿 ⚠️</span></div>
-      <ul>
-        <li>收费：按接入 Agent 数 / 席位订阅</li>
-        <li>GTM：先切 FDE 交付团队</li>
-        <li>护城河：处置合同机制 + 结果验证飞轮</li>
-      </ul>
+    <div class="commercial-panel">
+      <div class="biz-kicker">HOW WE SELL · 商业化路径</div>
+      <h2>从交付团队切入，走向企业级治理</h2>
+      <div class="commercial-steps">
+        <div class="commercial-step"><div class="k">ENTRY</div><div class="v"><b>FDE / 解决方案商</b><br>高频遇到事故与跨客户交付压力。</div></div>
+        <div class="commercial-step"><div class="k">PRICING</div><div class="v"><b>按接入 Agent 数 / 席位订阅</b><br>随管理规模与协作人数扩展。</div></div>
+        <div class="commercial-step"><div class="k">EXPAND</div><div class="v"><b>企业 AI 平台 / SRE</b><br>从单个交付团队进入统一生产治理。</div></div>
+        <div class="commercial-step"><div class="k">MOAT</div><div class="v"><b>处置合同 + 结果验证飞轮</b><br>持续沉淀可复用的事故处置知识。</div></div>
+      </div>
     </div>
+  </div>
+  <div class="biz-value-strip">
+    <div class="k">WHAT THEY BUY · 客户最终买什么</div>
+    <div class="v">不是更多告警，而是<span>更低的处置摩擦、可控的生产风险、可审计的责任闭环</span>。</div>
   </div>
   <div class="footer"><span>小宿科技环球黑客松 · 北京站</span><span class="pageno">06 / 08</span></div>
 </section>
@@ -412,8 +473,8 @@
   <h1 class="title">48 小时 · 我们做到了什么</h1>
   <div class="tl">
     <div class="node"><div class="t">10:00 · DAY 1</div><h4>组队 &amp; 选题</h4><p>锁定「Agent 事故处置 / SRE war room」方向，定下三场景。</p></div>
-    <div class="node"><div class="t">18:00–24:00 · DAY 1</div><h4>核心链路打通</h4><p>P0 baseline 端到端跑通 + 飞书 S1 卡片，第一条全链路。</p></div>
-    <div class="node"><div class="t">08:00–10:00 · DAY 2</div><h4>能力扩展 &amp; 调优</h4><p>模型路由 / 企业审计 / 运行时纠偏 + Ultra（知识图谱 / What-if）。</p></div>
+    <div class="node"><div class="t">18:00–24:00 · DAY 1</div><h4>核心链路打通</h4><p>P0 baseline 端到端跑通，第一条全链路。</p></div>
+    <div class="node"><div class="t">08:00–10:00 · DAY 2</div><h4>能力扩展 &amp; 调优</h4><p>模型路由 / 企业审计 / 运行时纠偏</p></div>
     <div class="node"><div class="t">12:00 · DAY 2</div><h4>Demo &amp; 提交</h4><p>真实 LLM 验证脚本 + 答辩录屏，可演示版本提交评审。</p></div>
   </div>
   <div class="next">NEXT → <b>真实 Agent 平台事件回调双向集成</b>：让 CoAgent 接管真实生产 Agent，从演示走向上线。</div>
