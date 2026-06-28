@@ -24,11 +24,9 @@
   </header>
 
   <nav class="subnav">
-    <a href="/?tab=1" class="{% if tab == 1 %}active{% endif %}">总览</a>
-    <a href="/?tab=2" class="{% if tab == 2 %}active{% endif %}">场景</a>
-    <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">把握度评分</a>
-    <a href="/?tab=4" class="{% if tab == 4 %}active{% endif %}">飞轮</a>
-    <a href="/?tab=5" class="{% if tab == 5 %}active{% endif %}">企业审计</a>
+    <a href="/?tab=1" class="{% if tab == 1 %}active{% endif %}">事故总览</a>
+    <a href="/?tab=2" class="{% if tab == 2 %}active{% endif %}">处置工作台</a>
+    <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">审计复盘</a>
   </nav>
 
   <div class="page {% if tab == 1 %}tab-overview{% endif %}">
@@ -39,7 +37,7 @@
         <h2>Agent 出错时，<em>90 秒内</em>知道要不要动、怎么动、有多大把握</h2>
         <p class="pitch-lead">PagerDuty 管基础设施，Chatbot 管问答——中间缺一层「Agent 运行态运维」。CoAgent 用可验证把握度评分，把告警变成敢执行的处置决策。</p>
         <div class="pitch-cta">
-          <a href="/?tab=2" class="btn btn-lg">开始 5 分钟演示 →</a>
+          <a href="/?tab=2" class="btn btn-lg">进入处置工作台 →</a>
           <span class="pitch-meta">S1 限流 · S2 空检索 · S3 超预算</span>
         </div>
       </div>
@@ -108,14 +106,14 @@
     <section class="demo-script card">
       <div class="card-header">
         <h3>5 分钟答辩节奏</h3>
-        <a href="/?tab=2" class="btn btn-secondary" style="font-size:var(--text-xs);padding:0.35rem 0.75rem;">去场景页演示</a>
+        <a href="/?tab=2" class="btn btn-secondary" style="font-size:var(--text-xs);padding:0.35rem 0.75rem;">进入处置工作台</a>
       </div>
       <ol class="demo-steps">
         <li><span class="demo-time">0:00</span><span>痛点 + 一句话价值（本页）</span></li>
-        <li><span class="demo-time">0:30</span><span>场景页 → <strong>S1</strong> → 把握度页 🟢 + 重试</span></li>
-        <li><span class="demo-time">1:40</span><span>场景页 → <strong>S2</strong> → 把握度页 🟡 无重试</span></li>
-        <li><span class="demo-time">2:05</span><span>场景页 → <strong>S3</strong> → 把握度页 🔴 升级</span></li>
-        <li><span class="demo-time">2:40</span><span>飞轮页 👎 → 统计更新</span></li>
+        <li><span class="demo-time">0:30</span><span>工作台 Demo 条 → <strong>S1</strong> → 🟢 可重试</span></li>
+        <li><span class="demo-time">1:40</span><span>工作台 Demo 条 → <strong>S2</strong> → 🟡 无重试</span></li>
+        <li><span class="demo-time">2:05</span><span>工作台 Demo 条 → <strong>S3</strong> → 🔴 升级</span></li>
+        <li><span class="demo-time">2:40</span><span>审计复盘 👎 → 飞轮统计更新</span></li>
         <li><span class="demo-time">3:10</span><span>飞书 S1 卡片（可选）</span></li>
         <li><span class="demo-time">4:00</span><span>三件套 + 投资回报 + 「越用越准」</span></li>
       </ol>
@@ -148,88 +146,42 @@
         <div id="timeline" class="timeline">
           <div class="empty">
             <div class="empty-icon">◎</div>
-            切换到「场景」页触发 S1/S2/S3，处置链路将在此实时滚动
+            在处置工作台使用 Demo 控制条注入 S1/S2/S3，流水线将在此实时滚动
           </div>
         </div>
       </div>
     </div>
 
     {% elif tab == 2 %}
-    <section class="page-hero page-hero-demo">
-      <h2>点击触发 · 看<em>问题→方案→效果</em></h2>
-      <p>三场景共用同一处置流水线，评分决定「敢不敢动」——触发后切到「把握度评分」Tab 查看完整决策链。</p>
-    </section>
-
-    <div class="demo-hint card">
-      <div class="demo-hint-steps">
-        <span class="demo-hint-step active">① 本页触发场景</span>
-        <span class="demo-hint-arrow">→</span>
-        <span class="demo-hint-step">② 把握度评分 Tab</span>
-        <span class="demo-hint-arrow">→</span>
-        <span class="demo-hint-step">③ 飞轮 / 审计 Tab</span>
-      </div>
-    </div>
-
-    <div class="scenario-grid">
-      <div class="scenario-card s1" onclick="triggerScenario('s1')">
-        <div class="scenario-card-bg" aria-hidden="true"></div>
-        <div class="scenario-card-content">
-          <div class="scenario-id">场景 01 · 🟢 可执行</div>
-          <h4>客服 Agent API 限流</h4>
-          <div class="scenario-chart-panel" aria-hidden="true">
-            <img src="/static/images/scenario-s1.svg" alt="429 限流趋势图" class="scenario-chart-img">
-          </div>
-          <dl class="scenario-pso">
-            <div class="pso-row"><dt>问题</dt><dd>大促并发 5→10，OpenAI 429，失败率 38%，客户先发现</dd></div>
-            <div class="pso-row"><dt>方案</dt><dd>根因推理 → OPS-101 手册 → 把握度三因子评分</dd></div>
-            <div class="pso-row pso-impact"><dt>效果</dt><dd><strong>87 分 🟢</strong> · 敢重试 · 飞书卡片同步</dd></div>
-          </dl>
-          <div class="expected">答辩话术：「限流是配额打满——评分 87，可以先重试」</div>
-          <button class="btn" type="button">触发 S1</button>
-        </div>
-      </div>
-      <div class="scenario-card s2" onclick="triggerScenario('s2')">
-        <div class="scenario-card-bg" aria-hidden="true"></div>
-        <div class="scenario-card-content">
-          <div class="scenario-id">场景 02 · 🟡 需确认</div>
-          <h4>RAG 空检索飙升</h4>
-          <div class="scenario-chart-panel" aria-hidden="true">
-            <img src="/static/images/scenario-s2.svg" alt="空检索率飙升图" class="scenario-chart-img">
-          </div>
-          <dl class="scenario-pso">
-            <div class="pso-row"><dt>问题</dt><dd>索引 lag 1 天，空检索 5%→35%，幻觉答复客诉 +12</dd></div>
-            <div class="pso-row"><dt>方案</dt><dd>根因链：索引滞后 → 空检索 → 幻觉 · OPS-203 手册</dd></div>
-            <div class="pso-row pso-impact"><dt>效果</dt><dd><strong>72 分 🟡</strong> · ⚠ 不建议重试 · 须改知识库</dd></div>
-          </dl>
-          <div class="expected">答辩话术：「同样 run_fail，S1 能重试 S2 不能——评分定义边界」</div>
-          <button class="btn btn-warning" type="button">触发 S2</button>
-        </div>
-      </div>
-      <div class="scenario-card s3" onclick="triggerScenario('s3')">
-        <div class="scenario-card-bg" aria-hidden="true"></div>
-        <div class="scenario-card-content">
-          <div class="scenario-id">场景 03 · 🔴 需升级</div>
-          <h4>Agent 日成本超预算</h4>
-          <div class="scenario-chart-panel" aria-hidden="true">
-            <img src="/static/images/scenario-s3.svg" alt="日成本超预算图" class="scenario-chart-img">
-          </div>
-          <dl class="scenario-pso">
-            <div class="pso-row"><dt>问题</dt><dd>新模板发布，Token +180%，日成本 ¥28.5 超预算 ¥20</dd></div>
-            <div class="pso-row"><dt>方案</dt><dd>非报错型事件 · OPS-305 限流/降级/暂停 · 评分 &lt;60</dd></div>
-            <div class="pso-row pso-impact"><dt>效果</dt><dd><strong>58 分 🔴</strong> · 不可自动执行 · @负责人升级</dd></div>
-          </dl>
-          <div class="expected">答辩话术：「不是坏了，是烧钱——评分 58 告诉你不该自己动」</div>
-          <button class="btn btn-danger" type="button">触发 S3</button>
-        </div>
-      </div>
-    </div>
-    <div id="trigger-result"></div>
-
-    {% elif tab == 3 %}
     <section class="page-hero">
-      <h2>用<em>把握度评分</em>验证效果</h2>
-      <p>三因子可验证推理 — 向评委展示「为什么敢动 / 为什么不敢动」。数据 · 手册 · 推理，均可追问公式。</p>
+      <h2>处置<em>工作台</em></h2>
+      <p>把握度评分驱动的 Agent 运维处置 — 推理链、执行决策、What-if 推演与知识图谱。</p>
     </section>
+
+    <div class="demo-control-bar" role="region" aria-label="Demo 控制">
+      <div class="demo-control-meta">
+        <span class="demo-control-tag">Demo 控制</span>
+        <span class="demo-control-desc">Hackathon 演示事件注入，非生产入口</span>
+      </div>
+      <div class="demo-control-actions">
+        <button type="button" class="demo-scenario-btn s1" data-demo-scenario="s1" onclick="triggerScenario('s1')">
+          <span class="demo-scenario-id">S1</span>
+          <span class="demo-scenario-name">API 限流</span>
+          <span class="demo-scenario-grade green">🟢 87</span>
+        </button>
+        <button type="button" class="demo-scenario-btn s2" data-demo-scenario="s2" onclick="triggerScenario('s2')">
+          <span class="demo-scenario-id">S2</span>
+          <span class="demo-scenario-name">空检索</span>
+          <span class="demo-scenario-grade amber">🟡 72</span>
+        </button>
+        <button type="button" class="demo-scenario-btn s3" data-demo-scenario="s3" onclick="triggerScenario('s3')">
+          <span class="demo-scenario-id">S3</span>
+          <span class="demo-scenario-name">超预算</span>
+          <span class="demo-scenario-grade red">🔴 58</span>
+        </button>
+      </div>
+      <div id="trigger-result" class="demo-trigger-result"></div>
+    </div>
 
     <div class="viz-panel card" style="margin-bottom:1.25rem;">
       <div class="card-header"><h3>三场景评分对比</h3></div>
@@ -266,14 +218,14 @@
         <div id="timeline" class="timeline">
           <div class="empty">
             <div class="empty-icon">◎</div>
-            触发场景后，完整处置链路将在此展示
+            使用 Demo 控制条注入事件后，完整处置链路将在此展示
           </div>
         </div>
       </div>
       <div id="decision-panel" class="card decision-panel">
         <div class="empty">
           <div class="empty-icon">◈</div>
-          触发场景后把握度详情将自动展示
+          使用 Demo 控制条注入事件后，把握度详情将自动展示
         </div>
       </div>
     </div>
@@ -322,10 +274,10 @@
       </div>
     </div>
 
-    {% elif tab == 4 %}
+    {% elif tab == 3 %}
     <section class="page-hero">
-      <h2>运维<em>飞轮</em></h2>
-      <p>👍/👎 反馈驱动运维手册与提示词迭代 — 处置经验沉淀在团队侧。</p>
+      <h2>审计<em>复盘</em></h2>
+      <p>全链路留痕、反馈飞轮与导出 — 事后追溯处置决策，驱动手册迭代。</p>
     </section>
 
     <div class="flywheel-stats-row">
@@ -386,7 +338,7 @@
             {% if fb.score_json and fb.score_json.total %} · 评分 {{ fb.score_json.total }}{% endif %}
           </span>
           <span class="flywheel-time">{{ fb.created_at | format_cn_time }}</span>
-          <a class="flywheel-detail-link" href="/?tab=5&amp;trace={{ fb.trace_id }}">故障详情 →</a>
+          <a class="flywheel-detail-link" href="/?tab=3&amp;trace={{ fb.trace_id }}">故障详情 →</a>
         </div>
         {% endfor %}
         {% else %}
@@ -397,16 +349,11 @@
         {% endif %}
       </div>
     </div>
-    {% elif tab == 5 %}
-    <section class="page-hero">
-      <h2>企业<em>审计</em></h2>
-      <p>操作人、审批动作、纠偏与反馈的全链路留痕 — 支持 JSON/CSV 导出。</p>
-    </section>
     {% if audit_detail %}
     <div class="card audit-detail-panel" id="audit-detail-panel">
       <div class="card-header">
         <h3>故障详情 · 审计归档</h3>
-        <a class="btn btn-outline" style="font-size:var(--text-xs);padding:0.35rem 0.75rem;" href="/?tab=5">关闭</a>
+        <a class="btn btn-outline" style="font-size:var(--text-xs);padding:0.35rem 0.75rem;" href="/?tab=3">关闭</a>
       </div>
       <div class="audit-detail-grid">
         <div><span class="audit-detail-label">追踪号</span><code>{{ audit_detail.trace_id }}</code></div>
@@ -418,7 +365,7 @@
         <div><span class="audit-detail-label">耗时</span><strong>{{ audit_detail.duration_ms or '—' }} ms</strong></div>
       </div>
       <div class="audit-detail-actions">
-        <a class="btn btn-secondary" href="/?tab=3&amp;trace={{ audit_detail.trace_id }}">查看决策链路</a>
+        <a class="btn btn-secondary" href="/?tab=2&amp;trace={{ audit_detail.trace_id }}">查看决策链路</a>
         <a class="btn btn-outline" href="/admin/audit/export" target="_blank">导出 JSON</a>
       </div>
       <div class="audit-detail-timeline">
@@ -831,7 +778,7 @@
       if (!banner) return;
       banner.style.display = 'flex';
       document.getElementById('trace-banner-id').textContent = traceId;
-      document.getElementById('trace-banner-link').href = `/?tab=3&trace=${traceId}`;
+      document.getElementById('trace-banner-link').href = `/?tab=2&trace=${traceId}`;
     }
 
     async function hydrateIncident(traceId) {
@@ -863,23 +810,29 @@
     }
 
     function selectIncident(traceId) {
-      window.location.href = `/?tab=3&trace=${traceId}`;
+      window.location.href = `/?tab=2&trace=${traceId}`;
     }
 
     async function triggerScenario(id) {
-      const card = document.querySelector(`.scenario-card.${id}`);
-      const btn = card?.querySelector('.btn');
-      if (btn) { btn.textContent = '运行中…'; btn.disabled = true; }
+      const btn = document.querySelector(`[data-demo-scenario="${id}"]`);
+      if (btn) {
+        btn.disabled = true;
+        btn.classList.add('running');
+        btn.querySelector('.demo-scenario-name').textContent = '运行中…';
+      }
 
       const res = await fetch(`/admin/trigger/${id}`, { method: 'POST' });
       const data = await res.json();
       const el = document.getElementById('trigger-result');
       if (el) {
         const note = data.status === 'duplicate' ? '（幂等命中，展示已有故障）' : '';
-        el.innerHTML = `<div class="result-banner">状态: <strong>${data.status}</strong>${note} · 跳转把握度页…</div>`;
+        el.innerHTML = `<span class="demo-result-text">状态: <strong>${data.status}</strong>${note}</span>`;
       }
       if (data.trace_id) {
-        setTimeout(() => { window.location.href = `/?tab=3&trace=${data.trace_id}`; }, 400);
+        setTimeout(() => { window.location.href = `/?tab=2&trace=${data.trace_id}`; }, 400);
+      } else if (btn) {
+        btn.disabled = false;
+        btn.classList.remove('running');
       }
     }
 
@@ -935,7 +888,7 @@
         const ts = formatCnTime(fb.created_at);
         const rating = fb.rating === 'up' ? '<span class="flywheel-rating up">👍 有用</span>' : '<span class="flywheel-rating down">👎 无用</span>';
         const score = fb.score_json?.total ? ` · 评分 ${fb.score_json.total}` : '';
-        return `<div class="flywheel-history-row">${rating}<span class="flywheel-meta"><code>${fb.trace_id}</code> · ${fb.agent_id} · ${(fb.scenario_id || '').toUpperCase()}${score}</span><span class="flywheel-time">${ts}</span><a class="flywheel-detail-link" href="/?tab=5&trace=${fb.trace_id}">故障详情 →</a></div>`;
+        return `<div class="flywheel-history-row">${rating}<span class="flywheel-meta"><code>${fb.trace_id}</code> · ${fb.agent_id} · ${(fb.scenario_id || '').toUpperCase()}${score}</span><span class="flywheel-time">${ts}</span><a class="flywheel-detail-link" href="/?tab=3&trace=${fb.trace_id}">故障详情 →</a></div>`;
       }).join('');
     }
 
@@ -970,7 +923,7 @@
         const ts = formatCnTime(log.created_at);
         const activeTrace = new URLSearchParams(location.search).get('trace');
         const hl = activeTrace && log.trace_id === activeTrace ? ' audit-row-highlight' : '';
-        return `<a class="incident-row audit-row-link${hl}" href="/?tab=5&trace=${encodeURIComponent(log.trace_id)}"><span><code>${log.trace_id}</code> · <strong>${label}</strong> · ${log.operator}</span><span class="ts" style="font-size:0.75rem;color:var(--text-muted)">${ts} · 详情 →</span></a>`;
+        return `<a class="incident-row audit-row-link${hl}" href="/?tab=3&trace=${encodeURIComponent(log.trace_id)}"><span><code>${log.trace_id}</code> · <strong>${label}</strong> · ${log.operator}</span><span class="ts" style="font-size:0.75rem;color:var(--text-muted)">${ts} · 详情 →</span></a>`;
       }).join('');
       updateAuditViz(data.actions);
     }
@@ -1159,7 +1112,7 @@
 
     async function runWhatIf() {
       const traceId = currentTraceId;
-      if (!traceId) { alert('请先在场景页触发 S1/S2/S3'); return; }
+      if (!traceId) { alert('请先使用 Demo 控制条注入 S1/S2/S3'); return; }
       const spec = document.getElementById('whatif-scenario')?.value || 'log_snippet:concurrent=5 rate_limit recovered';
       const colon = spec.indexOf(':');
       const key = spec.slice(0, colon);
@@ -1186,7 +1139,7 @@
       } else if (tab === 1 && document.getElementById('timeline')) {
         loadLatestTimeline();
       }
-      if (tab === 5) {
+      if (tab === 3) {
         loadAuditLog();
         if (params.get('trace')) {
           document.getElementById('audit-detail-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

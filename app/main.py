@@ -38,6 +38,10 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 async def admin_page(request: Request, tab: int = 1, trace: str | None = None):
+    legacy_tab_map = {3: 2, 4: 3, 5: 3, 6: 2}
+    tab = legacy_tab_map.get(tab, tab)
+    if tab not in (1, 2, 3):
+        tab = 1
     agents_path = settings.data_dir / "agents.json"
     with open(agents_path, encoding="utf-8") as f:
         agents = json.load(f)
