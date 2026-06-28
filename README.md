@@ -14,7 +14,7 @@
 
 <br />
 
-<video src="docs/demos/coagent-demo-15s-2026-06-28T04-35-20.webm" autoplay loop muted playsinline controls width="100%"></video>
+[![CoAgent 演示](docs/demos/coagent-demo.gif)](docs/demos/coagent-demo-15s-2026-06-28T04-35-20.mp4)
 
 *事件接入 → 场景路由 → 处置手册+工具 → 根因推理 → 把握度评分 → 分级处置 · 审计留痕*
 
