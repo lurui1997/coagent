@@ -30,7 +30,7 @@ async def test_trigger_idempotency(client):
     r1 = await client.post("/admin/trigger/s1")
     assert r1.status_code == 200
     data1 = r1.json()
-    assert data1["status"] == "ok"
+    assert data1["status"] == "started"
 
     r2 = await client.post("/admin/trigger/s1")
     data2 = r2.json()
