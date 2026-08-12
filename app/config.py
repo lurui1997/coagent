@@ -17,7 +17,6 @@ class Settings(BaseSettings):
     feishu_escalate_user_id: str = ""
     feishu_api_base: str = "https://open.feishu.cn/open-apis"
     demo_mode: bool = True
-    mock_llm: bool = False
     diagnostic_agent: bool = True
     diagnostic_max_steps: int = 8
     database_path: str = "coagent.db"
@@ -33,10 +32,6 @@ class Settings(BaseSettings):
     content_budget_yuan_daily: float = 20.0
     # 混合 Token 单价（元/1k tokens），对齐 S3：~1.2M tokens → ¥28.5
     content_cost_per_1k_tokens: float = 0.024
-
-    @property
-    def use_mock_llm(self) -> bool:
-        return self.mock_llm or not self.llm_api_key
 
 
 settings = Settings()

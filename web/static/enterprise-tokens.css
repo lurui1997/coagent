@@ -1,0 +1,92 @@
+/* CoAgent Enterprise Design System — shared tokens
+ * Used by Admin console + Showcase surfaces.
+ */
+
+:root {
+  color-scheme: light;
+
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --line: #e2e5eb;
+  --line-strong: #c8ceda;
+  --border: var(--line);
+  --border-strong: var(--line-strong);
+  --border-subtle: #eceef2;
+
+  --text: #12141a;
+  --text-secondary: #5c6578;
+  --text-muted: #8b93a7;
+  --faint: #8b93a7;
+
+  --accent: #1d4ed8;
+  --accent-bright: #3b6ef0;
+  --accent-soft: #e8eefc;
+  --accent-hover: #1e40af;
+  --accent-ring: rgba(29, 78, 216, 0.22);
+  --accent-border: rgba(29, 78, 216, 0.28);
+  --accent-border-strong: rgba(29, 78, 216, 0.42);
+  --brand: var(--accent);
+  --brand-dark: var(--accent-hover);
+  --brand-light: var(--accent-soft);
+  --brand-muted: #3b6ef0;
+  --brand-glow: rgba(29, 78, 216, 0.08);
+  --brand-ring: rgba(29, 78, 216, 0.22);
+  --brand-50: #eef2ff;
+  --brand-100: #e8eefc;
+  --brand-200: #c7d7f9;
+  --brand-300: #9bb6f3;
+  --brand-400: #5b82e8;
+  --brand-500: #3b6ef0;
+  --brand-600: #1d4ed8;
+  --brand-700: #1e40af;
+  --brand-800: #1e3a8a;
+
+  --purple: var(--brand);
+  --purple-light: var(--brand-light);
+  --purple-muted: var(--brand-muted);
+  --purple-glow: var(--brand-glow);
+
+  --ok: #0f7a45;
+  --ok-bg: #e8f6ee;
+  --warn: #9a6700;
+  --warn-bg: #fff6e0;
+  --bad: #b42318;
+  --bad-bg: #fdeceb;
+  --green: var(--ok);
+  --green-bg: var(--ok-bg);
+  --amber: var(--warn);
+  --amber-bg: var(--warn-bg);
+  --red: var(--bad);
+  --red-bg: var(--bad-bg);
+
+  --kg-agent: var(--brand-600);
+  --kg-incident: #2563eb;
+  --kg-playbook: var(--amber);
+  --kg-root: var(--red);
+  --kg-action: var(--green);
+  --kg-score: #5c6578;
+
+  --bg-grid: #e8eaef;
+  --bg-radial: transparent;
+  --header-bg: rgba(255, 255, 255, 0.92);
+  --canvas: var(--bg);
+  --canvas-elevated: var(--surface);
+
+  --shadow-sm: 0 1px 0 rgba(18, 20, 26, 0.04);
+  --shadow-md: 0 4px 16px rgba(18, 20, 26, 0.06);
+  --shadow-lg: 0 12px 32px rgba(18, 20, 26, 0.08);
+  --radius: 6px;
+  --radius-lg: 8px;
+
+  --font: "IBM Plex Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --text-base: 0.9375rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
+  --leading: 1.55;
+  --header-h: 56px;
+  --nav-h: 44px;
+  --content-max: min(1120px, 96vw);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}

@@ -136,19 +136,6 @@ class DiagnosticAgent:
         if not remaining:
             return {"thought": "证据已齐，结束工具阶段", "action": "finish"}
 
-        if settings.use_mock_llm:
-            tool = remaining[0]
-            thoughts = {
-                "query_agent_metrics": "先查运行指标，确认失败率/限流/空检索/成本是否异常",
-                "query_agent_config": "再查配置变更，对比昨日参数找根因线索",
-                "search_ops_playbook": "检索 Ops 手册，对齐标准处置步骤",
-            }
-            return {
-                "thought": thoughts.get(tool, f"调用 {tool} 补充证据"),
-                "action": "tool",
-                "tool": tool,
-            }
-
         return await self.llm.react_step(
             messages,
             playbook_id,

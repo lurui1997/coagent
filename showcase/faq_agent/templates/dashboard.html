@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ static_asset('enterprise-tokens.css') }}" />
+  <style>
+    :root {
+      --muted: var(--text-secondary);
+      --mono: var(--font-mono);
+      --shadow: var(--shadow-sm);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: var(--leading);
+      min-height: 100vh;
+      font-size: var(--text-base);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .topbar-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .brand:hover { text-decoration: none; }
+    .brand-mark {
+      width: 22px; height: 22px; border-radius: 4px;
+      background: var(--text); color: #fff;
+      display: grid; place-items: center;
+      font-size: 11px; font-weight: 700;
+    }
+
+    .nav {
+      display: flex; gap: 0.15rem; flex: 1;
+    }
+    .nav a {
+      color: var(--muted);
+      padding: 0.4rem 0.7rem;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .nav a:hover { background: var(--bg); color: var(--text); text-decoration: none; }
+    .nav a.active { background: var(--accent-soft); color: var(--accent); }
+
+    .top-meta {
+      color: var(--faint);
+      font-size: 0.78rem;
+      font-family: var(--mono);
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 1.75rem 1.5rem 3rem;
+    }
+
+    .page-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .page-head h1 {
+      font-size: 1.35rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .page-head p {
+      margin-top: 0.35rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+      max-width: 42rem;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 0.65rem;
+    }
+
+    /* Health metrics — not a card wall */
+    .health {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .health-item {
+      padding: 1rem 1.1rem 1.05rem;
+      border-right: 1px solid var(--line);
+    }
+    .health-item:last-child { border-right: 0; }
+    .health-item .k {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .health-item .v {
+      margin-top: 0.35rem;
+      font-size: 1.55rem;
+      font-weight: 650;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      font-family: var(--mono);
+    }
+    .health-item .hint {
+      margin-top: 0.2rem;
+      font-size: 0.75rem;
+      color: var(--faint);
+    }
+    .health-item.is-ok .v { color: var(--ok); }
+    .health-item.is-warn .v { color: var(--warn); }
+    .health-item.is-bad .v { color: var(--bad); }
+
+    .secondary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+      padding: 0 0.15rem;
+    }
+    .secondary .cell .k { font-size: 0.75rem; color: var(--faint); }
+    .secondary .cell .v {
+      margin-top: 0.15rem;
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-h {
+      padding: 0.85rem 1.1rem;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-h h2 {
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+    .panel-b { padding: 1.1rem; flex: 1; }
+
+    .ask-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .ask-row input[type="text"] {
+      flex: 1;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0.7rem 0.8rem;
+      font: inherit;
+      color: var(--text);
+      background: #fff;
+    }
+    .ask-row input:focus {
+      outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.1rem;
+      margin-top: 0.9rem;
+      align-items: center;
+    }
+    .actions label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    button, .btn {
+      font: inherit;
+      font-weight: 550;
+      font-size: 0.88rem;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      padding: 0.55rem 0.9rem;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { filter: brightness(1.05); }
+    .btn-primary:disabled { opacity: 0.55; cursor: wait; }
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--line);
+      color: var(--text);
+    }
+    .btn-ghost:hover { background: var(--bg); }
+
+    .answer-empty {
+      color: var(--faint);
+      font-size: 0.9rem;
+      padding: 1.5rem 0.2rem;
+    }
+    .answer-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+    }
+    .st-ok { background: var(--ok-bg); color: var(--ok); }
+    .st-warn { background: var(--warn-bg); color: var(--warn); }
+    .st-bad { background: var(--bad-bg); color: var(--bad); }
+
+    .answer-body {
+      font-size: 0.98rem;
+      line-height: 1.65;
+      color: var(--text);
+      white-space: pre-wrap;
+      margin-top: 0.75rem;
+    }
+    .answer-meta {
+      margin-top: 1rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem 1rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .answer-meta code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text);
+    }
+    .hits {
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .hits li { margin: 0.2rem 0 0.2rem 1rem; }
+
+    .evidence {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .evidence .panel-h { border-bottom: 1px solid var(--line); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.7rem 1.1rem;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--faint);
+      background: #fafbfc;
+    }
+    tr:last-child td { border-bottom: 0; }
+    td.mono { font-family: var(--mono); font-size: 0.78rem; }
+    .empty-row td { color: var(--faint); text-align: center; padding: 1.5rem; }
+
+    @media (max-width: 900px) {
+      .health { grid-template-columns: 1fr 1fr; }
+      .health-item:nth-child(2) { border-right: 0; }
+      .health-item:nth-child(1),
+      .health-item:nth-child(2) { border-bottom: 1px solid var(--line); }
+      .workspace { grid-template-columns: 1fr; }
+      .secondary { grid-template-columns: 1fr; gap: 0.5rem; }
+      .page-head { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  {% set empty_pct = summary.empty_retrieval_rate * 100 %}
+  {% set hallu_pct = summary.hallucination_risk_rate * 100 %}
+  {% set empty_cls = 'is-bad' if empty_pct >= 20 else ('is-warn' if empty_pct >= 5 else 'is-ok') %}
+  {% set hallu_cls = 'is-bad' if hallu_pct >= 10 else ('is-warn' if hallu_pct > 0 else 'is-ok') %}
+  {% set inc_cls = 'is-warn' if summary.incident_promotions > 0 else 'is-ok' %}
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark">C</span>
+        <span>CoAgent</span>
+      </a>
+      <nav class="nav" aria-label="主导航">
+        <a href="/?tab=1">事故总览</a>
+        <a href="/?tab=2">处置工作台</a>
+        <a href="/?tab=3">审计复盘</a>
+        <a class="active" href="/showcase/faq/">FAQ Agent</a>
+      </nav>
+      <div class="top-meta">ops · live llm</div>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-head">
+      <div>
+        <h1>FAQ Agent 运行态</h1>
+        <p>监控问答质量与成本，复现空检索事故并接入 CoAgent 处置闭环。</p>
+      </div>
+    </div>
+
+    <p class="section-label">Health</p>
+    <section class="health" aria-label="关键健康指标">
+      <div class="health-item {{ empty_cls }}">
+        <div class="k">空检索率</div>
+        <div class="v">{{ '%.1f'|format(empty_pct) }}%</div>
+        <div class="hint">质量 · empty retrieval</div>
+      </div>
+      <div class="health-item {{ hallu_cls }}">
+        <div class="k">幻觉风险率</div>
+        <div class="v">{{ '%.1f'|format(hallu_pct) }}%</div>
+        <div class="hint">空检索仍作答</div>
+      </div>
+      <div class="health-item">
+        <div class="k">延迟 p95</div>
+        <div class="v">{{ summary.p95_latency_ms }}<span style="font-size:0.85rem;color:var(--faint)"> ms</span></div>
+        <div class="hint">p50 {{ summary.p50_latency_ms }} ms</div>
+      </div>
+      <div class="health-item {{ inc_cls }}">
+        <div class="k">已提升事故</div>
+        <div class="v">{{ summary.incident_promotions }}</div>
+        <div class="hint">→ CoAgent 处置</div>
+      </div>
+    </section>
+
+    <section class="secondary" aria-label="辅助指标">
+      <div class="cell"><div class="k">请求量</div><div class="v">{{ summary.ask_count }}</div></div>
+      <div class="cell"><div class="k">Token 用量</div><div class="v">{{ summary.token_usage }}</div></div>
+      <div class="cell"><div class="k">估算成本</div><div class="v">¥{{ '%.4f'|format(summary.est_cost_yuan) }}</div></div>
+    </section>
+
+    <p class="section-label">Workspace</p>
+    <section class="workspace">
+      <div class="panel">
+        <div class="panel-h">
+          <h2>发起问答</h2>
+        </div>
+        <div class="panel-b">
+          <form id="ask-form">
+            <div class="ask-row">
+              <input type="text" id="query" placeholder="输入业务问题，例如：退货政策是什么" required autocomplete="off" />
+              <button class="btn-primary" type="submit" id="ask-btn">询问</button>
+            </div>
+            <div class="actions">
+              <label><input type="checkbox" id="force_empty" /> 强制空检索</label>
+              <label><input type="checkbox" id="allow_answer_on_empty" /> 空检索仍作答（风险）</label>
+              <button class="btn-ghost" type="button" id="demo-empty">复现质量事故</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h">
+          <h2>答复与证据</h2>
+          <span id="status-pill" class="answer-status st-ok" style="display:none"></span>
+        </div>
+        <div class="panel-b" id="answer-panel">
+          <div class="answer-empty" id="answer-placeholder">尚未发起请求。结果将显示在此处，而非原始 JSON。</div>
+          <div id="answer-content" hidden>
+            <div class="answer-body" id="answer-text"></div>
+            <ul class="hits" id="answer-hits"></ul>
+            <div class="answer-meta" id="answer-meta"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="section-label">Evidence</p>
+    <section class="evidence" aria-label="最近请求">
+      <div class="panel-h">
+        <h2>最近请求</h2>
+        <a href="/?tab=3">打开审计复盘</a>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>时间</th>
+            <th>问题</th>
+            <th>状态</th>
+            <th>延迟</th>
+            <th>事故</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in summary.recent %}
+          <tr>
+            <td class="mono">{{ r.ts }}</td>
+            <td>{{ r.query }}</td>
+            <td>{{ r.status }}</td>
+            <td class="mono">{{ r.latency_ms }} ms</td>
+            <td class="mono">
+              {% if r.incident_trace_id %}
+              <a href="/?tab=3&trace={{ r.incident_trace_id }}">{{ r.incident_trace_id }}</a>
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr class="empty-row"><td colspan="5">暂无请求记录</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const statusPill = document.getElementById('status-pill');
+    const placeholder = document.getElementById('answer-placeholder');
+    const content = document.getElementById('answer-content');
+    const answerText = document.getElementById('answer-text');
+    const answerHits = document.getElementById('answer-hits');
+    const answerMeta = document.getElementById('answer-meta');
+    const askBtn = document.getElementById('ask-btn');
+
+    function statusClass(status) {
+      if (status === 'ok') return 'st-ok';
+      if (status === 'empty_retrieval') return 'st-warn';
+      return 'st-bad';
+    }
+
+    function statusLabel(status) {
+      if (status === 'ok') return '正常';
+      if (status === 'empty_retrieval') return '空检索';
+      if (status === 'hallucination_risk') return '幻觉风险';
+      return status;
+    }
+
+    function render(data) {
+      placeholder.hidden = true;
+      content.hidden = false;
+      statusPill.style.display = 'inline-flex';
+      statusPill.className = 'answer-status ' + statusClass(data.status);
+      statusPill.textContent = statusLabel(data.status);
+      answerText.textContent = data.answer || '（无答复）';
+      answerHits.innerHTML = '';
+      (data.hits || []).forEach((h) => {
+        const li = document.createElement('li');
+        li.textContent = `${h.id} · ${h.question} (${Number(h.score).toFixed(2)})`;
+        answerHits.appendChild(li);
+      });
+      const incident = data.incident && data.incident.trace_id
+        ? `<a href="/?tab=3&trace=${data.incident.trace_id}">${data.incident.trace_id}</a>`
+        : '—';
+      answerMeta.innerHTML = `
+        <div>延迟 <code>${data.latency_ms || 0} ms</code></div>
+        <div>模型 <code>${data.model || '—'}</code></div>
+        <div>Token <code>${(data.prompt_tokens || 0) + (data.completion_tokens || 0)}</code></div>
+        <div>事故 ${incident}</div>
+      `;
+    }
+
+    async function ask(payload) {
+      askBtn.disabled = true;
+      placeholder.hidden = false;
+      content.hidden = true;
+      statusPill.style.display = 'none';
+      placeholder.textContent = '处理中…';
+      try {
+        const resp = await fetch('/showcase/faq/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.detail || resp.statusText);
+        render(data);
+        setTimeout(() => location.reload(), 1200);
+      } catch (err) {
+        placeholder.hidden = false;
+        content.hidden = true;
+        placeholder.textContent = '请求失败：' + err.message;
+      } finally {
+        askBtn.disabled = false;
+      }
+    }
+
+    document.getElementById('ask-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      ask({
+        query: document.getElementById('query').value.trim(),
+        force_empty: document.getElementById('force_empty').checked,
+        allow_answer_on_empty: document.getElementById('allow_answer_on_empty').checked,
+        promote: true,
+      });
+    });
+
+    document.getElementById('demo-empty').addEventListener('click', () => {
+      document.getElementById('query').value = '完全不存在的冷门政策 xyz-999';
+      ask({
+        query: '完全不存在的冷门政策 xyz-999',
+        force_empty: true,
+        allow_answer_on_empty: false,
+        promote: true,
+      });
+    });
+  </script>
+</body>
+</html>

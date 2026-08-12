@@ -141,13 +141,15 @@ CoAgent 面向 **Agent 进入生产后的运行态运维**，覆盖三类最常�
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
-MOCK_LLM=true DEMO_MODE=true uvicorn app.main:app --reload --port 8000
+cp .env.example .env   # 填入 DeepSeek LLM_API_KEY（必须真实 LLM，无 Mock）
+uvicorn app.main:app --reload --port 8000
 ```
 
-打开 http://localhost:8000/ → **处置工作台** 触发 S1 / S2 / S3，观察评分分级与审计时间线。
+- 管理台：http://localhost:8000/ → **处置工作台** 触发 S1 / S2 / S3  
+- Showcase FAQ Agent 看板：http://localhost:8000/showcase/faq  
+- 空检索事故演示：`curl -X POST 'http://localhost:8000/showcase/faq/demo/empty-retrieval'`
 
-可选：用 `agents/` 下的三个示例 Agent（客服 / 检索 / 内容）模拟真实上报，详见 [开发文档 · Agent 接入](docs/dev-deploy-test.md)。
+详见 [Showcase 决策](docs/showcase/faq-agent-decisions.md) · [状态与问题](docs/showcase/faq-agent-status.md)。
 
 ---
 
@@ -155,6 +157,7 @@ MOCK_LLM=true DEMO_MODE=true uvicorn app.main:app --reload --port 8000
 
 | 资料 | 内容 |
 |---|---|
+| [Showcase FAQ Agent](docs/showcase/faq-agent-decisions.md) | 企业 FAQ 切口 · 指标看板 · CoAgent 事故闭环 |
 | [交互式架构图](docs/diagrams/coagent-architecture.html) | 技术架构 + 业务流程，流水线自动循环 |
 | [C4 · Inline Observer](docs/architecture/c4-inline-observer.html) | Context / Container / Component（R1 真实 Agent 接入） |
 | [R1 接入说明](docs/architecture/r1-inline-observer.md) | OTLP 轨迹观察与事故提升 |

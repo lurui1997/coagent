@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-VERSIONED_STATIC_FILES = frozenset({"style.css", "theme.js", "vendor/htmx.min.js"})
+VERSIONED_STATIC_FILES = frozenset({
+    "style.css",
+    "enterprise-tokens.css",
+    "theme.js",
+    "vendor/htmx.min.js",
+})
 
 
 def file_mtime(static_dir: Path, filename: str) -> int:

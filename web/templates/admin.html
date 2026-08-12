@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="coagent-static-v" content="{{ static_v }}">
   <title>CoAgent — 运维控制台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ static_asset('enterprise-tokens.css') }}">
   <link rel="stylesheet" href="{{ static_asset('style.css') }}">
   <script src="{{ static_asset('vendor/htmx.min.js') }}" defer></script>
 </head>
@@ -20,6 +24,7 @@
     <a href="/?tab=1" class="{% if tab == 1 %}active{% endif %}">事故总览</a>
     <a href="/?tab=2" class="{% if tab == 2 %}active{% endif %}">处置工作台</a>
     <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">审计复盘</a>
+    <a href="/showcase/faq/">FAQ Agent</a>
   </nav>
 
   <div class="page {% if tab == 1 %}tab-overview{% elif tab == 2 %}tab-workspace{% elif tab == 3 %}tab-audit{% endif %}">
@@ -200,6 +205,24 @@
       <div class="meta-item"><span>Agent · </span><strong id="meta-agent"></strong></div>
       <div class="meta-item"><span>场景 · </span><strong id="meta-scenario"></strong></div>
       <div class="meta-item highlight"><span>状态 · </span><strong id="meta-status"></strong></div>
+      <div class="meta-item"><span>LLM · </span><strong id="meta-llm-model">—</strong></div>
+    </div>
+
+    <div id="observe-split" class="observe-split" style="display:none">
+      <div class="card observe-card">
+        <div class="card-header">
+          <h3>被观测 Agent</h3>
+          <span class="card-count" id="observe-agent-badge">—</span>
+        </div>
+        <div id="observe-agent-body" class="observe-body"></div>
+      </div>
+      <div class="card observe-card">
+        <div class="card-header">
+          <h3>LLM 调用执行</h3>
+          <span class="card-count" id="observe-llm-badge">真实 API</span>
+        </div>
+        <div id="observe-llm-body" class="observe-body"></div>
+      </div>
     </div>
 
     <div id="execution-chain" class="card execution-chain" style="display:none">
@@ -483,14 +506,21 @@
       else if (event.type === 'score_computed') summary = `总分=${payload.total} ${payload.grade || ''}`;
       else if (event.type === 'team_orchestration') summary = payload.mode_label || payload.mode || '';
       else if (event.type === 'llm_reasoning') summary = (payload.reasoning_chain || []).length + ' 步';
+      else if (event.type === 'llm_result') summary = payload.model || (payload.impact ? '已输出' : '');
       else if (event.type === 'agent_thought') summary = (payload.thought || '').slice(0, 40);
       else if (event.type === 'diagnostic_agent_started') summary = (payload.tools || []).join(', ');
       else if (event.type === 'incident_started') summary = payload.agent_id || '';
 
+      const maxLen = (event.type === 'llm_result' || event.type === 'llm_reasoning' || event.type === 'agent_thought')
+        ? 1200
+        : 320;
+      const raw = JSON.stringify(payload, null, 2);
+      const clipped = raw.length > maxLen ? `${raw.slice(0, maxLen)}\n…` : raw;
+
       const div = document.createElement('div');
       div.className = 'timeline-entry';
       div.dataset.type = event.type;
-      div.innerHTML = `<span class="type">${label}${summary ? ' · ' + summary : ''}</span><span class="ts">${ts}</span><pre>${JSON.stringify(payload, null, 2).slice(0, 320)}</pre>`;
+      div.innerHTML = `<span class="type">${label}${summary ? ' · ' + summary : ''}</span><span class="ts">${ts}</span><pre>${clipped}</pre>`;
       el.appendChild(div);
       el.scrollTop = el.scrollHeight;
       updateTimelineCount();
@@ -691,6 +721,105 @@
       document.getElementById('meta-agent').textContent = inc.agent_id;
       document.getElementById('meta-scenario').textContent = inc.scenario_id;
       document.getElementById('meta-status').textContent = inc.status;
+      const modelEl = document.getElementById('meta-llm-model');
+      if (modelEl) modelEl.textContent = inc.llm_model || '（流水线完成后回填）';
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderObservePanels(inc) {
+      const split = document.getElementById('observe-split');
+      if (!split) return;
+      split.style.display = 'grid';
+
+      const event = inc.event_json || {};
+      const agentBody = document.getElementById('observe-agent-body');
+      const agentBadge = document.getElementById('observe-agent-badge');
+      if (agentBadge) {
+        agentBadge.textContent = event.agent_name || event.agent_id || inc.agent_id || '—';
+      }
+      if (agentBody) {
+        const rows = [
+          ['agent_id', event.agent_id || inc.agent_id],
+          ['agent_name', event.agent_name],
+          ['type / symptom', `${event.type || '—'} / ${event.symptom || '—'}`],
+          ['error', event.error],
+          ['log_snippet', event.log_snippet],
+          ['cost / budget', `¥${event.cost_yuan_today ?? '—'} / ¥${event.budget_yuan_daily ?? '—'}`],
+          ['event_id', event.event_id || inc.event_id],
+          ['ts', event.ts],
+          ['retry_webhook', event.retry_webhook],
+        ];
+        agentBody.innerHTML = `
+          <dl class="observe-dl">
+            ${rows.map(([k, v]) => `
+              <div class="observe-row">
+                <dt>${escapeHtml(k)}</dt>
+                <dd class="${k === 'log_snippet' || k === 'error' ? 'mono wrap' : 'mono'}">${escapeHtml(v || '—')}</dd>
+              </div>`).join('')}
+          </dl>`;
+      }
+
+      const timeline = inc.timeline_json || [];
+      const thoughts = timeline.filter(e => e.type === 'agent_thought');
+      const llmReason = timeline.find(e => e.type === 'llm_reasoning');
+      const llmResult = timeline.find(e => e.type === 'llm_result');
+      const llm = inc.llm_json || {};
+      const llmBody = document.getElementById('observe-llm-body');
+      const llmBadge = document.getElementById('observe-llm-badge');
+      if (llmBadge) {
+        llmBadge.textContent = inc.llm_model
+          ? `真实 API · ${inc.llm_model}`
+          : (inc.status === 'running' ? '调用中…' : '真实 API（待回填 model）');
+      }
+      if (llmBody) {
+        let html = `<p class="observe-note">生产路径已移除 Mock：流水线经 <code>LLMClient</code> 调用 <code>LLM_BASE_URL</code>。下方为落库的执行摘要；原始 HTTP messages 未持久化。</p>`;
+        html += `<div class="observe-kv"><span>模型</span><strong class="mono">${escapeHtml(inc.llm_model || '—')}</strong></div>`;
+        html += `<div class="observe-kv"><span>ReAct 步数</span><strong>${thoughts.length}</strong></div>`;
+
+        if (thoughts.length) {
+          html += '<ol class="observe-steps">';
+          thoughts.forEach((e) => {
+            const p = e.payload || {};
+            html += `<li>
+              <div class="observe-step-meta">step ${escapeHtml(p.step)} · ${escapeHtml(p.action || '—')}${p.tool ? ` · tool=${escapeHtml(p.tool)}` : ''}</div>
+              <div class="observe-thought">${escapeHtml(p.thought || '')}</div>
+            </li>`;
+          });
+          html += '</ol>';
+        }
+
+        const chain = llm.reasoning_chain || llmReason?.payload?.reasoning_chain || [];
+        if (chain.length) {
+          html += '<div class="observe-section-label">最终推理链</div><ol class="observe-steps compact">';
+          chain.forEach((t) => { html += `<li>${escapeHtml(t)}</li>`; });
+          html += '</ol>';
+        }
+
+        if (llm.hypothesis?.length) {
+          html += `<div class="observe-section-label">假设</div><ul class="observe-steps compact">${
+            llm.hypothesis.map((h) => `<li>${escapeHtml(h)}</li>`).join('')
+          }</ul>`;
+        }
+
+        if (!thoughts.length && !chain.length && !llmResult && inc.status === 'running') {
+          html += '<div class="empty" style="padding:1rem 0">等待 LLM 步骤写入时间线…</div>';
+        } else if (!thoughts.length && !chain.length && !llm.impact) {
+          html += '<div class="empty" style="padding:1rem 0">尚无 LLM 输出（检查 <code>LLM_API_KEY</code> / 流水线失败审计）</div>';
+        }
+
+        if (llm.impact) {
+          html += `<div class="observe-section-label">影响评估</div><p class="observe-thought">${escapeHtml(llm.impact)}</p>`;
+        }
+
+        llmBody.innerHTML = html;
+      }
     }
 
     function renderDecision(inc) {
@@ -775,6 +904,7 @@
       const inc = await res.json();
 
       renderIncidentMeta(inc);
+      renderObservePanels(inc);
       renderExecutionChain(inc);
       renderTimelineFromIncident(inc.timeline_json);
       renderDecision(inc);
@@ -782,6 +912,54 @@
       showTraceBanner(traceId);
       await loadAdvancedPanels(traceId);
       return inc;
+    }
+
+    function livePatchObserveFromStream(data) {
+      const split = document.getElementById('observe-split');
+      const llmBody = document.getElementById('observe-llm-body');
+      const llmBadge = document.getElementById('observe-llm-badge');
+      if (!split || !llmBody) return;
+      split.style.display = 'grid';
+
+      if (data.type === 'diagnostic_agent_started' && llmBadge) {
+        llmBadge.textContent = '真实 API · ReAct 诊断中';
+      }
+      if (data.type === 'agent_thought') {
+        const p = data.payload || {};
+        let list = llmBody.querySelector('ol.observe-steps.live');
+        if (!list) {
+          const label = document.createElement('div');
+          label.className = 'observe-section-label';
+          label.textContent = '实时 ReAct';
+          list = document.createElement('ol');
+          list.className = 'observe-steps live';
+          llmBody.appendChild(label);
+          llmBody.appendChild(list);
+        }
+        const li = document.createElement('li');
+        li.innerHTML = `<div class="observe-step-meta">step ${escapeHtml(p.step)} · ${escapeHtml(p.action || '—')}${p.tool ? ` · tool=${escapeHtml(p.tool)}` : ''}</div>
+          <div class="observe-thought">${escapeHtml(p.thought || '')}</div>`;
+        list.appendChild(li);
+      }
+      if (data.type === 'llm_reasoning' && llmBadge) {
+        const model = (data.payload || {}).model;
+        llmBadge.textContent = model ? `真实 API · ${model}` : '真实 API · 最终推理完成';
+        const modelEl = document.getElementById('meta-llm-model');
+        if (modelEl && model) modelEl.textContent = model;
+      }
+      if (data.type === 'llm_result') {
+        const impact = (data.payload || {}).impact;
+        if (impact) {
+          const label = document.createElement('div');
+          label.className = 'observe-section-label';
+          label.textContent = '影响评估（流式）';
+          const p = document.createElement('p');
+          p.className = 'observe-thought';
+          p.textContent = impact;
+          llmBody.appendChild(label);
+          llmBody.appendChild(p);
+        }
+      }
     }
 
     // 实时订阅一条故障的流水线进度。incident 仍在 running 时挂 SSE，
@@ -799,6 +977,7 @@
       eventSource.addEventListener('incident', (e) => {
         const data = JSON.parse(e.data);
         appendTimeline(data);
+        livePatchObserveFromStream(data);
         if (data.type === 'incident_completed' || data.type === 'incident_failed' || data.type === 'replay_completed') {
           eventSource.close();
           eventSource = null;

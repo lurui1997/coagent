@@ -14,6 +14,7 @@ from app.static_assets import static_asset_url, static_dir_version, versioned_st
 from app.telemetry.service import telemetry_service
 from app.timeutil import format_display
 from app.ultra.api import router as ultra_router
+from showcase.faq_agent.app import router as showcase_faq_router
 
 
 @asynccontextmanager
@@ -57,11 +58,14 @@ app.include_router(agents.router)
 app.include_router(admin.router)
 app.include_router(demo.router)
 app.include_router(ultra_router)
+app.include_router(showcase_faq_router)
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "web" / "templates"))
 templates.env.filters["format_cn_time"] = format_display
 templates.env.globals["static_asset"] = lambda name: static_asset_url(static_dir, name)
-templates.env.globals["static_v"] = static_dir_version(static_dir, "style.css", "theme.js")
+templates.env.globals["static_v"] = static_dir_version(
+    static_dir, "style.css", "enterprise-tokens.css", "theme.js"
+)
 
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 

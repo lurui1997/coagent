@@ -25,3 +25,6 @@ docs/diagrams/.playwright-videos/
 /.codex/
 /.gstack/
 /artifacts/
+
+# Brainstorm visual companion
+.superpowers/

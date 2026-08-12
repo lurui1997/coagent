@@ -21,7 +21,6 @@ def s1_event() -> AgentEvent:
 
 @pytest.mark.asyncio
 async def test_diagnostic_agent_calls_all_tools(s1_event, monkeypatch):
-    monkeypatch.setattr(settings, "mock_llm", True)
     engine = PlaybookEngine(DATA_DIR / "ops_playbooks.json")
     agent = DiagnosticAgent(engine, LLMClient())
     timeline: list[dict] = []
@@ -46,7 +45,6 @@ async def test_diagnostic_agent_calls_all_tools(s1_event, monkeypatch):
 async def test_diagnostic_agent_legacy_fallback_in_orchestrator(s1_event, monkeypatch):
     from app.orchestrator import Orchestrator
 
-    monkeypatch.setattr(settings, "mock_llm", True)
     monkeypatch.setattr(settings, "diagnostic_agent", True)
 
     orch = Orchestrator()

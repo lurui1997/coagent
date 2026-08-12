@@ -12,7 +12,7 @@ from app.channels.feishu_im import (
     send_interactive_card,
 )
 from app.config import settings
-from app.llm.client import MOCK_RESPONSES
+from tests.llm_stubs import STUB_RESPONSES as MOCK_RESPONSES
 from app.models.event import AgentEvent
 
 

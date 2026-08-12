@@ -4,7 +4,8 @@ from pathlib import Path
 import pytest
 
 from app.config import settings
-from app.llm.client import LLMClient, MOCK_RESPONSES
+from tests.llm_stubs import STUB_RESPONSES as MOCK_RESPONSES
+from app.llm.client import LLMClient
 from app.models.event import AgentEvent
 from app.playbooks.engine import PlaybookEngine
 from app.scoring.scorer import compute_score, grade_from_total

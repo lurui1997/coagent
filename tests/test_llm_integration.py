@@ -56,19 +56,8 @@ async def test_live_llm_s1(client):
     import asyncio
     import os
 
-    if not os.environ.get("LLM_API_KEY"):
+    if not os.environ.get("LLM_API_KEY") or os.environ["LLM_API_KEY"].startswith("test-stub"):
         pytest.skip("LLM_API_KEY not set")
-
-    from app.config import settings
-
-    settings.mock_llm = False
-    settings.llm_api_key = os.environ["LLM_API_KEY"]
-    if os.environ.get("LLM_BASE_URL"):
-        settings.llm_base_url = os.environ["LLM_BASE_URL"]
-    if os.environ.get("LLM_MODEL"):
-        settings.llm_model = os.environ["LLM_MODEL"]
-    if os.environ.get("LLM_FALLBACK_MODEL"):
-        settings.llm_fallback_model = os.environ["LLM_FALLBACK_MODEL"]
 
     resp = await client.post("/admin/trigger/s1")
     data = resp.json()
