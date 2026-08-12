@@ -25,5 +25,5 @@ _Avoid_: 把 Trajectory 或原始 OTel span 直接叫作 Event
 _Avoid_: MOCK_LLM 演示捷径, 内置 MOCK_RESPONSES 作为默认可运行路径
 
 **Showcase Packaging**:
-Showcase 以本仓独立包 `showcase/faq-agent` 交付：自有 FAQ、运行入口、metrics 与看板；经 OTLP 接入 CoAgent，不与黑客松 demo bot 混为一谈。
+Showcase 以本仓独立包 `showcase/faq_agent` 交付：自有 FAQ、运行入口、metrics 与看板；经 OTLP 接入 CoAgent，不与黑客松 demo bot 混为一谈。
 _Avoid_: 把 Showcase 逻辑塞进 `agents/rag_bot.py` 作为唯一形态; 另起独立 git 仓库作为第一版

@@ -7,6 +7,7 @@
 ## 目标
 
 让演示 Agent 在运行时导出 Trajectory，由 CoAgent **持续观察**并在异常时自动打开既有处置流水线（Playbook → 诊断 → 评分 → 审计）。
+Showcase FAQ Agent 走同一条 OTLP → Detector → Orchestrator 路径，用于质量事故叙事。
 
 ## 数据流
 
@@ -42,8 +43,11 @@ Agent.build_simulate() / live 失败路径
 
 ## 本地验证
 
+需要真实 `LLM_API_KEY`（生产 Mock 已移除）。若仅验证 Inline Observer 上报，可用 `promote=false` 或测试 stub。
+
 ```bash
-MOCK_LLM=true DEMO_MODE=true uvicorn app.main:app --reload --port 8000
+set -a && source .env && set +a
+DEMO_MODE=true uvicorn app.main:app --reload --port 8000
 # 另开终端
 curl -s -X POST http://localhost:8000/agents/cs-bot/run \
   -H 'Content-Type: application/json' \
@@ -51,10 +55,16 @@ curl -s -X POST http://localhost:8000/agents/cs-bot/run \
 curl -s http://localhost:8000/telemetry/runs | python3 -m json.tool
 ```
 
+Showcase 质量事故（空检索 promote）：
+
+```bash
+curl -s -X POST 'http://localhost:8000/showcase/faq/demo/empty-retrieval' | python3 -m json.tool
+```
+
 测试：
 
 ```bash
-MOCK_LLM=true DEMO_MODE=true python -m pytest tests/test_telemetry.py tests/test_agents_api.py -q
+PYTHONPATH=. DEMO_MODE=true python -m pytest tests/test_telemetry.py tests/test_agents_api.py tests/test_showcase_faq.py -q
 ```
 
 ## 非目标（R1）

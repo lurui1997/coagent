@@ -14,7 +14,7 @@ CoAgent 是一款 Agent Ops 工具，让你在事故出现的第一时间看到�
 ![定位](https://img.shields.io/badge/定位-Agent%20运行态%20Ops-7c3aed)
 ![License](https://img.shields.io/badge/License-MIT-64748b)
 
-🌐 [官网](http://www.aikipedia.cn/coagent/) · 📊 [路演 PPT](https://tiny-crumble-616b23.netlify.app/) · 🏗 [架构图](docs/diagrams/coagent-architecture.html) · 📐 [C4 · Inline Observer](docs/architecture/c4-inline-observer.html) · 📘 [开发文档](docs/dev-deploy-test.md)
+🌐 [官网](http://www.aikipedia.cn/coagent/) · 📊 [路演 PPT](https://tiny-crumble-616b23.netlify.app/) · 🏗 [架构图](docs/diagrams/coagent-architecture.html) · 📐 [C4 · Inline Observer](docs/architecture/c4-inline-observer.html) · 📚 [文档索引](docs/README.md) · 📘 [开发文档](docs/dev-deploy-test.md)
 
 <br />
 
@@ -136,20 +136,94 @@ CoAgent 面向 **Agent 进入生产后的运行态运维**，覆盖三类最常�
 
 ---
 
-## 快速体验
+<a id="quickstart"></a>
+
+## Quickstart（5 分钟看清价值）
+
+目标：本地跑通「真实 Agent 事故 → 可解释把握度 → 分级处置 → 审计留痕」。
+本项目**必须配置真实 LLM**（推荐 DeepSeek）。
+生产路径已移除 Mock。
+
+### 1. 安装与配置
 
 ```bash
+git clone https://github.com/lurui1997/coagent.git
+cd coagent
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # 填入 DeepSeek LLM_API_KEY（必须真实 LLM，无 Mock）
-uvicorn app.main:app --reload --port 8000
+cp .env.example .env
 ```
 
-- 管理台：http://localhost:8000/ → **处置工作台** 触发 S1 / S2 / S3  
-- Showcase FAQ Agent 看板：http://localhost:8000/showcase/faq  
-- 空检索事故演示：`curl -X POST 'http://localhost:8000/showcase/faq/demo/empty-retrieval'`
+编辑 `.env`，至少填入：
 
-详见 [Showcase 决策](docs/showcase/faq-agent-decisions.md) · [状态与问题](docs/showcase/faq-agent-status.md)。
+```env
+LLM_API_KEY=sk-...
+LLM_BASE_URL=https://api.deepseek.com/v1
+LLM_MODEL=deepseek-v4-flash
+DEMO_MODE=true
+PIPELINE_TIMEOUT_S=90
+```
+
+### 2. 启动
+
+```bash
+set -a && source .env && set +a
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+| 入口 | URL | 你将看到什么 |
+|------|-----|--------------|
+| 管理台 | http://127.0.0.1:8000/ | 事故总览 · 处置工作台 · 审计复盘 |
+| FAQ Showcase | http://127.0.0.1:8000/showcase/faq/ | 质量/成本指标 + 问答工作区 |
+| API 文档 | http://127.0.0.1:8000/docs | OpenAPI |
+
+### 3. 价值演示路径 A — 三秒看懂处置边界
+
+打开 **处置工作台**，依次触发：
+
+| 按钮 | 叙事 | 把握度边界 |
+|------|------|------------|
+| **S1** API 限流 | 证据充分，可动手 | ≥80 可执行 |
+| **S2** 空检索 | 质量事故，不能盲重试 | 60–79 需确认 |
+| **S3** 超预算 | 高风险，必须升级 | &lt;60 须升级 |
+
+同一套流水线，三种决策权限——这就是 CoAgent 相对「告警面板」的差异。
+
+### 4. 价值演示路径 B — 真实 FAQ Agent 质量事故闭环
+
+```bash
+# 正常问答（看板计数 +1）
+curl -s -X POST http://127.0.0.1:8000/showcase/faq/ask \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"退货政策是什么"}' | python3 -m json.tool
+
+# 空检索质量事故 → OTLP → CoAgent 开事故
+curl -s -X POST 'http://127.0.0.1:8000/showcase/faq/demo/empty-retrieval' | python3 -m json.tool
+```
+
+然后：
+
+1. 打开 FAQ 看板，看到空检索率上升。
+2. 打开 **审计复盘**，点击日志「详情 →」查看故障归档与动作链。
+3. 需要处置时进入 **处置工作台**（或从详情「查看决策链路」）。
+
+```text
+Showcase FAQ 空检索
+  → OTLP /v1/traces
+  → CoAgent 检测并打开事故
+  → 把握度分级 + 审计留痕
+```
+
+### 5. 测试
+
+```bash
+PYTHONPATH=. pytest tests/ -m "not live_llm" -q
+# 可选真 LLM：
+# PYTHONPATH=. pytest tests/ -m live_llm -q
+```
+
+更多环境变量、API 与部署见 [开发 · 部署 · 测试](docs/dev-deploy-test.md)。
+Showcase 决策与状态见 [docs/showcase/](docs/showcase/README.md)。
 
 ---
 
@@ -157,11 +231,11 @@ uvicorn app.main:app --reload --port 8000
 
 | 资料 | 内容 |
 |---|---|
-| [Showcase FAQ Agent](docs/showcase/faq-agent-decisions.md) | 企业 FAQ 切口 · 指标看板 · CoAgent 事故闭环 |
-| [交互式架构图](docs/diagrams/coagent-architecture.html) | 技术架构 + 业务流程，流水线自动循环 |
-| [C4 · Inline Observer](docs/architecture/c4-inline-observer.html) | Context / Container / Component（R1 真实 Agent 接入） |
+| [文档索引](docs/README.md) | docs 目录导航 |
+| [Showcase FAQ Agent](docs/showcase/README.md) | 企业 FAQ 切口 · 指标看板 · 事故闭环 |
+| [交互式架构图](docs/diagrams/coagent-architecture.html) | 技术架构 + 业务流程 |
+| [C4 · Inline Observer](docs/architecture/c4-inline-observer.html) | Context / Container / Component |
 | [R1 接入说明](docs/architecture/r1-inline-observer.md) | OTLP 轨迹观察与事故提升 |
-| [技术架构 PNG](docs/diagrams/coagent-architecture.png) · [业务流程 PNG](docs/diagrams/coagent-business-flow.png) · [技术架构 GIF](docs/diagrams/coagent-pipeline.gif) | 静态/动画资源，可嵌入文档 |
 | [开发 · 部署 · 测试](docs/dev-deploy-test.md) | 环境变量、API、项目结构、测试与部署 |
 | [官网](http://www.aikipedia.cn/coagent/) | 产品叙事与路线图 |
 
