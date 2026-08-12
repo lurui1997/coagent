@@ -8,6 +8,12 @@
   环境变量、API、目录和本地运行说明的主要入口；具体实现状态仍需与源码核对。
 - [当前设计基线](docs/superpowers/specs/coagent-design-spec.md)
   适合追溯架构决策和验收标准，不应替代当前代码事实。
+- [C4 Inline Observer](docs/architecture/c4-inline-observer.html)
+  R1 真实 Demo Agent 接入后的 Context / Container / Component 视图。
+- [R1 接入说明](docs/architecture/r1-inline-observer.md)
+  `/v1/traces` 观察链路与本地验证步骤。
+- [ADR-0001 OTel 契约](docs/adr/0001-otel-trajectory-contract.md)
+  Trajectory 主交换格式决策。
 - [FastAPI 入口](app/main.py)
   查看生命周期、路由挂载、管理台渲染和静态资源策略。
 - [核心编排器](app/orchestrator.py)

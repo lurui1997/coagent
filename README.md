@@ -14,7 +14,7 @@ CoAgent 是一款 Agent Ops 工具，让你在事故出现的第一时间看到�
 ![定位](https://img.shields.io/badge/定位-Agent%20运行态%20Ops-7c3aed)
 ![License](https://img.shields.io/badge/License-MIT-64748b)
 
-🌐 [官网](http://www.aikipedia.cn/coagent/) · 📊 [路演 PPT](https://tiny-crumble-616b23.netlify.app/) · 🏗 [架构图](docs/diagrams/coagent-architecture.html) · 📘 [开发文档](docs/dev-deploy-test.md)
+🌐 [官网](http://www.aikipedia.cn/coagent/) · 📊 [路演 PPT](https://tiny-crumble-616b23.netlify.app/) · 🏗 [架构图](docs/diagrams/coagent-architecture.html) · 📐 [C4 · Inline Observer](docs/architecture/c4-inline-observer.html) · 📘 [开发文档](docs/dev-deploy-test.md)
 
 <br />
 
@@ -156,6 +156,8 @@ MOCK_LLM=true DEMO_MODE=true uvicorn app.main:app --reload --port 8000
 | 资料 | 内容 |
 |---|---|
 | [交互式架构图](docs/diagrams/coagent-architecture.html) | 技术架构 + 业务流程，流水线自动循环 |
+| [C4 · Inline Observer](docs/architecture/c4-inline-observer.html) | Context / Container / Component（R1 真实 Agent 接入） |
+| [R1 接入说明](docs/architecture/r1-inline-observer.md) | OTLP 轨迹观察与事故提升 |
 | [技术架构 PNG](docs/diagrams/coagent-architecture.png) · [业务流程 PNG](docs/diagrams/coagent-business-flow.png) · [技术架构 GIF](docs/diagrams/coagent-pipeline.gif) | 静态/动画资源，可嵌入文档 |
 | [开发 · 部署 · 测试](docs/dev-deploy-test.md) | 环境变量、API、项目结构、测试与部署 |
 | [官网](http://www.aikipedia.cn/coagent/) | 产品叙事与路线图 |

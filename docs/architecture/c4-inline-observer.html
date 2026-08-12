@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoAgent · C4 Architecture (Inline Observer R1)</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "dark",
+      securityLevel: "loose",
+      flowchart: { htmlLabels: true, curve: "basis" },
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3f56;
+      --text: #e8edf4;
+      --muted: #8b9cb3;
+      --accent: #3b82f6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1.25rem 4rem;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; }
+    h1 { font-size: 1.85rem; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    .sub { color: var(--muted); margin-bottom: 1.75rem; }
+    nav {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem;
+    }
+    nav a {
+      color: #93c5fd; text-decoration: none;
+      border: 1px solid var(--border); border-radius: 999px;
+      padding: 0.35rem 0.8rem; font-size: 0.85rem; background: var(--surface);
+    }
+    nav a:hover { border-color: var(--accent); }
+    section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.35rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    h2 { font-size: 1.2rem; margin-bottom: 0.35rem; }
+    h2 span {
+      font-size: 0.72rem; color: var(--accent);
+      background: rgba(59,130,246,.15); padding: 0.12rem 0.45rem;
+      border-radius: 6px; margin-right: 0.4rem; vertical-align: middle;
+    }
+    p { color: var(--muted); margin-bottom: 1rem; font-size: 0.95rem; }
+    .diagram {
+      background: #111827;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 0.75rem; }
+    th, td { text-align: left; padding: 0.55rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.86em; }
+    footer { color: var(--muted); font-size: 0.8rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>CoAgent C4 · Inline Observer R1</h1>
+    <p class="sub">
+      首个真实接入目标：仓库内 <code>cs-bot</code> / <code>rag-bot</code> / <code>content-bot</code>。
+      Trajectory 主契约为 OTLP/JSON（GenAI 语义约定子集），异常提升为既有 Incident 流水线。
+    </p>
+    <nav>
+      <a href="#l1">L1 Context</a>
+      <a href="#l2">L2 Container</a>
+      <a href="#l3">L3 Component</a>
+      <a href="#flow">序列流</a>
+      <a href="../adr/0001-otel-trajectory-contract.md">ADR-0001</a>
+      <a href="../dev-deploy-test.md">开发文档</a>
+    </nav>
+
+    <section id="l1">
+      <h2><span>L1</span> System Context</h2>
+      <p>人和外部系统如何与 CoAgent 交互。R1 不把 CoAgent 做成流量代理，而是常驻消费 Trajectory。</p>
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart LR
+  OP["值班 / FDE<br/>Operator"]
+  AG["Demo Agents<br/>cs-bot · rag-bot · content-bot"]
+  CA["CoAgent<br/>Agent Ops Inline Observer"]
+  LLM["LLM Provider<br/>可选 / MOCK"]
+
+  OP -->|管理台触发 / 审批处置| CA
+  AG -->|OTLP/JSON Trajectory<br/>POST /v1/traces| CA
+  CA -->|提升事故后诊断| LLM
+  CA -->|评分 · 审计 · 建议| OP
+  OP -->|simulate / live| AG
+        </pre>
+      </div>
+      <table>
+        <thead><tr><th>角色</th><th>职责</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Demo Agents</strong></td><td>运行业务逻辑，导出逐步 Trajectory（含错误属性）</td></tr>
+          <tr><td><strong>CoAgent</strong></td><td>观察轨迹、检测异常、分级处置、审计留痕</td></tr>
+          <tr><td><strong>Operator</strong></td><td>在管理台查看事故、确认/重试/升级</td></tr>
+          <tr><td><strong>LLM Provider</strong></td><td>根因推理；无 Key 时走 MOCK_LLM</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="l2">
+      <h2><span>L2</span> Containers</h2>
+      <p>可独立部署/进程边界的容器。R1 为单机 FastAPI + SQLite；Agent 可作为同仓模块或外挂进程。</p>
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart TB
+  subgraph People
+    OP[Operator Browser]
+  end
+
+  subgraph AgentRuntime["Agent Runtime"]
+    BOTS["agents/<br/>CSBot · RAGBot · ContentBot"]
+    TEL["agents/telemetry.py<br/>span builder"]
+  end
+
+  subgraph CoAgentApp["CoAgent Application (FastAPI)"]
+    API["HTTP API<br/>/v1/traces · /events · /agents · /admin"]
+    CORE["Control Plane<br/>Orchestrator · Playbooks · Scoring"]
+    OBS["Observer Plane<br/>OTLP parse · Store · Detector"]
+    UI["Admin UI<br/>Jinja SSR + SSE"]
+  end
+
+  DB[(SQLite<br/>incidents · trajectory_* )]
+
+  OP --> UI
+  UI --> API
+  BOTS --> TEL
+  TEL -->|OTLP/JSON| API
+  API --> OBS
+  OBS --> DB
+  OBS -->|promote AgentEvent| CORE
+  CORE --> DB
+  API --> CORE
+        </pre>
+      </div>
+    </section>
+
+    <section id="l3">
+      <h2><span>L3</span> Components · CoAgent Application</h2>
+      <p>观察面与控制面分离：Telemetry 负责「看见」，Orchestrator 负责「处置」。</p>
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart LR
+  subgraph Ingest
+    R1["api/telemetry.py<br/>POST /v1/traces"]
+    R2["api/agents.py<br/>simulate in-process"]
+    P["telemetry/otlp_json.py"]
+  end
+
+  subgraph Observe
+    S["telemetry/store.py"]
+    D["telemetry/detector.py"]
+    SVC["telemetry/service.py"]
+  end
+
+  subgraph Control
+    O["orchestrator.py"]
+    PB["playbooks/engine.py"]
+    SC["scoring/scorer.py"]
+    DA["diagnostic_agent.py"]
+  end
+
+  R1 --> SVC
+  R2 --> SVC
+  SVC --> P
+  SVC --> S
+  SVC --> D
+  D -->|Detection → AgentEvent| O
+  O --> PB
+  O --> DA
+  O --> SC
+        </pre>
+      </div>
+      <table>
+        <thead><tr><th>组件</th><th>输入</th><th>输出</th></tr></thead>
+        <tbody>
+          <tr><td><code>otlp_json</code></td><td>OTLP/JSON 或 flat spans</td><td><code>TelemetrySpan[]</code></td></tr>
+          <tr><td><code>store</code></td><td>spans</td><td><code>trajectory_runs</code> / <code>trajectory_spans</code></td></tr>
+          <tr><td><code>detector</code></td><td>spans</td><td><code>Detection</code> 或空</td></tr>
+          <tr><td><code>service</code></td><td>export payload</td><td>IngestResult（可含 incident）</td></tr>
+          <tr><td><code>orchestrator</code></td><td><code>AgentEvent</code></td><td>评分事故 + 审计时间线</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="flow">
+      <h2><span>Flow</span> R1 simulate 序列</h2>
+      <div class="diagram">
+        <pre class="mermaid">
+sequenceDiagram
+  participant Op as Operator
+  participant API as /agents/{id}/run
+  participant Bot as Demo Agent
+  participant Tel as TelemetryService
+  participant Det as Detector
+  participant Orch as Orchestrator
+
+  Op->>API: POST simulate
+  API->>Bot: build_simulate()
+  Bot-->>API: event + OTLP spans
+  API->>Tel: ingest_otlp_json(promote=true)
+  Tel->>Tel: parse + persist trajectory
+  Tel->>Det: detect_anomaly(spans)
+  Det-->>Tel: Detection(symptom)
+  Tel->>Orch: process_event(AgentEvent)
+  Orch-->>Tel: incident trace_id
+  Tel-->>API: IngestResult
+  API-->>Op: coagent + telemetry
+        </pre>
+      </div>
+    </section>
+
+    <footer>
+      C4 views for CoAgent Inline Observer R1 · ADR-0001 · 与代码路径 app/telemetry、agents/telemetry 对齐
+    </footer>
+  </div>
+</body>
+</html>

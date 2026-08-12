@@ -14,11 +14,13 @@ CoAgent 是面向企业的 **Agent 运维助手**,实现统一处置流水线:
 事件接入 → 场景路由 → 处置手册+工具 → 大模型根因推理 → 把握度评分 → 分级处置 · 审计留痕
 ```
 
-### 1.1 已实现功能（P0 + Ultra 基础）
+### 1.1 已实现功能（P0 + Ultra 基础 + R1 Observer）
 
 | 模块 | 状态 | 说明 |
 |------|------|------|
 | `POST /events` | ✅ | Webhook 接入,10 分钟 `event_id` 幂等 |
+| `POST /v1/traces` | ✅ | OTLP/JSON Trajectory 接入；可提升为事故（R1 Inline Observer） |
+| `GET /telemetry/runs` | ✅ | 观察轨迹列表 / 详情 |
 | 管理台三 Tab | ✅ | Tab1 总览 · Tab2 处置工作台 · Tab3 审计复盘 |
 | ReAct 诊断 Agent | ✅ | 默认 `DIAGNOSTIC_AGENT=true`,失败回退 legacy LLM 路径 |
 | SSE 时间线 | ✅ | incident_started → tool ×3 → llm → score → completed |
@@ -26,11 +28,11 @@ CoAgent 是面向企业的 **Agent 运维助手**,实现统一处置流水线:
 | 把握度评分 | ✅ | D/P/C 三因子 + 🟢🟡🔴 分级;`DEMO_MODE` 仅 clamp C |
 | Mock / 真 LLM | ✅ | 无 API Key 或 `MOCK_LLM=true` 可完整演示 |
 | 飞书 S1 | 📅 | 代码骨架 `feishu_im.py`;**尚未对接真实 API**,无 `FEISHU_*` 时仅 mock `channel_sync` |
-| 本地 Agent 接入 | ✅ | cs-bot / rag-bot / content-bot → `/events` |
+| 本地 Agent 接入 | ✅ | cs-bot / rag-bot / content-bot → `/v1/traces`（观察）并可提升事故 |
 | Ultra 面板 | ✅ | 知识图谱 · 相似事故 · What-if · Team-plan |
 | 回放 / 审计 | ✅ | 只读重放 SSE,不调 LLM;JSON/CSV 导出 |
 | 反馈飞轮 | ✅ | Tab3 👍/👎 统计 |
-| 测试套件 | ✅ | 18 个 pytest 文件,`-m "not live_llm"` |
+| 测试套件 | ✅ | pytest 含 telemetry / agents；`-m "not live_llm"` |
 
 ---
 
@@ -119,7 +121,8 @@ coagent/
 │   ├── config.py            # 环境配置
 │   ├── db.py                # SQLite 持久化
 │   ├── sse.py               # SSE 广播
-│   ├── api/                 # events, admin, agents, demo
+│   ├── api/                 # events, telemetry, admin, agents, demo
+│   ├── telemetry/           # OTLP/JSON 解析 · 存储 · 异常检测（R1）
 │   ├── playbooks/engine.py  # 处置手册 + mock 工具
 │   ├── llm/client.py        # Async LLM + mock
 │   ├── scoring/scorer.py    # 把握度评分 D/P/C
@@ -127,7 +130,7 @@ coagent/
 │   ├── correction/          # 纠偏建议
 │   ├── ultra/               # 图谱 / 相似 / what-if / team
 │   └── models/
-├── agents/                  # cs-bot, rag-bot, content-bot CLI
+├── agents/                  # cs-bot, rag-bot, content-bot + telemetry span builder
 ├── web/                     # 管理台模板与静态资源（非 website/）
 ├── website/                 # 营销官网静态页
 ├── data/
@@ -137,6 +140,7 @@ coagent/
 │   └── agent_kb/            # RAG FAQ
 ├── tests/
 ├── scripts/                 # demo.sh, run_tests.sh, test_agents.sh 等
+├── docs/architecture/       # C4 架构图与 R1 接入说明
 └── docs/diagrams/           # 架构 HTML（流水线自动循环高亮）
 ```
 
@@ -149,8 +153,11 @@ coagent/
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | POST | `/events` | Webhook 事件上报 |
+| POST | `/v1/traces` | OTLP/JSON 轨迹上报；`promote` 控制是否提升事故 |
+| GET | `/telemetry/runs` | 轨迹运行列表 |
+| GET | `/telemetry/runs/{run_id}` | 轨迹运行详情 |
 | GET | `/agents` | 列出 cs-bot / rag-bot / content-bot |
-| POST | `/agents/{id}/run` | live 或 simulate 运行 Agent |
+| POST | `/agents/{id}/run` | live 或 simulate（simulate 走 Inline Observer） |
 | POST | `/agents/retry/cs-bot` | Claude 重试（Agent 侧,非飞书） |
 | GET | `/agents/content-bot/cost` | content-bot 日累计成本 |
 | POST | `/agents/content-bot/cost/reset` | 重置日累计（测试） |
