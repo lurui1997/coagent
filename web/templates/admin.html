@@ -34,7 +34,7 @@
       <div class="pal-hero-scrim" aria-hidden="true"></div>
       <div class="pal-hero-content">
         <h1 class="pal-hero-title">CoAgent 与企业生产 Agent 协作</h1>
-        <p class="pal-hero-subtitle">提供异常发现、根因诊断、风险决策、受控处置和审计复盘能力</p>
+        <p class="pal-hero-subtitle">发现异常、评估把握度、受控处置并留下审计。</p>
         <a href="/?tab=2" class="pal-hero-cta">进入处置工作台</a>
       </div>
       <a href="#overview-content" class="pal-hero-scroll" aria-label="向下滚动">
@@ -156,11 +156,9 @@
 
     {% elif tab == 2 %}
     <section class="pal-page-banner" aria-label="处置工作台">
-      <div class="pal-hero-media" aria-hidden="true"></div>
-      <div class="pal-hero-scrim pal-banner-scrim" aria-hidden="true"></div>
       <div class="pal-page-banner-inner">
         <h1 class="pal-page-title">处置工作台</h1>
-        <p class="pal-page-lead">把握度评分驱动的 Agent 运维处置中心 — 根因推理链、分级决策、What-if 推演与知识图谱关联分析。</p>
+        <p class="pal-page-lead">选择场景或接入事件后，按把握度分级执行、确认或升级。</p>
       </div>
     </section>
     <div class="page-content">
@@ -170,139 +168,116 @@
         <button type="button" class="demo-scenario-btn s1" data-demo-scenario="s1" onclick="triggerScenario('s1')">
           <span class="demo-scenario-id">S1</span>
           <span class="demo-scenario-name">API 限流</span>
-          <span class="demo-scenario-grade green">🟢 87</span>
+          <span class="demo-scenario-grade green">可执行 · 87</span>
         </button>
         <button type="button" class="demo-scenario-btn s2" data-demo-scenario="s2" onclick="triggerScenario('s2')">
           <span class="demo-scenario-id">S2</span>
           <span class="demo-scenario-name">空检索</span>
-          <span class="demo-scenario-grade amber">🟡 72</span>
+          <span class="demo-scenario-grade amber">需确认 · 72</span>
         </button>
         <button type="button" class="demo-scenario-btn s3" data-demo-scenario="s3" onclick="triggerScenario('s3')">
           <span class="demo-scenario-id">S3</span>
           <span class="demo-scenario-name">超预算</span>
-          <span class="demo-scenario-grade red">🔴 58</span>
+          <span class="demo-scenario-grade red">须升级 · 58</span>
         </button>
       </div>
+      <p class="demo-grade-hint">≥80 可执行 · 60–79 需确认 · &lt;60 须升级</p>
       <div id="trigger-result" class="demo-trigger-result"></div>
     </div>
 
-    <div class="viz-panel card" style="margin-bottom:1.25rem;">
-      <div class="card-header"><h3>典型场景 · 把握度基准</h3></div>
-      <div class="viz-grouped-bars">
-        <div class="viz-group"><span class="viz-group-label">S1 限流</span><div class="viz-bar-track"><div class="viz-bar-fill green" style="width:87%"></div></div><span>87</span></div>
-        <div class="viz-group"><span class="viz-group-label">S2 空检索</span><div class="viz-bar-track"><div class="viz-bar-fill amber" style="width:72%"></div></div><span>72</span></div>
-        <div class="viz-group"><span class="viz-group-label">S3 超预算</span><div class="viz-bar-track"><div class="viz-bar-fill red" style="width:58%"></div></div><span>58</span></div>
-      </div>
-      <div class="viz-legend">
-        <span><i class="viz-dot green"></i>≥80 可执行</span>
-        <span><i class="viz-dot amber"></i>60–79 需确认</span>
-        <span><i class="viz-dot red"></i>&lt;60 升级</span>
-      </div>
-    </div>
-
     <div id="incident-meta" class="card incident-meta" style="display:none">
-      <div class="meta-item"><span>追踪号 · </span><strong id="meta-trace"></strong></div>
+      <div class="meta-item"><span>追踪 · </span><strong id="meta-trace"></strong></div>
       <div class="meta-item"><span>Agent · </span><strong id="meta-agent"></strong></div>
       <div class="meta-item"><span>场景 · </span><strong id="meta-scenario"></strong></div>
       <div class="meta-item highlight"><span>状态 · </span><strong id="meta-status"></strong></div>
-      <div class="meta-item"><span>LLM · </span><strong id="meta-llm-model">—</strong></div>
     </div>
 
-    <div id="observe-split" class="observe-split" style="display:none">
-      <div class="card observe-card">
+    <div class="incident-split incident-primary">
+      <div id="decision-panel" class="card decision-panel">
+        <div class="empty">
+          <div class="empty-icon">◈</div>
+          选择上方场景开始处置，把握度与建议将显示在这里
+        </div>
+      </div>
+      <div id="observe-agent-card" class="card observe-card" style="display:none">
         <div class="card-header">
-          <h3>被观测 Agent</h3>
+          <h3>异常现场</h3>
           <span class="card-count" id="observe-agent-badge">—</span>
         </div>
         <div id="observe-agent-body" class="observe-body"></div>
       </div>
-      <div class="card observe-card">
-        <div class="card-header">
-          <h3>LLM 调用执行</h3>
-          <span class="card-count" id="observe-llm-badge">真实 API</span>
-        </div>
-        <div id="observe-llm-body" class="observe-body"></div>
-      </div>
     </div>
 
-    <div id="execution-chain" class="card execution-chain" style="display:none">
-      <div class="card-header"><h3>处置执行链 · 逻辑链</h3></div>
-      <div id="execution-chain-body" class="whatif-panel"></div>
+    <div id="observe-llm-card" class="card observe-card observe-llm-card" style="display:none">
+      <div class="card-header">
+        <h3>诊断要点</h3>
+        <span class="card-count" id="observe-llm-badge">—</span>
+      </div>
+      <div id="observe-llm-body" class="observe-body"></div>
     </div>
 
-    <div class="incident-split">
-      <div class="card">
-        <div class="card-header">
-          <h3>审计时间线</h3>
-          <span class="card-count" id="timeline-count">—</span>
-        </div>
-        <div id="timeline" class="timeline">
-          <div class="empty">
-            <div class="empty-icon">◎</div>
-            事件接入后，完整处置链路将在此展示
-          </div>
-        </div>
+    <div id="progress-card" class="card" style="margin-top:1.25rem;display:none">
+      <div class="card-header">
+        <h3>处置进度</h3>
+        <span class="card-count" id="timeline-count">—</span>
       </div>
-      <div id="decision-panel" class="card decision-panel">
+      <div id="timeline" class="timeline">
         <div class="empty">
-          <div class="empty-icon">◈</div>
-          事件接入后，把握度详情与处置建议将自动展示
+          <div class="empty-icon">◎</div>
+          触发后实时展示诊断与评分步骤
         </div>
       </div>
     </div>
 
-      <div id="advanced-panels" class="advanced-panels" style="display:none">
-      <div id="ultra-api-hint" class="alert alert-warning" style="display:none;margin-bottom:1rem;"></div>
-      <div class="grid-2 kg-layout">
-        <div class="card kg-card">
-          <div class="card-header">
-            <h3>知识图谱 · 因果拓扑</h3>
-            <span class="card-count" id="kg-stats">—</span>
+    <details id="workspace-depth" class="workspace-disclosure" style="display:none">
+      <summary>深度分析（执行链 · 图谱 · What-if）</summary>
+      <div id="execution-chain" class="card execution-chain" style="display:none;margin-top:1rem;">
+        <div class="card-header"><h3>处置执行链</h3></div>
+        <div id="execution-chain-body" class="whatif-panel"></div>
+      </div>
+      <div id="advanced-panels" class="advanced-panels">
+        <div id="ultra-api-hint" class="alert alert-warning" style="display:none;margin-bottom:1rem;"></div>
+        <div class="grid-2 kg-layout">
+          <div class="card kg-card">
+            <div class="card-header">
+              <h3>因果关联</h3>
+              <span class="card-count" id="kg-stats">—</span>
+            </div>
+            <div id="kg-topology-wrap" class="kg-topology-wrap">
+              <div id="kg-topology" class="kg-readable-graph" aria-label="因果关联"></div>
+            </div>
           </div>
-          <div class="kg-legend">
-            <span><i class="kg-dot agent"></i>Agent</span>
-            <span><i class="kg-dot incident"></i>故障</span>
-            <span><i class="kg-dot playbook"></i>手册</span>
-            <span><i class="kg-dot root_cause"></i>根因</span>
-            <span><i class="kg-dot action"></i>处置</span>
-            <span><i class="kg-dot score"></i>评分</span>
-          </div>
-          <div id="kg-topology-wrap" class="kg-topology-wrap">
-            <div id="kg-topology" class="kg-readable-graph" aria-label="知识图谱拓扑"></div>
+          <div class="advanced-side">
+            <div class="card">
+              <div class="card-header"><h3>协作编排</h3></div>
+              <div id="team-plan" class="advanced-panel-body">—</div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>相似历史事故</h3></div>
+              <div id="similar-incidents" class="advanced-panel-body">—</div>
+            </div>
           </div>
         </div>
-        <div class="advanced-side">
-          <div class="card">
-            <div class="card-header"><h3>Agent-Team 编排</h3></div>
-            <div id="team-plan" class="advanced-panel-body">事件触发后自动加载编排计划</div>
+        <div class="card" style="margin-top:1rem;">
+          <div class="card-header"><h3>假设推演</h3></div>
+          <div class="whatif-controls">
+            <select id="whatif-scenario" class="select-field" style="width:auto;">
+              <option value="log_snippet:concurrent=5 rate_limit recovered stable">降并发后日志恢复</option>
+              <option value="budget_yuan_daily:30">日预算 → ¥30</option>
+            </select>
+            <button class="btn" type="button" onclick="runWhatIf()">运行推演</button>
           </div>
-          <div class="card">
-            <div class="card-header"><h3>相似历史事故</h3></div>
-            <div id="similar-incidents" class="advanced-panel-body">事件触发后自动检索相似历史事故</div>
-          </div>
+          <div id="whatif-result" class="whatif-panel"></div>
         </div>
       </div>
-      <div class="card" style="margin-top:1rem;">
-        <div class="card-header"><h3>What-if 推演 · 逻辑链</h3></div>
-        <div class="whatif-controls">
-          <select id="whatif-scenario" class="select-field" style="width:auto;">
-            <option value="log_snippet:concurrent=5 rate_limit recovered stable">S1 · 降并发后日志恢复</option>
-            <option value="budget_yuan_daily:30">S3 · 日预算 → ¥30</option>
-          </select>
-          <button class="btn" type="button" onclick="runWhatIf()">运行推演</button>
-        </div>
-        <div id="whatif-result" class="whatif-panel"></div>
-      </div>
-    </div>
+    </details>
     </div>
 
     {% elif tab == 3 %}
     <section class="pal-page-banner" aria-label="审计复盘">
-      <div class="pal-hero-media" aria-hidden="true"></div>
-      <div class="pal-hero-scrim pal-banner-scrim" aria-hidden="true"></div>
       <div class="pal-page-banner-inner">
         <h1 class="pal-page-title">审计复盘</h1>
-        <p class="pal-page-lead">全链路审计留痕、运营反馈闭环与合规导出 — 追溯每一次处置决策，持续优化运维手册。</p>
+        <p class="pal-page-lead">追溯处置决策与反馈，导出合规记录。</p>
       </div>
     </section>
     <div class="page-content">
@@ -471,16 +446,16 @@
 
     const EVENT_LABELS = {
       incident_started: '事件接入',
-      diagnostic_agent_started: 'Diagnostic Agent 启动',
-      agent_thought: 'Agent 推理',
-      tool_called: '工具查询',
-      llm_reasoning: '大模型推理',
-      llm_result: '大模型输出',
+      diagnostic_agent_started: '开始诊断',
+      agent_thought: '分析中',
+      tool_called: '查询证据',
+      llm_reasoning: '形成结论',
+      llm_result: '处置建议',
       score_computed: '把握度评分',
-      channel_sync: '通道同步',
-      team_orchestration: 'Agent-Team 编排',
-      incident_completed: '已完成',
-      incident_failed: '已失败',
+      channel_sync: '通知同步',
+      team_orchestration: '协作编排',
+      incident_completed: '诊断完成',
+      incident_failed: '诊断失败',
       replay_started: '回放开始',
       replay_completed: '回放完成',
     };
@@ -516,11 +491,13 @@
         : 320;
       const raw = JSON.stringify(payload, null, 2);
       const clipped = raw.length > maxLen ? `${raw.slice(0, maxLen)}\n…` : raw;
+      const detailId = `tl-detail-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
       const div = document.createElement('div');
       div.className = 'timeline-entry';
       div.dataset.type = event.type;
-      div.innerHTML = `<span class="type">${label}${summary ? ' · ' + summary : ''}</span><span class="ts">${ts}</span><pre>${clipped}</pre>`;
+      div.innerHTML = `<div class="timeline-entry-main"><span class="type">${label}${summary ? ' · ' + summary : ''}</span><span class="ts">${ts}</span></div>
+        <details class="timeline-detail"><summary>详情</summary><pre id="${detailId}">${clipped}</pre></details>`;
       el.appendChild(div);
       el.scrollTop = el.scrollHeight;
       updateTimelineCount();
@@ -720,9 +697,11 @@
       document.getElementById('meta-trace').textContent = inc.trace_id;
       document.getElementById('meta-agent').textContent = inc.agent_id;
       document.getElementById('meta-scenario').textContent = inc.scenario_id;
-      document.getElementById('meta-status').textContent = inc.status;
-      const modelEl = document.getElementById('meta-llm-model');
-      if (modelEl) modelEl.textContent = inc.llm_model || '（流水线完成后回填）';
+      document.getElementById('meta-status').textContent = ({
+        running: '诊断中',
+        completed: '待处置',
+        failed: '失败',
+      })[inc.status] || inc.status;
     }
 
     function escapeHtml(s) {
@@ -734,34 +713,36 @@
     }
 
     function renderObservePanels(inc) {
-      const split = document.getElementById('observe-split');
-      if (!split) return;
-      split.style.display = 'grid';
+      const depth = document.getElementById('workspace-depth');
+      if (depth) depth.style.display = 'block';
+      const progress = document.getElementById('progress-card');
+      if (progress) progress.style.display = 'block';
 
       const event = inc.event_json || {};
+      const agentCard = document.getElementById('observe-agent-card');
       const agentBody = document.getElementById('observe-agent-body');
       const agentBadge = document.getElementById('observe-agent-badge');
+      if (agentCard) agentCard.style.display = 'block';
       if (agentBadge) {
         agentBadge.textContent = event.agent_name || event.agent_id || inc.agent_id || '—';
       }
       if (agentBody) {
+        const symptom = event.symptom || '—';
         const rows = [
-          ['agent_id', event.agent_id || inc.agent_id],
-          ['agent_name', event.agent_name],
-          ['type / symptom', `${event.type || '—'} / ${event.symptom || '—'}`],
-          ['error', event.error],
-          ['log_snippet', event.log_snippet],
-          ['cost / budget', `¥${event.cost_yuan_today ?? '—'} / ¥${event.budget_yuan_daily ?? '—'}`],
-          ['event_id', event.event_id || inc.event_id],
-          ['ts', event.ts],
-          ['retry_webhook', event.retry_webhook],
+          ['名称', event.agent_name || event.agent_id || inc.agent_id],
+          ['异常', symptom],
+          ['报错', event.error],
+          ['关键日志', event.log_snippet],
         ];
+        if (event.cost_yuan_today != null || event.budget_yuan_daily != null) {
+          rows.push(['今日成本 / 预算', `¥${event.cost_yuan_today ?? '—'} / ¥${event.budget_yuan_daily ?? '—'}`]);
+        }
         agentBody.innerHTML = `
           <dl class="observe-dl">
             ${rows.map(([k, v]) => `
               <div class="observe-row">
                 <dt>${escapeHtml(k)}</dt>
-                <dd class="${k === 'log_snippet' || k === 'error' ? 'mono wrap' : 'mono'}">${escapeHtml(v || '—')}</dd>
+                <dd class="${k === '关键日志' || k === '报错' ? 'mono wrap' : ''}">${escapeHtml(v || '—')}</dd>
               </div>`).join('')}
           </dl>`;
       }
@@ -769,55 +750,44 @@
       const timeline = inc.timeline_json || [];
       const thoughts = timeline.filter(e => e.type === 'agent_thought');
       const llmReason = timeline.find(e => e.type === 'llm_reasoning');
-      const llmResult = timeline.find(e => e.type === 'llm_result');
       const llm = inc.llm_json || {};
+      const llmCard = document.getElementById('observe-llm-card');
       const llmBody = document.getElementById('observe-llm-body');
       const llmBadge = document.getElementById('observe-llm-badge');
+      if (llmCard) llmCard.style.display = 'block';
       if (llmBadge) {
-        llmBadge.textContent = inc.llm_model
-          ? `真实 API · ${inc.llm_model}`
-          : (inc.status === 'running' ? '调用中…' : '真实 API（待回填 model）');
+        llmBadge.textContent = inc.status === 'running' ? '诊断中' : (inc.llm_model || '已完成');
       }
       if (llmBody) {
-        let html = `<p class="observe-note">生产路径已移除 Mock：流水线经 <code>LLMClient</code> 调用 <code>LLM_BASE_URL</code>。下方为落库的执行摘要；原始 HTTP messages 未持久化。</p>`;
-        html += `<div class="observe-kv"><span>模型</span><strong class="mono">${escapeHtml(inc.llm_model || '—')}</strong></div>`;
-        html += `<div class="observe-kv"><span>ReAct 步数</span><strong>${thoughts.length}</strong></div>`;
-
-        if (thoughts.length) {
-          html += '<ol class="observe-steps">';
-          thoughts.forEach((e) => {
-            const p = e.payload || {};
-            html += `<li>
-              <div class="observe-step-meta">step ${escapeHtml(p.step)} · ${escapeHtml(p.action || '—')}${p.tool ? ` · tool=${escapeHtml(p.tool)}` : ''}</div>
-              <div class="observe-thought">${escapeHtml(p.thought || '')}</div>
-            </li>`;
-          });
-          html += '</ol>';
-        }
-
+        let html = '';
         const chain = llm.reasoning_chain || llmReason?.payload?.reasoning_chain || [];
+        if (llm.impact) {
+          html += `<p class="observe-lead">${escapeHtml(llm.impact)}</p>`;
+        }
         if (chain.length) {
-          html += '<div class="observe-section-label">最终推理链</div><ol class="observe-steps compact">';
+          html += '<ol class="observe-steps compact">';
           chain.forEach((t) => { html += `<li>${escapeHtml(t)}</li>`; });
           html += '</ol>';
         }
-
         if (llm.hypothesis?.length) {
-          html += `<div class="observe-section-label">假设</div><ul class="observe-steps compact">${
+          html += `<div class="observe-section-label">可能原因</div><ul class="observe-steps compact">${
             llm.hypothesis.map((h) => `<li>${escapeHtml(h)}</li>`).join('')
           }</ul>`;
         }
-
-        if (!thoughts.length && !chain.length && !llmResult && inc.status === 'running') {
-          html += '<div class="empty" style="padding:1rem 0">等待 LLM 步骤写入时间线…</div>';
-        } else if (!thoughts.length && !chain.length && !llm.impact) {
-          html += '<div class="empty" style="padding:1rem 0">尚无 LLM 输出（检查 <code>LLM_API_KEY</code> / 流水线失败审计）</div>';
+        if (thoughts.length && (inc.status === 'running' || !chain.length)) {
+          html += '<div class="observe-section-label">诊断步骤</div><ol class="observe-steps">';
+          thoughts.slice(-4).forEach((e) => {
+            const p = e.payload || {};
+            const label = p.tool ? `调用 ${p.tool}` : (p.action === 'finish' ? '完成' : (p.action || '分析'));
+            html += `<li><div class="observe-thought"><strong>${escapeHtml(label)}</strong> — ${escapeHtml(p.thought || '')}</div></li>`;
+          });
+          html += '</ol>';
         }
-
-        if (llm.impact) {
-          html += `<div class="observe-section-label">影响评估</div><p class="observe-thought">${escapeHtml(llm.impact)}</p>`;
+        if (!html) {
+          html = inc.status === 'running'
+            ? '<div class="empty" style="padding:1rem 0">正在分析异常…</div>'
+            : '<div class="empty" style="padding:1rem 0">暂无诊断摘要</div>';
         }
-
         llmBody.innerHTML = html;
       }
     }
@@ -837,47 +807,42 @@
       panel.className = `card decision-panel ${gradeClass(grade)}`;
 
       let html = `<div class="decision-score-header">
-        <h3>评分 ${sc.total}</h3>
+        <h3>把握度 ${sc.total}</h3>
         <span class="grade-pill ${gradeClass(grade)}">${sc.labels?.grade_display || grade}</span>
       </div>`;
 
       html += `<div class="factors">
-        <div class="factor"><div class="label">数据 · 完备度</div><div class="value">${(sc.factors.data_completeness * 100).toFixed(0)}%</div></div>
-        <div class="factor"><div class="label">手册 · 匹配度</div><div class="value">${(sc.factors.playbook_match * 100).toFixed(0)}%</div></div>
-        <div class="factor"><div class="label">推理 · 一致性</div><div class="value">${(sc.factors.reasoning_consistency * 100).toFixed(0)}%</div></div>
+        <div class="factor"><div class="label">数据完备</div><div class="value">${(sc.factors.data_completeness * 100).toFixed(0)}%</div></div>
+        <div class="factor"><div class="label">手册匹配</div><div class="value">${(sc.factors.playbook_match * 100).toFixed(0)}%</div></div>
+        <div class="factor"><div class="label">推理一致</div><div class="value">${(sc.factors.reasoning_consistency * 100).toFixed(0)}%</div></div>
       </div>`;
 
-      {% if demo_mode %}
-      if (sc.clamp_applied) {
-        html += `<div class="footnote">演练环境 · 推理因子已校正 (原始 ${sc.factors.reasoning_consistency_raw} → ${sc.factors.reasoning_consistency})</div>`;
-      }
-      {% endif %}
-
-      if (llm.impact) html += `<div class="impact-text">${llm.impact}</div>`;
+      if (llm.impact) html += `<div class="impact-text">${escapeHtml(llm.impact)}</div>`;
       if (llm.steps) {
+        const riskLabel = { low: '低', medium: '中', high: '高' };
         html += '<ul class="steps-list">';
         llm.steps.forEach(s => {
-          html += `<li><span class="risk-tag risk-${s.risk}">${s.risk}</span><span>${s.action}</span></li>`;
+          html += `<li><span class="risk-tag risk-${s.risk}">${riskLabel[s.risk] || s.risk}</span><span>${escapeHtml(s.action)}</span></li>`;
         });
         html += '</ul>';
       }
 
       html += '<div class="action-row">';
       if (grade === 'executable' && llm.retry_recommended) {
-        html += `<button class="btn btn-success" type="button" onclick="doRetry('cs-bot')">一键重试</button>`;
+        html += `<button class="btn btn-success" type="button" onclick="doRetry('cs-bot')">执行重试</button>`;
       } else if (grade === 'needs_confirmation') {
-        html += `<div class="alert alert-warning" style="flex:1;margin:0">不建议重试 — 请确认后执行</div>`;
+        html += `<div class="alert alert-warning" style="flex:1;margin:0">请确认后再执行，不建议直接重试</div>`;
       } else if (grade === 'escalate') {
-        html += `<div class="alert alert-danger" style="flex:1;margin:0">升级 {{ escalate_user }} — 高风险步骤不可自动执行</div>`;
+        html += `<div class="alert alert-danger" style="flex:1;margin:0">须升级负责人，禁止自动执行</div>`;
       }
-      html += `<a class="btn btn-secondary" href="/?tab=3&trace=${encodeURIComponent(inc.trace_id)}">审计复盘</a>`;
+      html += `<a class="btn btn-secondary" href="/?tab=3&trace=${encodeURIComponent(inc.trace_id)}">查看审计</a>`;
       if (inc.correction_suggestions?.length) {
-        html += `<button class="btn btn-outline" type="button" onclick="applyCorrection('${inc.trace_id}')">应用纠偏建议 (${inc.correction_suggestions.length})</button>`;
+        html += `<button class="btn btn-outline" type="button" onclick="applyCorrection('${inc.trace_id}')">纠偏建议 (${inc.correction_suggestions.length})</button>`;
       }
       html += '</div>';
 
       if (grade === 'escalate' && llm.comms_draft) {
-        html += `<p style="margin-top:1rem;font-size:0.875rem;color:var(--text-secondary)">${llm.comms_draft}</p>`;
+        html += `<p style="margin-top:1rem;font-size:0.875rem;color:var(--text-secondary)">${escapeHtml(llm.comms_draft)}</p>`;
       }
 
       panel.innerHTML = html;
@@ -915,14 +880,14 @@
     }
 
     function livePatchObserveFromStream(data) {
-      const split = document.getElementById('observe-split');
+      const llmCard = document.getElementById('observe-llm-card');
       const llmBody = document.getElementById('observe-llm-body');
       const llmBadge = document.getElementById('observe-llm-badge');
-      if (!split || !llmBody) return;
-      split.style.display = 'grid';
+      if (!llmCard || !llmBody) return;
+      llmCard.style.display = 'block';
 
       if (data.type === 'diagnostic_agent_started' && llmBadge) {
-        llmBadge.textContent = '真实 API · ReAct 诊断中';
+        llmBadge.textContent = '诊断中';
       }
       if (data.type === 'agent_thought') {
         const p = data.payload || {};
@@ -930,34 +895,30 @@
         if (!list) {
           const label = document.createElement('div');
           label.className = 'observe-section-label';
-          label.textContent = '实时 ReAct';
+          label.textContent = '诊断步骤';
           list = document.createElement('ol');
           list.className = 'observe-steps live';
+          const empty = llmBody.querySelector('.empty');
+          if (empty) empty.remove();
           llmBody.appendChild(label);
           llmBody.appendChild(list);
         }
+        const label = p.tool ? `调用 ${p.tool}` : (p.action === 'finish' ? '完成' : (p.action || '分析'));
         const li = document.createElement('li');
-        li.innerHTML = `<div class="observe-step-meta">step ${escapeHtml(p.step)} · ${escapeHtml(p.action || '—')}${p.tool ? ` · tool=${escapeHtml(p.tool)}` : ''}</div>
-          <div class="observe-thought">${escapeHtml(p.thought || '')}</div>`;
+        li.innerHTML = `<div class="observe-thought"><strong>${escapeHtml(label)}</strong> — ${escapeHtml(p.thought || '')}</div>`;
         list.appendChild(li);
       }
       if (data.type === 'llm_reasoning' && llmBadge) {
-        const model = (data.payload || {}).model;
-        llmBadge.textContent = model ? `真实 API · ${model}` : '真实 API · 最终推理完成';
-        const modelEl = document.getElementById('meta-llm-model');
-        if (modelEl && model) modelEl.textContent = model;
+        llmBadge.textContent = '整理结论';
       }
       if (data.type === 'llm_result') {
         const impact = (data.payload || {}).impact;
-        if (impact) {
-          const label = document.createElement('div');
-          label.className = 'observe-section-label';
-          label.textContent = '影响评估（流式）';
-          const p = document.createElement('p');
-          p.className = 'observe-thought';
-          p.textContent = impact;
-          llmBody.appendChild(label);
-          llmBody.appendChild(p);
+        if (impact && llmBadge) llmBadge.textContent = '已完成';
+        if (impact && !llmBody.querySelector('.observe-lead')) {
+          const lead = document.createElement('p');
+          lead.className = 'observe-lead';
+          lead.textContent = impact;
+          llmBody.prepend(lead);
         }
       }
     }
@@ -1393,16 +1354,16 @@
     }
 
     async function loadAdvancedPanels(traceId) {
+      const depth = document.getElementById('workspace-depth');
       const panel = document.getElementById('advanced-panels');
-      if (!panel) return;
-      panel.style.display = traceId ? 'block' : 'none';
-      if (!traceId) return;
+      if (depth) depth.style.display = traceId ? 'block' : 'none';
+      if (!panel || !traceId) return;
 
       const hint = document.getElementById('ultra-api-hint');
       const graphRes = await fetch('/admin/ultra/graph');
       if (graphRes.status === 404 && hint) {
         hint.style.display = 'block';
-        hint.textContent = '高级分析 API 不可用：请重启 uvicorn 以加载 app/ultra 模块。';
+        hint.textContent = '高级分析暂不可用，请稍后重试。';
         return;
       }
       if (hint) hint.style.display = 'none';
