@@ -5,7 +5,7 @@
   "type": "cost_report",
   "symptom": "over_budget",
   "error": null,
-  "log_snippet": "[18:00:00] tokens_today=1.2M (+180% vs 7d avg); top_route=marketing-batch",
+  "log_snippet": "[18:00:00] 今日 Token=1.2M（较 7 日均值 +180%）；top_route=marketing-batch；cost / budget 超支",
   "cost_yuan_today": 28.5,
   "budget_yuan_daily": 20,
   "retry_webhook": null,

@@ -24,6 +24,10 @@ _Avoid_: 把 Trajectory 或原始 OTel span 直接叫作 Event
 本项目运行与演示路径必须调用真实 LLM API；禁止以 Mock 响应冒充模型输出。
 _Avoid_: MOCK_LLM 演示捷径, 内置 MOCK_RESPONSES 作为默认可运行路径
 
+**Operator UI Language**:
+面向值班人的诊断叙述（impact / hypothesis / reasoning_chain / steps.action / comms_draft / thought）必须为简体中文；技术标识符可保留英文。见 `app/llm/language.py`。
+_Avoid_: 英文诊断要点直接展示在管理台; 仅用英文 schema hint 而不约束叙述语言
+
 **Showcase Packaging**:
 Showcase 以本仓独立包 `showcase/faq_agent` 交付：自有 FAQ、运行入口、metrics 与看板；经 OTLP 接入 CoAgent，不与黑客松 demo bot 混为一谈。
 _Avoid_: 把 Showcase 逻辑塞进 `agents/rag_bot.py` 作为唯一形态; 另起独立 git 仓库作为第一版

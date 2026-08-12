@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from app.config import settings
+from app.llm.language import USER_FACING_ZH_RULE
 from app.models.event import AgentEvent
 
 
@@ -61,8 +62,9 @@ class PlaybookEngine:
 Ops 手册参考：{pb['tool_mocks'].get('search_ops_playbook', {})}
 
 输出要求：
+- {USER_FACING_ZH_RULE}
 - reasoning_chain 至少 3 步根因链
-- steps 覆盖 OPS 手册建议
+- steps 覆盖 OPS 手册建议（action 用中文；command 可保留英文）
 - retry_recommended: {pb.get('retry_recommended', False)}
 - 只输出 JSON，无 markdown"""
         return [

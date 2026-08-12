@@ -28,7 +28,7 @@ STUB_RESPONSES = {
             "Agent 无检索结果仍生成答案，客诉 +12",
         ],
         steps=[
-            Step(order=1, action="Rebuild 知识库索引", command="kb rebuild --version v2.4", risk="medium"),
+            Step(order=1, action="重建知识库索引", command="kb rebuild --version v2.4", risk="medium"),
             Step(order=2, action="启用兜底 prompt 拒绝无检索作答", command="config set fallback_prompt=strict", risk="low"),
             Step(order=3, action="检查 FAQ 更新同步状态", command="kb sync --force", risk="low"),
         ],

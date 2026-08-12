@@ -6,6 +6,7 @@ from typing import Any
 
 from app.config import settings
 from app.llm.client import LLMClient
+from app.llm.language import USER_FACING_ZH_RULE
 from app.models.event import AgentEvent
 from app.models.llm_output import LLMOutput
 from app.playbooks.engine import PlaybookEngine
@@ -68,7 +69,7 @@ class DiagnosticAgent:
                 messages.append(
                     {
                         "role": "user",
-                        "content": f"Observation: tool {tool_name!r} skipped (already called or invalid)",
+                        "content": f"观察：工具 {tool_name!r} 已跳过（已调用或不合法）",
                     }
                 )
                 continue
@@ -94,7 +95,7 @@ class DiagnosticAgent:
             messages.append(
                 {
                     "role": "user",
-                    "content": f"Observation: {json.dumps(result, ensure_ascii=False)}",
+                    "content": f"观察：{json.dumps(result, ensure_ascii=False)}",
                 }
             )
 
@@ -180,15 +181,16 @@ class DiagnosticAgent:
         system = f"""{pb["system_prompt"]}
 
 你是 Diagnostic Agent，使用 ReAct（Reason + Act）逐步收集证据后再给出最终诊断。
+{USER_FACING_ZH_RULE}
 可用工具：
 {tools_json}
 
 每轮只输出一个 JSON（无 markdown）：
-- 调用工具: {{"thought":"推理","action":"tool","tool":"<工具名>"}}
-- 证据足够: {{"thought":"推理","action":"finish"}}
+- 调用工具: {{"thought":"简体中文推理","action":"tool","tool":"<工具名>"}}
+- 证据足够: {{"thought":"简体中文推理","action":"finish"}}
 
 规则：在 finish 前至少调用 query_agent_metrics 与 search_ops_playbook；全部 required_tools 调用后再 finish。"""
-        user = f"Agent 事件：\n{event_context}\n\n请开始 ReAct 诊断。"
+        user = f"Agent 事件：\n{event_context}\n\n请开始 ReAct 诊断（叙述用简体中文）。"
         return [
             {"role": "system", "content": system},
             {"role": "user", "content": user},

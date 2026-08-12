@@ -6,6 +6,7 @@ from typing import Any
 import httpx
 
 from app.config import settings
+from app.llm.language import with_json_schema_instruction
 from app.llm.model_router import ModelRouter
 from app.models.llm_output import LLMOutput
 
@@ -79,7 +80,7 @@ class LLMClient:
             '"comms_draft":"string","retry_recommended":bool}'
         )
         messages = messages + [
-            {"role": "system", "content": f"Respond with valid JSON only matching: {schema_hint}"}
+            {"role": "system", "content": with_json_schema_instruction(schema_hint)}
         ]
 
         content = await self._chat_completion(messages, model, temperature=0.3)
@@ -133,8 +134,8 @@ class LLMClient:
             {
                 "role": "system",
                 "content": (
-                    f"Respond with valid JSON only matching: {schema_hint}. "
-                    f"Remaining tools: {remaining_tools or []}"
+                    f"{with_json_schema_instruction(schema_hint)} "
+                    f"剩余可用工具: {remaining_tools or []}"
                 ),
             }
         ]

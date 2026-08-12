@@ -67,7 +67,7 @@ def detect_anomaly(spans: list[TelemetrySpan]) -> Detection | None:
                     event_type="run_fail",
                     agent_id=agent_id,
                     agent_name=agent_name,
-                    error=(sp.status_message or "rate limited")[:2000],
+                    error=(sp.status_message or "触发 API 限流（rate_limit）")[:2000],
                     log_snippet=_log_snippet(spans),
                     retry_webhook=_opt_str(_attr(spans, "coagent.retry_webhook")),
                 )
@@ -77,7 +77,7 @@ def detect_anomaly(spans: list[TelemetrySpan]) -> Detection | None:
                     event_type="run_fail",
                     agent_id=agent_id,
                     agent_name=agent_name,
-                    error=(sp.status_message or "empty retrieval")[:2000],
+                    error=(sp.status_message or "检索为空（empty_retrieval）")[:2000],
                     log_snippet=_log_snippet(spans),
                 )
             if "budget" in combined or "over_budget" in combined:
@@ -86,7 +86,7 @@ def detect_anomaly(spans: list[TelemetrySpan]) -> Detection | None:
                     event_type="cost_report",
                     agent_id=agent_id,
                     agent_name=agent_name,
-                    error=(sp.status_message or "over budget")[:2000],
+                    error=(sp.status_message or "日成本超预算（over_budget）")[:2000],
                     log_snippet=_log_snippet(spans),
                     cost_yuan_today=float(_attr(spans, "coagent.cost_yuan_today") or 0.0),
                     budget_yuan_daily=float(_attr(spans, "coagent.budget_yuan_daily") or 0.0),

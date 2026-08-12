@@ -32,7 +32,7 @@ def build_empty_retrieval_otlp(
         start_time_unix_nano=now - 2_000_000,
         end_time_unix_nano=now,
         status_code="ERROR",
-        status_message="empty_retrieval",
+        status_message="empty_retrieval：检索返回 0 个片段",
         attributes={
             "coagent.run_id": run_id,
             "coagent.agent_id": agent_id,
@@ -52,7 +52,7 @@ def build_empty_retrieval_otlp(
         start_time_unix_nano=now - 1_500_000,
         end_time_unix_nano=now - 100_000,
         status_code="ERROR",
-        status_message="Retrieval returned 0 chunks",
+        status_message="检索未返回高于阈值的片段（0 chunks / empty_retrieval）",
         attributes={
             "gen_ai.retrieval.empty": True,
             "coagent.agent_id": agent_id,
