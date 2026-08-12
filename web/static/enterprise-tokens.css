@@ -1,58 +1,60 @@
 /* CoAgent Enterprise Design System — shared tokens
- * Used by Admin console + Showcase surfaces.
+ * Industrial ops console: light canvas, deep blue accent, tinted neutrals.
  */
 
 :root {
   color-scheme: light;
 
-  --bg: #f4f5f7;
-  --surface: #ffffff;
-  --surface-elevated: #ffffff;
-  --line: #e2e5eb;
-  --line-strong: #c8ceda;
+  /* Cool-tinted neutrals (avoid pure gray / pure white) */
+  --bg: oklch(0.965 0.008 250);
+  --surface: oklch(0.995 0.004 250);
+  --surface-elevated: oklch(0.99 0.006 250);
+  --line: oklch(0.9 0.012 250);
+  --line-strong: oklch(0.82 0.018 250);
   --border: var(--line);
   --border-strong: var(--line-strong);
-  --border-subtle: #eceef2;
+  --border-subtle: oklch(0.94 0.008 250);
 
-  --text: #12141a;
-  --text-secondary: #5c6578;
-  --text-muted: #8b93a7;
-  --faint: #8b93a7;
+  --text: oklch(0.22 0.02 255);
+  --text-secondary: oklch(0.48 0.025 255);
+  --text-muted: oklch(0.62 0.02 255);
+  --faint: var(--text-muted);
 
-  --accent: #1d4ed8;
-  --accent-bright: #3b6ef0;
-  --accent-soft: #e8eefc;
-  --accent-hover: #1e40af;
-  --accent-ring: rgba(29, 78, 216, 0.22);
-  --accent-border: rgba(29, 78, 216, 0.28);
-  --accent-border-strong: rgba(29, 78, 216, 0.42);
+  --accent: oklch(0.48 0.18 262);
+  --accent-bright: oklch(0.55 0.17 262);
+  --accent-soft: oklch(0.95 0.03 262);
+  --accent-hover: oklch(0.42 0.16 262);
+  --accent-ring: oklch(0.48 0.18 262 / 0.28);
+  --accent-border: oklch(0.48 0.18 262 / 0.32);
+  --accent-border-strong: oklch(0.48 0.18 262 / 0.45);
+
   --brand: var(--accent);
   --brand-dark: var(--accent-hover);
   --brand-light: var(--accent-soft);
-  --brand-muted: #3b6ef0;
-  --brand-glow: rgba(29, 78, 216, 0.08);
-  --brand-ring: rgba(29, 78, 216, 0.22);
-  --brand-50: #eef2ff;
-  --brand-100: #e8eefc;
-  --brand-200: #c7d7f9;
-  --brand-300: #9bb6f3;
-  --brand-400: #5b82e8;
-  --brand-500: #3b6ef0;
-  --brand-600: #1d4ed8;
-  --brand-700: #1e40af;
-  --brand-800: #1e3a8a;
+  --brand-muted: var(--accent-bright);
+  --brand-glow: oklch(0.48 0.18 262 / 0.08);
+  --brand-ring: var(--accent-ring);
+  --brand-50: oklch(0.97 0.02 262);
+  --brand-100: var(--accent-soft);
+  --brand-200: oklch(0.88 0.05 262);
+  --brand-300: oklch(0.78 0.09 262);
+  --brand-400: oklch(0.65 0.14 262);
+  --brand-500: var(--accent-bright);
+  --brand-600: var(--accent);
+  --brand-700: var(--accent-hover);
+  --brand-800: oklch(0.36 0.12 262);
 
   --purple: var(--brand);
   --purple-light: var(--brand-light);
   --purple-muted: var(--brand-muted);
   --purple-glow: var(--brand-glow);
 
-  --ok: #0f7a45;
-  --ok-bg: #e8f6ee;
-  --warn: #9a6700;
-  --warn-bg: #fff6e0;
-  --bad: #b42318;
-  --bad-bg: #fdeceb;
+  --ok: oklch(0.52 0.12 155);
+  --ok-bg: oklch(0.96 0.03 155);
+  --warn: oklch(0.55 0.12 85);
+  --warn-bg: oklch(0.97 0.04 95);
+  --bad: oklch(0.52 0.17 25);
+  --bad-bg: oklch(0.96 0.03 25);
   --green: var(--ok);
   --green-bg: var(--ok-bg);
   --amber: var(--warn);
@@ -61,23 +63,23 @@
   --red-bg: var(--bad-bg);
 
   --kg-agent: var(--brand-600);
-  --kg-incident: #2563eb;
+  --kg-incident: oklch(0.5 0.16 255);
   --kg-playbook: var(--amber);
   --kg-root: var(--red);
   --kg-action: var(--green);
-  --kg-score: #5c6578;
+  --kg-score: var(--text-secondary);
 
-  --bg-grid: #e8eaef;
+  --bg-grid: oklch(0.93 0.01 250);
   --bg-radial: transparent;
-  --header-bg: rgba(255, 255, 255, 0.92);
+  --header-bg: oklch(0.995 0.004 250 / 0.92);
   --canvas: var(--bg);
   --canvas-elevated: var(--surface);
 
-  --shadow-sm: 0 1px 0 rgba(18, 20, 26, 0.04);
-  --shadow-md: 0 4px 16px rgba(18, 20, 26, 0.06);
-  --shadow-lg: 0 12px 32px rgba(18, 20, 26, 0.08);
-  --radius: 6px;
-  --radius-lg: 8px;
+  --shadow-sm: 0 1px 0 oklch(0.22 0.02 255 / 0.04);
+  --shadow-md: 0 6px 20px oklch(0.22 0.02 255 / 0.06);
+  --shadow-lg: 0 14px 36px oklch(0.22 0.02 255 / 0.08);
+  --radius: 4px;
+  --radius-lg: 6px;
 
   --font: "IBM Plex Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -86,7 +88,14 @@
   --text-xs: 0.75rem;
   --leading: 1.55;
   --header-h: 56px;
-  --nav-h: 44px;
-  --content-max: min(1120px, 96vw);
+  --nav-h: 0px;
+  --content-max: min(1120px, 94vw);
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --focus-ring: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent-ring);
 }

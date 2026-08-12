@@ -115,9 +115,38 @@ class Orchestrator:
             return {"status": "ok", "trace_id": trace_id, "incident_id": incident_id}
         except Exception as e:
             logger.exception("Pipeline failed for %s", trace_id)
-            await record("incident_failed", {"error": str(e)})
-            update_incident(trace_id, status="failed", timeline_json=timeline)
-            return {"status": "failed", "trace_id": trace_id, "error": str(e)}
+            duration_ms = int((time.time() - start_ms) * 1000)
+            error_msg = self._format_pipeline_error(e)
+            await record(
+                "incident_failed",
+                {
+                    "error": error_msg,
+                    "error_type": type(e).__name__,
+                    "duration_ms": duration_ms,
+                },
+            )
+            update_incident(
+                trace_id,
+                status="failed",
+                timeline_json=timeline,
+                duration_ms=duration_ms,
+            )
+            insert_audit_action(
+                trace_id,
+                "incident_failed",
+                operator,
+                {"error": error_msg, "error_type": type(e).__name__, "duration_ms": duration_ms},
+            )
+            return {"status": "failed", "trace_id": trace_id, "error": error_msg}
+
+    @staticmethod
+    def _format_pipeline_error(exc: BaseException) -> str:
+        if isinstance(exc, TimeoutError):
+            return f"Pipeline timed out after {settings.pipeline_timeout_s:g}s"
+        msg = str(exc).strip()
+        if msg:
+            return msg
+        return type(exc).__name__ or "Unknown pipeline error"
 
     async def process_event(
         self,

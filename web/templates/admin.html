@@ -13,40 +13,35 @@
   <script src="{{ static_asset('vendor/htmx.min.js') }}" defer></script>
 </head>
 <body class="page-app">
-  <header class="site-header">
+  <header class="site-header enterprise-topbar">
     <a href="/?tab=1" class="brand">
-      <div class="brand-mark">C</div>
+      <div class="brand-mark" aria-hidden="true">C</div>
       <span class="brand-name">CoAgent</span>
     </a>
+    <nav class="subnav" aria-label="主导航">
+      <a href="/?tab=1" class="{% if tab == 1 %}active{% endif %}">事故总览</a>
+      <a href="/?tab=2" class="{% if tab == 2 %}active{% endif %}">处置工作台</a>
+      <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">审计复盘</a>
+      <a href="/showcase/faq/">FAQ Agent</a>
+    </nav>
   </header>
-
-  <nav class="subnav">
-    <a href="/?tab=1" class="{% if tab == 1 %}active{% endif %}">事故总览</a>
-    <a href="/?tab=2" class="{% if tab == 2 %}active{% endif %}">处置工作台</a>
-    <a href="/?tab=3" class="{% if tab == 3 %}active{% endif %}">审计复盘</a>
-    <a href="/showcase/faq/">FAQ Agent</a>
-  </nav>
 
   <div class="page {% if tab == 1 %}tab-overview{% elif tab == 2 %}tab-workspace{% elif tab == 3 %}tab-audit{% endif %}">
     {% if tab == 1 %}
     <section class="pitch-hero pal-hero" aria-label="CoAgent 平台概览">
-      <div class="pal-hero-media" aria-hidden="true"></div>
-      <div class="pal-hero-scrim" aria-hidden="true"></div>
       <div class="pal-hero-content">
-        <h1 class="pal-hero-title">CoAgent 与企业生产 Agent 协作</h1>
+        <p class="pal-hero-eyebrow">Agent Ops</p>
+        <h1 class="pal-hero-title">运行态事故处置控制台</h1>
         <p class="pal-hero-subtitle">发现异常、评估把握度、受控处置并留下审计。</p>
         <a href="/?tab=2" class="pal-hero-cta">进入处置工作台</a>
       </div>
-      <a href="#overview-content" class="pal-hero-scroll" aria-label="向下滚动">
-        <span aria-hidden="true">↓</span>
-      </a>
     </section>
 
     <div id="overview-content" class="overview-content">
     <section class="pitch-stats-bar" aria-label="平台指标">
       <div class="pitch-stat"><strong>90s</strong><span>平均研判时延</span></div>
-      <div class="pitch-stat"><strong>3</strong><span>典型场景类型</span></div>
-      <div class="pitch-stat"><strong>🟢🟡🔴</strong><span>三级处置边界</span></div>
+      <div class="pitch-stat"><strong>3</strong><span>典型场景</span></div>
+      <div class="pitch-stat"><strong>三级</strong><span>执行 / 确认 / 升级</span></div>
     </section>
 
     <div id="trace-banner" class="trace-banner" style="display:none">
@@ -76,7 +71,7 @@
           <div class="solution-arrow">→</div>
           <div class="solution-step"><span class="solution-num">3</span><div><strong>把握度评分</strong><span>数据 · 手册 · 推理 三因子可审计</span></div></div>
           <div class="solution-arrow">→</div>
-          <div class="solution-step"><span class="solution-num">4</span><div><strong>分级处置</strong><span>🟢 可执行 / 🟡 需确认 / 🔴 须升级</span></div></div>
+          <div class="solution-step"><span class="solution-num">4</span><div><strong>分级处置</strong><span>可执行 / 需确认 / 须升级</span></div></div>
         </div>
         <p class="pitch-formula"><code>总分 = round(100 × (0.35×数据 + 0.35×手册 + 0.30×推理))</code></p>
       </article>
@@ -114,7 +109,7 @@
         <li><span class="demo-time">②</span><span>场景路由 — 按 (type, symptom) 匹配运维手册</span></li>
         <li><span class="demo-time">③</span><span>工具查询 — 拉取指标、配置与手册条目</span></li>
         <li><span class="demo-time">④</span><span>根因推理 — LLM 生成因果链与处置步骤</span></li>
-        <li><span class="demo-time">⑤</span><span>把握度评分 — 三因子计算，输出 🟢🟡🔴 分级</span></li>
+        <li><span class="demo-time">⑤</span><span>把握度评分 — 三因子计算，输出执行 / 确认 / 升级</span></li>
         <li><span class="demo-time">⑥</span><span>分级处置 — 执行 / 确认 / 升级，同步 IM 通道</span></li>
         <li><span class="demo-time">⑦</span><span>审计归档 — 全链路留痕，反馈驱动手册迭代</span></li>
       </ol>
@@ -155,15 +150,16 @@
     </div>
 
     {% elif tab == 2 %}
-    <section class="pal-page-banner" aria-label="处置工作台">
-      <div class="pal-page-banner-inner">
-        <h1 class="pal-page-title">处置工作台</h1>
-        <p class="pal-page-lead">选择场景或接入事件后，按把握度分级执行、确认或升级。</p>
+    <section class="page-head" aria-label="处置工作台">
+      <div>
+        <h1>处置工作台</h1>
+        <p>选择场景或接入事件后，按把握度分级执行、确认或升级。</p>
       </div>
     </section>
-    <div class="page-content">
+    <div class="page-content page-content-flush">
 
     <div class="demo-control-bar" role="region" aria-label="场景触发">
+      <div class="demo-control-label">演练场景</div>
       <div class="demo-control-actions">
         <button type="button" class="demo-scenario-btn s1" data-demo-scenario="s1" onclick="triggerScenario('s1')">
           <span class="demo-scenario-id">S1</span>
@@ -193,10 +189,10 @@
     </div>
 
     <div class="incident-split incident-primary">
-      <div id="decision-panel" class="card decision-panel">
-        <div class="empty">
-          <div class="empty-icon">◈</div>
-          选择上方场景开始处置，把握度与建议将显示在这里
+      <div id="decision-panel" class="card decision-panel decision-panel-primary">
+        <div class="empty empty-quiet">
+          <p>选择上方场景开始处置</p>
+          <span>把握度与建议将显示在这里</span>
         </div>
       </div>
       <div id="observe-agent-card" class="card observe-card" style="display:none">
@@ -274,13 +270,13 @@
     </div>
 
     {% elif tab == 3 %}
-    <section class="pal-page-banner" aria-label="审计复盘">
-      <div class="pal-page-banner-inner">
-        <h1 class="pal-page-title">审计复盘</h1>
-        <p class="pal-page-lead">追溯处置决策与反馈，导出合规记录。</p>
+    <section class="page-head" aria-label="审计复盘">
+      <div>
+        <h1>审计复盘</h1>
+        <p>追溯处置决策与反馈，导出合规记录。</p>
       </div>
     </section>
-    <div class="page-content">
+    <div class="page-content page-content-flush">
 
     <section class="flywheel-loop-card card" aria-label="反馈迭代飞轮">
       <div class="card-header flywheel-card-header">
@@ -347,29 +343,7 @@
         <div class="viz-stack-row"><span>apply_correction</span><div class="viz-bar-track"><div class="viz-bar-fill brand" style="width:15%"></div></div></div>
       </div>
     </div>
-    <details class="card collapsible-card audit-log-collapsible" id="audit-log-section" open>
-      <summary class="card-header collapsible-summary audit-log-header">
-        <span class="collapse-chevron" aria-hidden="true"></span>
-        <h3>审计动作日志</h3>
-        <span class="card-count" id="audit-log-count">—</span>
-      </summary>
-      <div class="collapsible-body">
-        <div class="audit-log-toolbar">
-          <a class="btn btn-secondary btn-sm" href="/admin/audit/export" target="_blank">JSON 导出</a>
-          <a class="btn btn-outline btn-sm" href="/admin/audit/export?format=csv" target="_blank">CSV 导出</a>
-          <button class="btn btn-outline btn-sm" type="button" onclick="loadAuditLog()">刷新</button>
-        </div>
-      <div id="audit-log-list">
-        <div class="empty" style="padding:2rem;">
-          <div class="empty-icon">◎</div>
-          加载中…
-        </div>
-      </div>
-      <p class="audit-log-footnote">
-        说明：10 分钟内重复触发同一演练场景将幂等命中（<code>duplicate_event</code>），不新建故障记录，审计日志仍完整保留。
-      </p>
-      </div>
-    </details>
+
     {% if audit_detail %}
     <details class="card collapsible-card audit-detail-panel" id="audit-detail-panel" open>
       <summary class="card-header collapsible-summary">
@@ -387,6 +361,19 @@
         <div><span class="audit-detail-label">把握度</span><strong>{{ sc.total or '—' }} {{ sc.grade or '' }}</strong></div>
         <div><span class="audit-detail-label">耗时</span><strong>{{ audit_detail.duration_ms or '—' }} ms</strong></div>
       </div>
+      {% if audit_detail.status == 'failed' %}
+      {% set ns = namespace(err='') %}
+      {% for e in audit_detail.timeline_json or [] %}
+        {% if e.type == 'incident_failed' and e.payload and e.payload.error %}
+          {% set ns.err = e.payload.error %}
+        {% endif %}
+      {% endfor %}
+      {% if ns.err %}
+      <div class="alert alert-danger" style="margin:0.75rem 0 0;">失败原因：{{ ns.err }}</div>
+      {% else %}
+      <div class="alert alert-danger" style="margin:0.75rem 0 0;">诊断流水线失败（旧记录可能未写入超时原因）</div>
+      {% endif %}
+      {% endif %}
       <div class="audit-detail-actions audit-feedback-row">
         <a class="btn btn-secondary" href="/?tab=2&amp;trace={{ audit_detail.trace_id }}">查看决策链路</a>
         <span id="audit-feedback-hint" class="audit-feedback-hint">在此提交处置反馈</span>
@@ -410,7 +397,39 @@
       </div>
       </div>
     </details>
+    {% elif active_trace %}
+    <div class="card audit-detail-missing" id="audit-detail-missing">
+      <div class="card-header"><h3>故障详情</h3></div>
+      <p class="empty empty-quiet" style="min-height:auto;padding:1.25rem;">
+        <span>未找到追踪号 <code>{{ active_trace }}</code> 对应的故障记录。</span>
+        <span>请从下方审计动作日志重新选择，或返回处置工作台触发场景。</span>
+      </p>
+    </div>
     {% endif %}
+
+    <details class="card collapsible-card audit-log-collapsible" id="audit-log-section" open>
+      <summary class="card-header collapsible-summary audit-log-header">
+        <span class="collapse-chevron" aria-hidden="true"></span>
+        <h3>审计动作日志</h3>
+        <span class="card-count" id="audit-log-count">—</span>
+      </summary>
+      <div class="collapsible-body">
+        <div class="audit-log-toolbar">
+          <a class="btn btn-secondary btn-sm" href="/admin/audit/export" target="_blank">JSON 导出</a>
+          <a class="btn btn-outline btn-sm" href="/admin/audit/export?format=csv" target="_blank">CSV 导出</a>
+          <button class="btn btn-outline btn-sm" type="button" onclick="loadAuditLog()">刷新</button>
+        </div>
+      <div id="audit-log-list">
+        <div class="empty" style="padding:2rem;">
+          <div class="empty-icon">◎</div>
+          加载中…
+        </div>
+      </div>
+      <p class="audit-log-footnote">
+        说明：10 分钟内重复触发同一演练场景将幂等命中（<code>duplicate_event</code>），不新建故障记录，审计日志仍完整保留。
+      </p>
+      </div>
+    </details>
     </div>
 
     {% endif %}
@@ -786,7 +805,13 @@
         if (!html) {
           html = inc.status === 'running'
             ? '<div class="empty" style="padding:1rem 0">正在分析异常…</div>'
-            : '<div class="empty" style="padding:1rem 0">暂无诊断摘要</div>';
+            : (inc.status === 'failed'
+              ? (() => {
+                  const failed = timeline.find(e => e.type === 'incident_failed');
+                  const err = failed?.payload?.error || '诊断未完成';
+                  return `<div class="alert alert-danger" style="margin:0">${escapeHtml(err)}</div>`;
+                })()
+              : '<div class="empty" style="padding:1rem 0">暂无诊断摘要</div>');
         }
         llmBody.innerHTML = html;
       }
@@ -794,9 +819,26 @@
 
     function renderDecision(inc) {
       const panel = document.getElementById('decision-panel');
-      if (!panel || !inc.score_json) {
-        if (panel && inc.status === 'running') {
-          panel.innerHTML = '<div class="empty"><div class="empty-icon">◌</div>流水线运行中…</div>';
+      if (!panel) return;
+
+      if (!inc.score_json) {
+        if (inc.status === 'running') {
+          panel.innerHTML = '<div class="empty empty-quiet"><p>诊断进行中</p><span>把握度与处置建议稍后显示</span></div>';
+          return;
+        }
+        if (inc.status === 'failed') {
+          const failed = (inc.timeline_json || []).find(e => e.type === 'incident_failed');
+          const err = failed?.payload?.error || '诊断未完成';
+          panel.className = 'card decision-panel escalate';
+          panel.innerHTML = `<div class="decision-score-header">
+            <h3>诊断失败</h3>
+            <span class="grade-pill escalate">失败</span>
+          </div>
+          <div class="alert alert-danger" style="margin:0">${escapeHtml(err)}</div>
+          <div class="action-row" style="margin-top:1rem">
+            <a class="btn btn-secondary" href="/?tab=3&trace=${encodeURIComponent(inc.trace_id)}#audit-detail-panel">查看审计</a>
+          </div>`;
+          return;
         }
         return;
       }
@@ -1212,7 +1254,7 @@
         const ts = formatCnTime(log.created_at);
         const activeTrace = new URLSearchParams(location.search).get('trace');
         const hl = activeTrace && log.trace_id === activeTrace ? ' audit-row-highlight' : '';
-        return `<a class="incident-row audit-row-link${hl}" href="/?tab=3&trace=${encodeURIComponent(log.trace_id)}"><span><code>${log.trace_id}</code> · <strong>${label}</strong> · ${log.operator}</span><span class="ts" style="font-size:0.75rem;color:var(--text-muted)">${ts} · 详情 →</span></a>`;
+        return `<a class="incident-row audit-row-link${hl}" href="/?tab=3&trace=${encodeURIComponent(log.trace_id)}#audit-detail-panel"><span><code>${log.trace_id}</code> · <strong>${label}</strong> · ${log.operator}</span><span class="ts" style="font-size:0.75rem;color:var(--text-muted)">${ts} · 详情 →</span></a>`;
       }).join('');
       updateAuditViz(data.actions);
     }
@@ -1431,8 +1473,12 @@
       if (tab === 3) {
         syncAuditFeedbackTrace();
         loadAuditLog();
-        if (params.get('trace')) {
-          document.getElementById('audit-detail-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const detailEl = document.getElementById('audit-detail-panel')
+          || document.getElementById('audit-detail-missing');
+        if (params.get('trace') && detailEl) {
+          requestAnimationFrame(() => {
+            detailEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
         }
       }
     });

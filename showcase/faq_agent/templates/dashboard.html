@@ -60,7 +60,7 @@
     .brand:hover { text-decoration: none; }
     .brand-mark {
       width: 22px; height: 22px; border-radius: 4px;
-      background: var(--text); color: #fff;
+      background: var(--text); color: oklch(0.99 0.004 250);
       display: grid; place-items: center;
       font-size: 11px; font-weight: 700;
     }
@@ -75,8 +75,10 @@
       font-size: 0.9rem;
       font-weight: 500;
       text-decoration: none;
+      transition: color 0.18s var(--ease-out), background 0.18s var(--ease-out);
     }
     .nav a:hover { background: var(--bg); color: var(--text); text-decoration: none; }
+    .nav a:focus-visible { outline: none; box-shadow: var(--focus-ring); }
     .nav a.active { background: var(--accent-soft); color: var(--accent); }
 
     .top-meta {
@@ -253,9 +255,10 @@
     }
     .btn-primary {
       background: var(--accent);
-      color: #fff;
+      color: oklch(0.99 0.004 250);
     }
-    .btn-primary:hover { filter: brightness(1.05); }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:focus-visible { outline: none; box-shadow: var(--focus-ring); }
     .btn-primary:disabled { opacity: 0.55; cursor: wait; }
     .btn-ghost {
       background: transparent;
@@ -263,6 +266,7 @@
       color: var(--text);
     }
     .btn-ghost:hover { background: var(--bg); }
+    .btn-ghost:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
     .answer-empty {
       color: var(--faint);
@@ -476,7 +480,7 @@
             <td class="mono">{{ r.latency_ms }} ms</td>
             <td class="mono">
               {% if r.incident_trace_id %}
-              <a href="/?tab=3&trace={{ r.incident_trace_id }}">{{ r.incident_trace_id }}</a>
+              <a href="/?tab=3&trace={{ r.incident_trace_id }}#audit-detail-panel">{{ r.incident_trace_id }}</a>
               {% else %}—{% endif %}
             </td>
           </tr>
@@ -524,7 +528,7 @@
         answerHits.appendChild(li);
       });
       const incident = data.incident && data.incident.trace_id
-        ? `<a href="/?tab=3&trace=${data.incident.trace_id}">${data.incident.trace_id}</a>`
+        ? `<a href="/?tab=3&trace=${data.incident.trace_id}#audit-detail-panel">${data.incident.trace_id}</a>`
         : '—';
       answerMeta.innerHTML = `
         <div>延迟 <code>${data.latency_ms || 0} ms</code></div>
