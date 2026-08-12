@@ -53,18 +53,38 @@ async def test_feedback_stats(client):
 @pytest.mark.live_llm
 @pytest.mark.asyncio
 async def test_live_llm_s1(client):
+    import asyncio
     import os
+
     if not os.environ.get("LLM_API_KEY"):
         pytest.skip("LLM_API_KEY not set")
 
     from app.config import settings
+
     settings.mock_llm = False
     settings.llm_api_key = os.environ["LLM_API_KEY"]
+    if os.environ.get("LLM_BASE_URL"):
+        settings.llm_base_url = os.environ["LLM_BASE_URL"]
+    if os.environ.get("LLM_MODEL"):
+        settings.llm_model = os.environ["LLM_MODEL"]
+    if os.environ.get("LLM_FALLBACK_MODEL"):
+        settings.llm_fallback_model = os.environ["LLM_FALLBACK_MODEL"]
 
     resp = await client.post("/admin/trigger/s1")
     data = resp.json()
-    assert data["status"] == "ok"
-    incident = await client.get(f"/admin/incidents/{data['trace_id']}")
-    inc = incident.json()
+    assert data["status"] in ("started", "ok", "duplicate")
+    trace_id = data["trace_id"]
+
+    inc = None
+    for _ in range(60):
+        incident = await client.get(f"/admin/incidents/{trace_id}")
+        assert incident.status_code == 200
+        inc = incident.json()
+        if inc.get("status") in ("completed", "failed"):
+            break
+        await asyncio.sleep(1)
+
+    assert inc is not None
+    assert inc["status"] == "completed", inc
     assert inc["llm_json"]["reasoning_chain"]
     assert len(inc["llm_json"]["reasoning_chain"]) >= 3
