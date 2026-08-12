@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from typing import Any
 
 import httpx
 
@@ -15,6 +16,17 @@ class CoAgentClient:
         resp = httpx.post(
             f"{self.base_url}/events",
             json=event.model_dump(),
+            headers={"X-Operator": operator},
+            timeout=60.0,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+    def export_traces(self, payload: dict[str, Any], operator: str = "agent-runtime", *, promote: bool = True) -> dict:
+        resp = httpx.post(
+            f"{self.base_url}/v1/traces",
+            params={"promote": str(promote).lower()},
+            json=payload,
             headers={"X-Operator": operator},
             timeout=60.0,
         )

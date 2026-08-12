@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 from app.config import settings
 
 from agents.claude_runner import claude_print
 from agents.coagent_client import CoAgentClient
 from agents.scenario_events import build_rate_limit_event, load_scenario_event
+from agents.telemetry import SimulateBundle, spans_from_event
 
 AGENT_ID = "cs-bot"
 AGENT_NAME = "客服 Agent"
@@ -17,10 +15,16 @@ class CSBot:
     def __init__(self, client: CoAgentClient | None = None):
         self.client = client or CoAgentClient(settings.coagent_public_url)
 
-    def run_simulate(self) -> dict:
+    def build_simulate(self) -> SimulateBundle:
         event = load_scenario_event("s1")
-        result = self.client.post_event(event, operator="cs-bot/simulate")
-        return {"agent": AGENT_ID, "mode": "simulate", "coagent": result}
+        return SimulateBundle(event=event, spans=spans_from_event(event), agent_id=AGENT_ID)
+
+    def run_simulate(self) -> dict:
+        """CLI / external: export trajectory then let CoAgent detect + dispose."""
+        bundle = self.build_simulate()
+        telemetry = self.client.export_traces(bundle.to_otlp(), operator="cs-bot/simulate")
+        coagent = telemetry.get("incident") or {}
+        return bundle.as_result(coagent, telemetry)
 
     def run_live(self, query: str) -> dict:
         prompt = (
@@ -36,13 +40,18 @@ class CSBot:
                 log_snippet=f"query={query!r}; claude_rc={claude.returncode}",
                 coagent_base=settings.coagent_public_url,
             )
-            coagent = self.client.post_event(event, operator="cs-bot/live")
+            spans = spans_from_event(event)
+            telemetry = self.client.export_traces(
+                SimulateBundle(event=event, spans=spans, agent_id=AGENT_ID, mode="live").to_otlp(),
+                operator="cs-bot/live",
+            )
             return {
                 "agent": AGENT_ID,
                 "mode": "live",
                 "status": "run_fail",
                 "symptom": "rate_limit",
-                "coagent": coagent,
+                "coagent": telemetry.get("incident") or {},
+                "telemetry": telemetry,
             }
         if claude.returncode != 0:
             return {

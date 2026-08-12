@@ -79,6 +79,13 @@ def init_db() -> None:
     with get_db() as conn:
         conn.executescript(SCHEMA)
         _migrate_incidents_operator(conn)
+    # Trajectory tables for Inline Observer (R1); safe if telemetry not imported yet.
+    try:
+        from app.telemetry.store import init_trajectory_tables
+
+        init_trajectory_tables()
+    except Exception:
+        pass
 
 
 def _migrate_incidents_operator(conn: sqlite3.Connection) -> None:

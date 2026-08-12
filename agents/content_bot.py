@@ -15,6 +15,7 @@ from agents.cost_tracker import (
     save_state,
 )
 from agents.scenario_events import build_over_budget_event, load_scenario_event
+from agents.telemetry import SimulateBundle, spans_from_event
 
 AGENT_ID = "content-bot"
 AGENT_NAME = "内容生成 Agent"
@@ -47,10 +48,15 @@ class ContentBot:
         state = reset_state()
         return {"agent": AGENT_ID, "status": "reset", "cost_yuan_today": state.cost_yuan}
 
-    def run_simulate(self) -> dict:
+    def build_simulate(self) -> SimulateBundle:
         event = load_scenario_event("s3")
-        result = self.client.post_event(event, operator="content-bot/simulate")
-        return {"agent": AGENT_ID, "mode": "simulate", "coagent": result}
+        return SimulateBundle(event=event, spans=spans_from_event(event), agent_id=AGENT_ID)
+
+    def run_simulate(self) -> dict:
+        bundle = self.build_simulate()
+        telemetry = self.client.export_traces(bundle.to_otlp(), operator="content-bot/simulate")
+        coagent = telemetry.get("incident") or {}
+        return bundle.as_result(coagent, telemetry)
 
     def run_live(self, task: str, *, template: str = "longform") -> dict:
         if template not in TEMPLATE_CONFIG:
@@ -59,11 +65,14 @@ class ContentBot:
         state = load_state()
         budget = self.budget
 
-        # 已累计超预算：拒绝执行并上报（成本门禁）
         if state.over_budget:
             log = build_over_budget_log(state, task, None)
             event = build_over_budget_event(AGENT_ID, AGENT_NAME, state.cost_yuan, budget, log)
-            coagent = self.client.post_event(event, operator="content-bot/gate")
+            spans = spans_from_event(event)
+            telemetry = self.client.export_traces(
+                SimulateBundle(event=event, spans=spans, agent_id=AGENT_ID, mode="live").to_otlp(),
+                operator="content-bot/gate",
+            )
             return {
                 "agent": AGENT_ID,
                 "mode": "live",
@@ -73,7 +82,8 @@ class ContentBot:
                 "message": "日预算已用尽，本次未调用 Claude",
                 "cost_yuan_today": state.cost_yuan,
                 "budget_yuan_daily": budget,
-                "coagent": coagent,
+                "coagent": telemetry.get("incident") or {},
+                "telemetry": telemetry,
             }
 
         prompt = build_content_prompt(task, template)
@@ -102,13 +112,18 @@ class ContentBot:
         if state.over_budget:
             log = build_over_budget_log(state, task, estimate)
             event = build_over_budget_event(AGENT_ID, AGENT_NAME, state.cost_yuan, budget, log)
-            coagent = self.client.post_event(event, operator="content-bot/live")
+            spans = spans_from_event(event)
+            telemetry = self.client.export_traces(
+                SimulateBundle(event=event, spans=spans, agent_id=AGENT_ID, mode="live").to_otlp(),
+                operator="content-bot/live",
+            )
             return {
                 **base,
                 "status": "cost_report",
                 "symptom": "over_budget",
                 "blocked": False,
-                "coagent": coagent,
+                "coagent": telemetry.get("incident") or {},
+                "telemetry": telemetry,
             }
 
         return {**base, "status": "ok"}

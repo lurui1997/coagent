@@ -7,10 +7,11 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app.api import admin, agents, demo, events
+from app.api import admin, agents, demo, events, telemetry
 from app.config import settings
 from app.db import get_feedback_stats, get_incident, get_latest_scores, init_db, list_audit_actions, list_feedback_history, list_incidents
 from app.static_assets import static_asset_url, static_dir_version, versioned_static_url
+from app.telemetry.service import telemetry_service
 from app.timeutil import format_display
 from app.ultra.api import router as ultra_router
 
@@ -18,6 +19,7 @@ from app.ultra.api import router as ultra_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    telemetry_service.ensure_schema()
     yield
 
 
@@ -50,6 +52,7 @@ async def cache_policy(request: Request, call_next):
 
 
 app.include_router(events.router)
+app.include_router(telemetry.router)
 app.include_router(agents.router)
 app.include_router(admin.router)
 app.include_router(demo.router)

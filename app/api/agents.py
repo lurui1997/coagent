@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from agents.registry import AGENT_IDS, get_agent
 from app.db import insert_audit_action
+from app.telemetry.service import telemetry_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/agents", tags=["agents"])
@@ -42,7 +43,14 @@ async def run_agent(
     agent = get_agent(agent_id)
     try:
         if body.mode == "simulate":
-            result = agent.run_simulate()
+            # In-process Inline Observer path: avoid HTTP loopback to self.
+            bundle = agent.build_simulate()
+            telemetry = await telemetry_service.ingest_otlp_json(
+                bundle.to_otlp(),
+                promote=True,
+                operator=operator,
+            )
+            result = bundle.as_result(telemetry.incident or {}, telemetry.model_dump())
         elif agent_id == "content-bot":
             result = agent.run_live(body.task or "营销长文案", template=body.template)
         elif agent_id == "rag-bot":
@@ -53,6 +61,8 @@ async def run_agent(
             if not body.query:
                 raise HTTPException(400, "cs-bot live 需要 query")
             result = agent.run_live(body.query)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.exception("Agent run failed: %s", agent_id)
         raise HTTPException(502, str(e)) from e

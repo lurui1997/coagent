@@ -20,6 +20,9 @@ def temp_db(tmp_path, monkeypatch):
     db_path = tmp_path / "test.db"
     monkeypatch.setattr(settings, "database_path", str(db_path))
     init_db()
+    from app.telemetry.service import telemetry_service
+
+    telemetry_service.ensure_schema()
     yield db_path
 
 
